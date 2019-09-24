@@ -11,9 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -34,9 +32,11 @@ public class PowerfulService {
 	private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
 	private static Random rand = new Random();
 	private final StringRenderer stringRenderer;
+	private RestTemplate restTemplate;
 
-	public PowerfulService(StringRenderer stringRenderer) {
+	public PowerfulService(StringRenderer stringRenderer, RestTemplate restTemplate) {
 		this.stringRenderer = stringRenderer;
+		this.restTemplate = restTemplate;
 	}
 
 	public void echo(Echo echoRequest, RenderingContext requestContext) throws InterruptedException {
@@ -48,19 +48,6 @@ public class PowerfulService {
 			Thread.sleep(delay);
 		}
 	}
-
-	private RestTemplate restTemplate = new RestTemplate() {{
-		setErrorHandler(new ResponseErrorHandler() {
-			@Override
-			public boolean hasError(ClientHttpResponse clientHttpResponse) {
-				return true;
-			}
-			@Override
-			public void handleError(ClientHttpResponse clientHttpResponse) {
-
-			}
-		});
-	}};
 
 	public ResponseEntity<String> redirectHttp(Redirect redirect, RenderingContext context) {
 		HttpHeaders headers = new HttpHeaders();

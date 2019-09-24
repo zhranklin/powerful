@@ -11,6 +11,7 @@
 
   <modules>
     <module>powerful-core</module>
+    <module>powerful-spring-mvc</module>
     <module>powerful-springboot-1</module>
     <module>powerful-springboot-2</module>
   </modules>
