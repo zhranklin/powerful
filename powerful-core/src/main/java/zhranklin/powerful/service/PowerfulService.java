@@ -12,12 +12,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,16 +29,20 @@ import java.util.stream.Stream;
 /**
  * Created by 张武 at 2019/9/6
  */
-@Component
 public class PowerfulService {
 
 	private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
 	private static Random rand = new Random();
+	private final StringRenderer stringRenderer;
+
+	public PowerfulService(StringRenderer stringRenderer) {
+		this.stringRenderer = stringRenderer;
+	}
 
 	public void echo(Echo echoRequest, RenderingContext requestContext) throws InterruptedException {
-		echoRequest.setResponseBody(StringRenderer.render(echoRequest.getResponseBody(), requestContext));
+		echoRequest.setResponseBody(stringRenderer.render(echoRequest.getResponseBody(), requestContext));
 		Map<String, String> headers = echoRequest.getResponseHeaders();
-		headers.forEach((key, value) -> headers.put(key, StringRenderer.render(value, requestContext)));
+		headers.forEach((key, value) -> headers.put(key, stringRenderer.render(value, requestContext)));
 		long delay = (long) (echoRequest.getDelay() * 1000);
 		if (delay > 0) {
 			Thread.sleep(delay);
@@ -50,11 +52,11 @@ public class PowerfulService {
 	private RestTemplate restTemplate = new RestTemplate() {{
 		setErrorHandler(new ResponseErrorHandler() {
 			@Override
-			public boolean hasError(ClientHttpResponse clientHttpResponse) throws IOException {
+			public boolean hasError(ClientHttpResponse clientHttpResponse) {
 				return true;
 			}
 			@Override
-			public void handleError(ClientHttpResponse clientHttpResponse) throws IOException {
+			public void handleError(ClientHttpResponse clientHttpResponse) {
 
 			}
 		});
@@ -62,10 +64,10 @@ public class PowerfulService {
 
 	public ResponseEntity<String> redirectHttp(Redirect redirect, RenderingContext context) {
 		HttpHeaders headers = new HttpHeaders();
-		redirect.getRequestHeaders().forEach((k, v) -> headers.set(k, StringRenderer.render(v, context)));
+		redirect.getRequestHeaders().forEach((k, v) -> headers.set(k, stringRenderer.render(v, context)));
 		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		try {
-			String url = StringRenderer.render(redirect.getUrl(), context);
+			String url = stringRenderer.render(redirect.getUrl(), context);
 			ResponseEntity<String> ret = restTemplate.exchange(new RequestEntity<>(redirect.getRequestBody(), headers, HttpMethod.POST, URI.create(url)), String.class);
 			String respBody = ret.getBody();
 			if (!StringUtils.isEmpty(redirect.getResponseBody())) {
@@ -73,7 +75,7 @@ public class PowerfulService {
 				contextWithResp.setRequestHeaders(context.getRequestHeaders());
 				contextWithResp.setResponseBody(respBody);
 				contextWithResp.setResponseHeaders(ret.getHeaders().toSingleValueMap());
-				respBody = StringRenderer.render(redirect.getResponseBody(), contextWithResp);
+				respBody = stringRenderer.render(redirect.getResponseBody(), contextWithResp);
 			}
 			return new ResponseEntity<>(respBody, ret.getHeaders(), ret.getStatusCode());
 		} finally {

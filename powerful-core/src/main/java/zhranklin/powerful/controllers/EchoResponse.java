@@ -1,4 +1,4 @@
-package zhranklin.powerful.interfaces;
+package zhranklin.powerful.controllers;
 
 import java.util.Map;
 

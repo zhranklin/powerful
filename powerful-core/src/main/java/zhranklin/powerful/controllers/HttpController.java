@@ -1,4 +1,4 @@
-package zhranklin.powerful.interfaces;
+package zhranklin.powerful.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import zhranklin.powerful.service.PowerfulService;
@@ -26,8 +26,12 @@ import java.util.Map;
 @RestController
 public class HttpController {
 
-	private PowerfulService powerfulService = new PowerfulService();
+	private final PowerfulService powerfulService;
 	private ObjectMapper mapper = new ObjectMapper();
+
+	public HttpController(PowerfulService powerfulService) {
+		this.powerfulService = powerfulService;
+	}
 
 	@RequestMapping("/echo")
 	public String echo(@RequestBody(required = false) Echo echo, HttpServletRequest request, HttpServletResponse response) throws InterruptedException, IOException {

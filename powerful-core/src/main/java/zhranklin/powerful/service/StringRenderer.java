@@ -20,19 +20,19 @@ import java.util.stream.IntStream;
  * Created by 张武 at 2019/9/10
  */
 public class StringRenderer {
-	private static Map<String, Function<RenderingContext, Function<List<String>, Object>>> exprFuncs = new HashMap<>();
+	private Map<String, Function<RenderingContext, Function<List<String>, Object>>> exprFuncs = new HashMap<>();
 	private static Random rand = new Random();
 	private static Pattern EXPR_PATTERN = Pattern.compile("\\{\\{(.+?)}}");
 	private static Pattern FUNCTION_PATTERN = Pattern.compile("([-a-zA-Z_]+)\\((.*)\\)");
 
-	static {
-		StringRenderer.exprFuncs.put("randomDigits", context -> params -> {
+	public StringRenderer() {
+		exprFuncs.put("randomDigits", context -> params -> {
 			int size = Integer.parseInt(params.get(0));
 			return IntStream.range(0, size)
 				.mapToObj(i -> ""+rand.nextInt(10))
 				.collect(Collectors.joining(""));
 		});
-		StringRenderer.exprFuncs.put("randomInt", context -> params -> {
+		exprFuncs.put("randomInt", context -> params -> {
 			int parSize = params.size();
 			switch (parSize) {
 				case 0: return rand.nextInt();
@@ -47,18 +47,18 @@ public class StringRenderer {
 				default: throw new IllegalArgumentException(String.format("Illegal arguments for randomInt: %s", params));
 			}
 		});
-		StringRenderer.exprFuncs.put("version", context -> params -> System.getProperty("version"));
-		StringRenderer.exprFuncs.put("timestamp", context -> params -> {
+		exprFuncs.put("p", context -> params -> System.getProperty(params.get(0)));
+		exprFuncs.put("timestamp", context -> params -> {
 			Date now = new Date();
 			String pattern = params.isEmpty() ? "yyyy-MM-dd hh:mm:ss" : params.get(0);
 			return new SimpleDateFormat(pattern).format(now);
 		});
-		StringRenderer.exprFuncs.put("requestHeader", context -> params -> ""+context.getRequestHeaders().get(params.get(0)));
-		StringRenderer.exprFuncs.put("responseHeader", context -> params -> ""+context.getResponseHeaders().get(params.get(0)));
-		StringRenderer.exprFuncs.put("responseBody", context -> params -> ""+context.getResponseBody());
+		exprFuncs.put("requestHeader", context -> params -> ""+context.getRequestHeaders().get(params.get(0)));
+		exprFuncs.put("responseHeader", context -> params -> ""+context.getResponseHeaders().get(params.get(0)));
+		exprFuncs.put("responseBody", context -> params -> ""+context.getResponseBody());
 	}
 
-	private static String calc(String expr, RenderingContext context) {
+	private String calc(String expr, RenderingContext context) {
 		Matcher matcher = FUNCTION_PATTERN.matcher(expr);
 		if (!matcher.matches()) {
 			throw new IllegalArgumentException(String.format("'%s' is not a valid expression.", expr));
@@ -73,7 +73,7 @@ public class StringRenderer {
 		return ""+function.apply(context).apply(params);
 	}
 
-	public static String render(String source, RenderingContext requestContext) {
+	public String render(String source, RenderingContext requestContext) {
 		if (source == null) {
 			return null;
 		}
