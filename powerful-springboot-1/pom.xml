@@ -10,7 +10,7 @@
   </parent>
   <groupId>zhranklin</groupId>
   <artifactId>powerful-springboot-1</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <name>powerful-springboot-1</name>
 
   <properties>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>zhranklin</groupId>
       <artifactId>powerful-core</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.0.1</version>
     </dependency>
 
   </dependencies>
