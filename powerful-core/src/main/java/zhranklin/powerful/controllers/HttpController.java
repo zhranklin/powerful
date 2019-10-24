@@ -2,9 +2,8 @@ package zhranklin.powerful.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import zhranklin.powerful.service.PowerfulService;
-import zhranklin.powerful.service.model.BatchRedirect;
 import zhranklin.powerful.service.model.Echo;
-import zhranklin.powerful.service.model.Redirect;
+import zhranklin.powerful.service.model.Instruction;
 import zhranklin.powerful.service.model.RenderingContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -57,11 +56,18 @@ public class HttpController {
 		return null;
 	}
 
-	@RequestMapping(value = "/redirect", params = "type=http")
-	public String redirect(@RequestBody Redirect redirect, HttpServletRequest request, HttpServletResponse response) throws IOException {
+	@RequestMapping(value = "/redirect")
+	public Object redirect(@RequestBody Instruction instruction, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		RenderingContext context = new RenderingContext();
 		context.setRequestHeaders(transformRequestHeaders(request));
-		ResponseEntity<String> responseEntity = powerfulService.redirectHttp(redirect, context);
+		if ("none".equals(instruction.getMode())) {
+			return redirectHttp(instruction, response, context);
+		}
+		return powerfulService.batchRedirectHttp(instruction, context);
+	}
+
+	private String redirectHttp(@RequestBody Instruction instruction, HttpServletResponse response, RenderingContext context) throws IOException {
+		ResponseEntity<String> responseEntity = powerfulService.redirectHttp(instruction, context);
 		response.setStatus(responseEntity.getStatusCode().value());
 		response.setContentType(MappingJackson2JsonView.DEFAULT_CONTENT_TYPE);
 //		responseEntity.getHeaders().forEach((k, vs) -> response.setHeader(k, String.join("", vs)));
@@ -69,13 +75,6 @@ public class HttpController {
 			response.getWriter().write(responseEntity.getBody());
 		}
 		return null;
-	}
-
-	@RequestMapping(value = "/batchRedirect", params = "type=http")
-	public Object redirect(@RequestBody BatchRedirect batchRedirect, HttpServletRequest request) {
-		RenderingContext context = new RenderingContext();
-		context.setRequestHeaders(transformRequestHeaders(request));
-		return powerfulService.batchRedirectHttp(batchRedirect, context);
 	}
 
 	private static Map<String, String> transformRequestHeaders(HttpServletRequest request) {

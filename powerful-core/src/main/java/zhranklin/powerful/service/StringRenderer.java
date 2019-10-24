@@ -53,9 +53,9 @@ public class StringRenderer {
 			String pattern = params.isEmpty() ? "yyyy-MM-dd hh:mm:ss" : params.get(0);
 			return new SimpleDateFormat(pattern).format(now);
 		});
-		exprFuncs.put("requestHeader", context -> params -> ""+context.getRequestHeaders().get(params.get(0)));
-		exprFuncs.put("responseHeader", context -> params -> ""+context.getResponseHeaders().get(params.get(0)));
-		exprFuncs.put("responseBody", context -> params -> ""+context.getResponseBody());
+		exprFuncs.put("receivedHeader", context -> params -> ""+context.getRequestHeaders().get(params.get(0)));
+		exprFuncs.put("resultHeader", context -> params -> ""+context.getResponseHeaders().get(params.get(0)));
+		exprFuncs.put("resultBody", context -> params -> ""+context.getResponseBody());
 	}
 
 	private String calc(String expr, RenderingContext context) {

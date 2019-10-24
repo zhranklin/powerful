@@ -19,7 +19,7 @@ public class BatchRedirect {
 	private String responseBody = "";
 
 	@JsonProperty(defaultValue = "[]")
-	private List<Redirect> redirects = new ArrayList<>();
+	private List<Instruction> instructions = new ArrayList<>();
 
 	public int getTimes() {
 		return times;
@@ -37,12 +37,12 @@ public class BatchRedirect {
 		this.aggregationMode = aggregationMode;
 	}
 
-	public List<Redirect> getRedirects() {
-		return redirects;
+	public List<Instruction> getInstructions() {
+		return instructions;
 	}
 
-	public void setRedirects(List<Redirect> redirects) {
-		this.redirects = redirects;
+	public void setInstructions(List<Instruction> instructions) {
+		this.instructions = instructions;
 	}
 
 	public String getResponseBody() {
