@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @Configuration
 @ComponentScan(basePackages = "zhranklin.powerful.controllers")
-public class PowerfulSpringConfiguration {
+public class PowerfulAutoConfiguration {
 
 	@Bean
 	PowerfulService powerfulService() {

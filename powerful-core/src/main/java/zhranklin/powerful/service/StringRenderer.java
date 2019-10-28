@@ -1,6 +1,8 @@
 package zhranklin.powerful.service;
 
 import zhranklin.powerful.service.model.RenderingContext;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,8 +56,28 @@ public class StringRenderer {
 			return new SimpleDateFormat(pattern).format(now);
 		});
 		exprFuncs.put("receivedHeader", context -> params -> ""+context.getRequestHeaders().get(params.get(0)));
-		exprFuncs.put("resultHeader", context -> params -> ""+context.getResponseHeaders().get(params.get(0)));
-		exprFuncs.put("resultBody", context -> params -> ""+context.getResponseBody());
+		exprFuncs.put("resultHeader", context -> params -> {
+			if (context.getResult() instanceof ResponseEntity) {
+				List<String> values = ((ResponseEntity) context.getResult()).getHeaders().get(params.get(0));
+				return values == null ? "null" : String.join(",", values);
+			} else {
+				return null;
+			}
+		});
+		exprFuncs.put("result", context -> params -> ""+context.getResult());
+		exprFuncs.put("resultBody", context -> params -> {
+			if (context.getResult() instanceof HttpEntity) {
+				return ""+((HttpEntity) context.getResult()).getBody();
+			}
+			return null;
+		});
+		exprFuncs.put("statusCode", context -> params -> {
+			if (context.getResult() instanceof ResponseEntity) {
+				return "" + ((ResponseEntity) context.getResult()).getStatusCodeValue();
+			} else {
+				return "null";
+			}
+		});
 	}
 
 	private String calc(String expr, RenderingContext context) {

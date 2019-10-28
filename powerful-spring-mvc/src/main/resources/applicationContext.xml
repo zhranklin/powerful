@@ -15,6 +15,6 @@
     <mvc:annotation-driven/>
     <mvc:default-servlet-handler/>
 
-    <bean class="zhranklin.powerful.PowerfulSpringConfiguration"> </bean>
+    <bean class="zhranklin.powerful.PowerfulAutoConfiguration"> </bean>
 
 </beans>

@@ -1,6 +1,5 @@
 package zhranklin.powerful.service;
 
-import zhranklin.powerful.service.model.Echo;
 import zhranklin.powerful.service.model.Instruction;
 import zhranklin.powerful.service.model.RenderingContext;
 import org.slf4j.Logger;
@@ -14,7 +13,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.Map;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -35,44 +34,53 @@ public class PowerfulService {
 		this.restTemplate = restTemplate;
 	}
 
-	public void echo(Echo echoRequest, RenderingContext requestContext) throws InterruptedException {
-		echoRequest.setResponseBody(stringRenderer.render(echoRequest.getResponseBody(), requestContext));
-		Map<String, String> headers = echoRequest.getResponseHeaders();
-		headers.forEach((key, value) -> headers.put(key, stringRenderer.render(value, requestContext)));
-		long delay = (long) (echoRequest.getDelay() * 1000);
-		if (delay > 0) {
-			Thread.sleep(delay);
+	public Object execute(Instruction instruction, RenderingContext context) {
+		if ("none".equals(instruction.getCollectBy())) {
+			return executeSingle(instruction, context);
 		}
+		Stream<Object> responses = IntStream.range(0, instruction.getForTimes())
+			.mapToObj(i -> executeSingle(instruction, context));
+		List<Object> result = null;
+		if ("list".equals(instruction.getCollectBy())) {
+			 result = responses.collect(Collectors.toList());
+		}
+		context.setResult(null);
+		return result;
 	}
 
-	public ResponseEntity<String> redirectHttp(Instruction instruction, RenderingContext context) {
+	public String executeSingle(Instruction instruction, RenderingContext context) {
+		if (!StringUtils.isEmpty(instruction.getTell())) {
+			switch (instruction.getBy()) {
+				case "http":
+					context.setResult(executeHttp(instruction, context));
+					break;
+				default:
+			}
+		}
+		int delay = (int)(instruction.getThenDelay() * 1000);
+		if (delay > 0) {
+			try {
+				Thread.sleep(delay);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		Integer errorPercent = instruction.getThenThrowByPercent();
+		if (errorPercent > 0) {
+			if (rand.nextInt(100) < errorPercent) {
+				throw new RuntimeException("Random Error.");
+			}
+		}
+		String template = !StringUtils.isEmpty(instruction.getThenReturn()) ? instruction.getThenReturn() : "{{resultBody()}}";
+		return stringRenderer.render(template, context);
+	}
+
+	public ResponseEntity<String> executeHttp(Instruction instruction, RenderingContext context) {
 		HttpHeaders headers = new HttpHeaders();
 		instruction.getWithHeaders().forEach((k, v) -> headers.set(k, stringRenderer.render(v, context)));
 		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		try {
-			String url = stringRenderer.render(instruction.getTell(), context);
-			ResponseEntity<String> ret = restTemplate.exchange(new RequestEntity<>(instruction.getTo(), headers, HttpMethod.POST, URI.create(url)), String.class);
-			String respBody = ret.getBody();
-			if (!StringUtils.isEmpty(instruction.getThenReturns())) {
-				RenderingContext contextWithResp = new RenderingContext();
-				contextWithResp.setRequestHeaders(context.getRequestHeaders());
-				contextWithResp.setResponseBody(respBody);
-				contextWithResp.setResponseHeaders(ret.getHeaders().toSingleValueMap());
-				respBody = stringRenderer.render(instruction.getThenReturns(), contextWithResp);
-			}
-			return new ResponseEntity<>(respBody, ret.getHeaders(), ret.getStatusCode());
-		} finally {
-			context.setResponseHeaders(null);
-		}
-	}
-
-	public Object batchRedirectHttp(Instruction instruction, RenderingContext context) {
-		Stream<ResponseEntity<String>> responses = IntStream.range(0, instruction.getTimes())
-			.mapToObj(i -> redirectHttp(instruction, context));
-		if ("list".equals(instruction.getMode())) {
-			return responses.map(ResponseEntity::getBody).collect(Collectors.toList());
-		}
-		return "";
+		String url = stringRenderer.render(instruction.getTell() + "/execute", context);
+		return restTemplate.exchange(new RequestEntity<>(instruction.getTo(), headers, HttpMethod.POST, URI.create(url)), String.class);
 	}
 
 }
