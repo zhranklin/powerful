@@ -40,6 +40,7 @@ public class HttpController {
 			}
 			return result;
 		} catch (RuntimeException e){
+			e.printStackTrace();
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

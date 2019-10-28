@@ -23,9 +23,13 @@ public class Instruction {
 
 	private Map<String, String> withHeaders = new HashMap<>();
 
+	private Map<String, String> withQuerys = new HashMap<>();
+
 	private double thenDelay = 0;
 
 	private Integer thenThrowByPercent = 0;
+
+	private Integer thenOKTurnByRoundRobin = 1;
 
 	private String thenReturn = "";
 
@@ -109,5 +113,21 @@ public class Instruction {
 
 	public void setThenThrowByPercent(Integer thenThrowByPercent) {
 		this.thenThrowByPercent = thenThrowByPercent;
+	}
+
+	public Integer getThenOKTurnByRoundRobin() {
+		return thenOKTurnByRoundRobin;
+	}
+
+	public void setThenOKTurnByRoundRobin(Integer thenOKTurnByRoundRobin) {
+		this.thenOKTurnByRoundRobin = thenOKTurnByRoundRobin;
+	}
+
+	public Map<String, String> getWithQuerys() {
+		return withQuerys;
+	}
+
+	public void setWithQuerys(Map<String, String> withQuerys) {
+		this.withQuerys = withQuerys;
 	}
 }
