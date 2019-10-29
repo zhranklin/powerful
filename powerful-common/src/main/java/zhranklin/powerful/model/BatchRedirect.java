@@ -1,4 +1,4 @@
-package zhranklin.powerful.service.model;
+package zhranklin.powerful.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

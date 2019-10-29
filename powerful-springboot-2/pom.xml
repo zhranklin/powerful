@@ -28,10 +28,14 @@
     </dependency>
     <dependency>
       <groupId>zhranklin</groupId>
+      <artifactId>powerful-common</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>zhranklin</groupId>
       <artifactId>powerful-core</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
-
   </dependencies>
 
   <build>

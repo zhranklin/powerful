@@ -1,6 +1,6 @@
 package zhranklin.powerful.service;
 
-import zhranklin.powerful.service.model.RenderingContext;
+import zhranklin.powerful.model.RenderingContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;

@@ -1,12 +1,13 @@
-package zhranklin.powerful.service.model;
+package zhranklin.powerful.model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by 张武 at 2019/9/6
  */
-public class RenderingContext {
+public class RenderingContext implements Serializable{
 
 	private Map<String, String> requestHeaders = new HashMap<>();
 	private Object result = null;

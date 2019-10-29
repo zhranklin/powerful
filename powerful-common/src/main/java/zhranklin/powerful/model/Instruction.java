@@ -1,14 +1,15 @@
-package zhranklin.powerful.service.model;
+package zhranklin.powerful.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by 张武 at 2019/9/6
  */
-public class Instruction {
+public class Instruction implements Serializable {
 
 	private String tell = "";
 
@@ -18,8 +19,8 @@ public class Instruction {
 
 	private int forTimes = 1;
 
-	@JsonProperty(defaultValue = "{}")
-	private Object to = "{}";
+	//@JsonProperty(defaultValue = "{}")
+	private Instruction to;
 
 	private Map<String, String> withHeaders = new HashMap<>();
 
@@ -43,11 +44,11 @@ public class Instruction {
 		this.tell = tell;
 	}
 
-	public Object getTo() {
+	public Instruction getTo() {
 		return to;
 	}
 
-	public void setTo(Object to) {
+	public void setTo(Instruction to) {
 		this.to = to;
 	}
 
