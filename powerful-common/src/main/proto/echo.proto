@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "zhranklin.powerful.grpc.service";
+option java_outer_classname = "EchoService";
+
+// The greeting service definition.
+service Echo {
+    // Sends a greeting
+    rpc Echo (EchoNum) returns (Reply) {}
+    rpc EchoAsync (EchoNum) returns (Reply) {}
+}
+
+// The request message containing the user's name.
+message EchoNum {
+    int32 time = 1;
+    string instruction = 2;
+    string context = 3;
+}
+
+// The response message containing the greetings
+message Reply {
+    string message = 1;
+}

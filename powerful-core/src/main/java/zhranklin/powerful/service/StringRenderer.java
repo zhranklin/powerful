@@ -75,8 +75,9 @@ public class StringRenderer implements EnvironmentAware {
         exprFuncs.put("resultBody", context -> params -> {
             if (context.getResult() instanceof HttpEntity) {
                 return "" + ((HttpEntity) context.getResult()).getBody();
+            }else{
+                return context.getResult().toString();
             }
-            return null;
         });
         exprFuncs.put("statusCode", context -> params -> {
             if (context.getResult() instanceof ResponseEntity) {

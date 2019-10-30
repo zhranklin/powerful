@@ -1,5 +1,6 @@
 package zhranklin.powerful.service;
 
+import zhranklin.powerful.grpc.service.EchoGrpc;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
 /**
  * Created by 张武 at 2019/9/6
  */
-public abstract class AbstractPowerfulService {
+public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
 
     private static Logger logger = LoggerFactory.getLogger(AbstractPowerfulService.class);
     private static Random rand = new Random();
@@ -54,6 +55,7 @@ public abstract class AbstractPowerfulService {
         }
         int roundRobinNum = instruction.getThenOKTurnByRoundRobin();
         if (executeCount.get() % roundRobinNum != 0) {
+            logger.info("throw roundRobin error");
             throw new RuntimeException("roundRobin return error.");
         }
         int delay = (int) (instruction.getThenDelay() * 1000);
@@ -67,6 +69,7 @@ public abstract class AbstractPowerfulService {
         Integer errorPercent = instruction.getThenThrowByPercent();
         if (errorPercent > 0) {
             if (rand.nextInt(100) < errorPercent) {
+                logger.info("throw Random error");
                 throw new RuntimeException("Random Error.");
             }
         }
