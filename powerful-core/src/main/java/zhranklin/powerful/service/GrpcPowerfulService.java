@@ -10,7 +10,10 @@ import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+
+import java.lang.reflect.Method;
 
 /**
  * Created by twogoods on 2019/10/29.
@@ -18,6 +21,9 @@ import org.springframework.context.ApplicationContext;
 public class GrpcPowerfulService extends AbstractPowerfulService {
 
     private static Logger logger = LoggerFactory.getLogger(GrpcPowerfulService.class);
+
+    @Autowired(required = false)
+    private GrpcClientInterceptor grpcClientInterceptor;
 
     private ApplicationContext applicationContext;
 
@@ -56,8 +62,9 @@ public class GrpcPowerfulService extends AbstractPowerfulService {
         } catch (Exception e) {
             logger.error("convert to json string error");
         }
-        builder.setTime(param);
+        builder.setNum(param);
         EchoNum echoNum = builder.build();
+        grpcClientInterceptor.addCustomizeHeaders(instruction.getWithHeaders());
         if (beanName.equalsIgnoreCase("grpc-a")) {
             return grpcAEchoBlockingStub.echo(echoNum).getMessage();
         } else if (beanName.equalsIgnoreCase("grpc-b")) {
@@ -68,6 +75,21 @@ public class GrpcPowerfulService extends AbstractPowerfulService {
         return "unknow service";
     }
 
+
+    protected String getColor() {
+        try {
+            Class clazz = this.getClass().getClassLoader().loadClass("zhranklin.agent.core.flowcolor.GlobalContext");
+            Method method = clazz.getDeclaredMethod("getFlowColor");
+            Object color = method.invoke(null);
+            if (color == null) {
+                return "null";
+            }
+            return color.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public void setGrpcAEchoBlockingStub(EchoGrpc.EchoBlockingStub grpcAEchoBlockingStub) {
         this.grpcAEchoBlockingStub = grpcAEchoBlockingStub;

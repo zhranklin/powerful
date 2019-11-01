@@ -2,7 +2,6 @@ package zhranklin.powerful.grpc;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import zhranklin.powerful.dubbo.DubboAServiceImpl;
 import zhranklin.powerful.grpc.service.EchoGrpc;
 import zhranklin.powerful.grpc.service.EchoNum;
 import zhranklin.powerful.grpc.service.Reply;
@@ -26,31 +25,30 @@ import java.io.IOException;
  * Created by twogoods on 2019/10/30.
  */
 @GrpcService
-@ConditionalOnProperty(name = "framew.type", havingValue = "grpc")
-public class GrpcAService extends GrpcPowerfulService implements InitializingBean {
-    private static Logger logger = LoggerFactory.getLogger(GrpcAService.class);
+@ConditionalOnProperty(name = "framew.application.name", havingValue = "grpc-b")
+public class GrpcBService extends GrpcPowerfulService implements InitializingBean {
+    private static Logger logger = LoggerFactory.getLogger(GrpcBService.class);
 
-    @GrpcClient("grpc-b")
-    private EchoGrpc.EchoBlockingStub grpcBEchoBlockingStub;
-    @GrpcClient("grpc-b")
-    private EchoGrpc.EchoStub grpcBEchoStub;
+    @GrpcClient("grpc-c")
+    private EchoGrpc.EchoBlockingStub grpcCEchoBlockingStub;
+    @GrpcClient("grpc-c")
+    private EchoGrpc.EchoStub grpcCEchoStub;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
-    private void init(){
-        logger.info("init grpc-a service ...");
+    private void init() {
+        logger.info("init grpc-b service ...");
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    public GrpcAService(StringRenderer stringRenderer, ApplicationContext applicationContext) {
+    public GrpcBService(StringRenderer stringRenderer, ApplicationContext applicationContext) {
         super(stringRenderer, applicationContext);
     }
 
-
     @Override
     public void echo(EchoNum request, StreamObserver<Reply> responseObserver) {
-        logger.info("in GrpcAService num: " + request.getNum());
+        logger.info("in GrpcBService num: " + request.getNum());
         try {
             Instruction instruction = objectMapper.readValue(request.getInstruction(), Instruction.class);
             RenderingContext context = objectMapper.readValue(request.getContext(), RenderingContext.class);
@@ -70,7 +68,7 @@ public class GrpcAService extends GrpcPowerfulService implements InitializingBea
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        setGrpcBEchoBlockingStub(grpcBEchoBlockingStub);
-        setGrpcBEchoStub(grpcBEchoStub);
+        setGrpcCEchoBlockingStub(grpcCEchoBlockingStub);
+        setGrpcCEchoStub(grpcCEchoStub);
     }
 }
