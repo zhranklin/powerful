@@ -13,7 +13,6 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-//@ConditionalOnExpression("${framew.type:http} || ${framew.type:springboot2.1}|| ${framew.type:springboot2}")
 @ConditionalOnExpression(" '${framew.type}'=='http' || '${framew.type}'=='springboot2.1' || '${framew.type}'=='springboot2' || '${framew.type}'=='mvc'")
 @ComponentScan(basePackages = {"zhranklin.powerful.controllers", "zhranklin.powerful.configuration"})
 public class HttpConfiguration {
@@ -36,8 +35,8 @@ public class HttpConfiguration {
     }
 
     @Bean
-    HttpPowerfulService httpPowerfulService(@Qualifier("stringRenderer") StringRenderer stringRenderer) {
-        return new HttpPowerfulService(stringRenderer, restTemplate());
+    HttpPowerfulService httpPowerfulService(@Qualifier("stringRenderer") StringRenderer stringRenderer, RestTemplate restTemplate) {
+        return new HttpPowerfulService(stringRenderer, restTemplate);
     }
 
 }

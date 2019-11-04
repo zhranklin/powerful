@@ -17,8 +17,8 @@ public class DubboConfiguration {
     @Value("${framew.zk}")
     public String zk;
 
-    //@Value("#{systemProperties['framew.application.name']}")
-    @Value("${framew.app}")
+    @Value("#{systemProperties['framew.application.name']}")
+    //@Value("${framew.app}")
     public String app;
 
     @Value("${framew.port}")
