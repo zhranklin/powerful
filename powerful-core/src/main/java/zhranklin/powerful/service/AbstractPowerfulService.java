@@ -6,7 +6,9 @@ import zhranklin.powerful.model.RenderingContext;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,6 +26,8 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
     protected final StringRenderer stringRenderer;
 
     private AtomicInteger executeCount = new AtomicInteger(0);
+
+    @Autowired private TestingMethodService testingMethodService;
 
     public AbstractPowerfulService(StringRenderer stringRenderer) {
         this.stringRenderer = stringRenderer;
@@ -53,6 +57,10 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
         if (!StringUtils.isEmpty(instruction.getTell())) {
             context.setResult(remoteCall(instruction, context));
         }
+        Integer tm = instruction.getThenCallTestMethod();
+        if (tm != null) {
+            context.setInvokeResult(invokeTestMethod(tm));
+        }
         int roundRobinNum = instruction.getThenOKTurnByRoundRobin();
         if (executeCount.get() % roundRobinNum != 0) {
             logger.info("throw roundRobin error");
@@ -77,5 +85,20 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
         return stringRenderer.render(template, context);
     }
 
+    public String invokeTestMethod(int n) {
+    	if (n == 0) {
+    	    return null;
+        }
+        if (n > 100 || n < 0) {
+            throw new IllegalArgumentException(String.format("invokeTestMethod: illegal n: %s", n));
+        }
+        try {
+            int i = rand.nextInt(100);
+            Method method = TestingMethodService.class.getMethod(String.format("method%02d", i));
+            return (String) method.invoke(testingMethodService);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

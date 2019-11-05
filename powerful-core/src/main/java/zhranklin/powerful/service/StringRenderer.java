@@ -86,6 +86,7 @@ public class StringRenderer implements EnvironmentAware {
                 return "null";
             }
         });
+        exprFuncs.put("invokeResult", context -> params -> "" + context.getInvokeResult());
     }
 
     private String calc(String expr, RenderingContext context) {

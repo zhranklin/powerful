@@ -1,7 +1,5 @@
 package zhranklin.powerful.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +23,8 @@ public class Instruction implements Serializable {
 	private Map<String, String> withHeaders = new HashMap<>();
 
 	private Map<String, String> withQuerys = new HashMap<>();
+
+	private Integer thenCallTestMethod = 0;
 
 	private double thenDelay = 0;
 
@@ -130,5 +130,13 @@ public class Instruction implements Serializable {
 
 	public void setWithQuerys(Map<String, String> withQuerys) {
 		this.withQuerys = withQuerys;
+	}
+
+	public Integer getThenCallTestMethod() {
+		return thenCallTestMethod;
+	}
+
+	public void setThenCallTestMethod(Integer thenCallTestMethod) {
+		this.thenCallTestMethod = thenCallTestMethod;
 	}
 }

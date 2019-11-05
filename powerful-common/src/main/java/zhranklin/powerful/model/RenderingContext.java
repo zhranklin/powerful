@@ -11,6 +11,7 @@ public class RenderingContext implements Serializable{
 
 	private Map<String, String> requestHeaders = new HashMap<>();
 	private Object result = null;
+	private String invokeResult;
 
 	public Map<String, String> getRequestHeaders() {
 		return requestHeaders;
@@ -26,5 +27,13 @@ public class RenderingContext implements Serializable{
 
 	public void setResult(Object result) {
 		this.result = result;
+	}
+
+	public String getInvokeResult() {
+		return invokeResult;
+	}
+
+	public void setInvokeResult(String invokeResult) {
+		this.invokeResult = invokeResult;
 	}
 }
