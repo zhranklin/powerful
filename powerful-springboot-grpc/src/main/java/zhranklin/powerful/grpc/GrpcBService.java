@@ -29,10 +29,10 @@ import java.io.IOException;
 public class GrpcBService extends GrpcPowerfulService implements InitializingBean {
     private static Logger logger = LoggerFactory.getLogger(GrpcBService.class);
 
-    @GrpcClient("grpc-c")
-    private EchoGrpc.EchoBlockingStub grpcCEchoBlockingStub;
-    @GrpcClient("grpc-c")
-    private EchoGrpc.EchoStub grpcCEchoStub;
+    @GrpcClient("grpc-a")
+    private EchoGrpc.EchoBlockingStub grpcAEchoBlockingStub;
+    @GrpcClient("grpc-a")
+    private EchoGrpc.EchoStub grpcAEchoStub;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -68,7 +68,7 @@ public class GrpcBService extends GrpcPowerfulService implements InitializingBea
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        setGrpcCEchoBlockingStub(grpcCEchoBlockingStub);
-        setGrpcCEchoStub(grpcCEchoStub);
+        setGrpcAEchoBlockingStub(grpcAEchoBlockingStub);
+        setGrpcAEchoStub(grpcAEchoStub);
     }
 }

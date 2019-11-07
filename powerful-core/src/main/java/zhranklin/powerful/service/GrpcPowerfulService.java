@@ -1,11 +1,8 @@
 package zhranklin.powerful.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import zhranklin.powerful.dubbo.DubboAService;
-import zhranklin.powerful.dubbo.DubboBService;
 import zhranklin.powerful.grpc.service.EchoGrpc;
 import zhranklin.powerful.grpc.service.EchoNum;
-import zhranklin.powerful.model.Echo;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
 import org.slf4j.Logger;
@@ -28,14 +25,10 @@ public class GrpcPowerfulService extends AbstractPowerfulService {
     private ApplicationContext applicationContext;
 
     protected EchoGrpc.EchoBlockingStub grpcAEchoBlockingStub;
-
     protected EchoGrpc.EchoBlockingStub grpcBEchoBlockingStub;
-
-    protected EchoGrpc.EchoBlockingStub grpcCEchoBlockingStub;
 
     protected EchoGrpc.EchoStub grpcAEchoStub;
     protected EchoGrpc.EchoStub grpcBEchoStub;
-    protected EchoGrpc.EchoStub grpcCEchoStub;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -69,8 +62,6 @@ public class GrpcPowerfulService extends AbstractPowerfulService {
             return grpcAEchoBlockingStub.echo(echoNum).getMessage();
         } else if (beanName.equalsIgnoreCase("grpc-b")) {
             return grpcBEchoBlockingStub.echo(echoNum).getMessage();
-        } else if (beanName.equalsIgnoreCase("grpc-c")) {
-            return grpcCEchoBlockingStub.echo(echoNum).getMessage();
         }
         return "unknow service";
     }
@@ -99,19 +90,11 @@ public class GrpcPowerfulService extends AbstractPowerfulService {
         this.grpcBEchoBlockingStub = grpcBEchoBlockingStub;
     }
 
-    public void setGrpcCEchoBlockingStub(EchoGrpc.EchoBlockingStub grpcCEchoBlockingStub) {
-        this.grpcCEchoBlockingStub = grpcCEchoBlockingStub;
-    }
-
     public void setGrpcAEchoStub(EchoGrpc.EchoStub grpcAEchoStub) {
         this.grpcAEchoStub = grpcAEchoStub;
     }
 
     public void setGrpcBEchoStub(EchoGrpc.EchoStub grpcBEchoStub) {
         this.grpcBEchoStub = grpcBEchoStub;
-    }
-
-    public void setGrpcCEchoStub(EchoGrpc.EchoStub grpcCEchoStub) {
-        this.grpcCEchoStub = grpcCEchoStub;
     }
 }

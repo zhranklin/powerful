@@ -24,10 +24,14 @@ public class DubboConfiguration {
     @Value("${framew.port}")
     public int port;
 
+    @Value("${framew.app.version:0.0.1}")
+    public String version;
+
     @Bean
     public ApplicationConfig applicationConfig() {
         ApplicationConfig application = new ApplicationConfig();
         application.setName(app);
+        application.setVersion(version);
         return application;
     }
 
