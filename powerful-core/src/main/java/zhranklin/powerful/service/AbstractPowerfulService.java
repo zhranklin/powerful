@@ -93,7 +93,7 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
             throw new IllegalArgumentException(String.format("invokeTestMethod: illegal n: %s", n));
         }
         try {
-            int i = rand.nextInt(100);
+            int i = rand.nextInt(n);
             Method method = TestingMethodService.class.getMethod(String.format("method%02d", i));
             return (String) method.invoke(testingMethodService);
         } catch (Exception e) {
