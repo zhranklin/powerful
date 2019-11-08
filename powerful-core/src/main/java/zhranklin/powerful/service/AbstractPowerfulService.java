@@ -37,10 +37,10 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
 
     public Object execute(Instruction instruction, RenderingContext context) {
         if (instruction.getForTimes() <= 1 || "none".equals(instruction.getCollectBy())) {
-            return executeSingle(instruction, context);
+            return executeSingle(instruction, context, false);
         }
         Stream<String> responses = IntStream.range(0, instruction.getForTimes())
-                .mapToObj(i -> executeSingle(instruction, context));
+                .mapToObj(i -> executeSingle(instruction, context, true));
         Object result = null;
         if ("list".equals(instruction.getCollectBy())) {
             result = responses.collect(Collectors.toList());
@@ -52,7 +52,21 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
         return result;
     }
 
-    private String executeSingle(Instruction instruction, RenderingContext context) {
+    private String executeSingle(Instruction instruction, RenderingContext context, boolean handleException) {
+    	try {
+            doExecuteSingle(instruction, context);
+        } catch (Exception e) {
+    		if (handleException) {
+                context.setResult(e.getMessage());
+            } else {
+                throw e;
+            }
+        }
+        String template = !StringUtils.isEmpty(instruction.getThenReturn()) ? instruction.getThenReturn() : "{{resultBody()}}";
+        return stringRenderer.render(template, context);
+    }
+
+    private void doExecuteSingle(Instruction instruction, RenderingContext context) {
         executeCount.incrementAndGet();
         if (!StringUtils.isEmpty(instruction.getTell())) {
             context.setResult(remoteCall(instruction, context));
@@ -81,8 +95,6 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
                 throw new RuntimeException("Random Error.");
             }
         }
-        String template = !StringUtils.isEmpty(instruction.getThenReturn()) ? instruction.getThenReturn() : "{{resultBody()}}";
-        return stringRenderer.render(template, context);
     }
 
     public String invokeTestMethod(int n) {
