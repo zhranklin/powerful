@@ -68,6 +68,11 @@ public class GrpcAService extends GrpcPowerfulService implements InitializingBea
     public void echoAsync(EchoNum request, StreamObserver<Reply> responseObserver) {
     }
 
+    private void fallback(EchoNum req, StreamObserver<Reply> responseObserver){
+        responseObserver.onNext(Reply.newBuilder().setMessage("fallback").build());
+        responseObserver.onCompleted();
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         setGrpcBEchoBlockingStub(grpcBEchoBlockingStub);

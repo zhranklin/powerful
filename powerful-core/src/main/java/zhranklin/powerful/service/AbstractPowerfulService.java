@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 /**
  * Created by 张武 at 2019/9/6
  */
-public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
+public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase {
 
     private static Logger logger = LoggerFactory.getLogger(AbstractPowerfulService.class);
     private static Random rand = new Random();
@@ -27,7 +27,8 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
 
     private AtomicInteger executeCount = new AtomicInteger(0);
 
-    @Autowired private TestingMethodService testingMethodService;
+    @Autowired
+    private TestingMethodService testingMethodService;
 
     public AbstractPowerfulService(StringRenderer stringRenderer) {
         this.stringRenderer = stringRenderer;
@@ -53,10 +54,10 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
     }
 
     private String executeSingle(Instruction instruction, RenderingContext context, boolean handleException) {
-    	try {
+        try {
             doExecuteSingle(instruction, context);
         } catch (Exception e) {
-    		if (handleException) {
+            if (handleException) {
                 context.setResult(e.getMessage());
             } else {
                 throw e;
@@ -98,8 +99,8 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
     }
 
     public String invokeTestMethod(int n) {
-    	if (n == 0) {
-    	    return null;
+        if (n == 0) {
+            return null;
         }
         if (n > 100 || n < 0) {
             throw new IllegalArgumentException(String.format("invokeTestMethod: illegal n: %s", n));
@@ -113,4 +114,7 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase{
         }
     }
 
+    private String fallback(Instruction instruction, RenderingContext context) {
+        return "fallback";
+    }
 }

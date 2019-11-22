@@ -3,15 +3,13 @@ package zhranklin.powerful.dubbo;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import zhranklin.powerful.model.Instruction;
+import zhranklin.powerful.service.StringRenderer;
 import zhranklin.powerful.model.RenderingContext;
 import zhranklin.powerful.service.DubboPowerfulService;
-import zhranklin.powerful.service.StringRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.core.annotation.Order;
 
 import javax.annotation.PostConstruct;
 
@@ -38,6 +36,10 @@ public class DubboAServiceImpl extends DubboPowerfulService implements DubboASer
     public Object echo(Integer num, Instruction instruction, RenderingContext context) {
         logger.info("in DubboAServiceImpl, num: " + num);
         return execute(instruction, context);
+    }
+
+    public Object fallback(Integer num, Instruction instruction, RenderingContext context) {
+        return "fallback";
     }
 
     @Override
