@@ -4,7 +4,6 @@ import zhranklin.powerful.service.HttpPowerfulService;
 import zhranklin.powerful.service.StringRenderer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +12,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@ConditionalOnExpression(" '${framew.type}'=='http' || '${framew.type}'=='springboot2.1' || '${framew.type}'=='springboot2' || '${framew.type}'=='mvc'")
+@ConditionalOnExpression(" '${framew.type:http}'=='http' || '${framew.type}'=='springboot2.1' || '${framew.type}'=='springboot2' || '${framew.type}'=='mvc'")
 @ComponentScan(basePackages = {"zhranklin.powerful.controllers", "zhranklin.powerful.configuration"})
 public class HttpConfiguration {
 
