@@ -13,7 +13,7 @@ public class Instruction implements Serializable {
 
 	private String by = "http";
 
-	private String collectBy = "none";
+	private String collectBy = "string";
 
 	private int forTimes = 1;
 

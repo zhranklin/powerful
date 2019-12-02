@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -39,7 +38,7 @@ public class PowerfulService {
     }
 
     public Object execute(Instruction instruction, RenderingContext context) {
-        if (instruction.getForTimes() <= 1 || "none".equals(instruction.getCollectBy())) {
+        if (instruction.getForTimes() <= 1) {
             return executeSingle(instruction, context, false);
         }
         Stream<String> responses = IntStream.range(0, instruction.getForTimes())
@@ -48,8 +47,7 @@ public class PowerfulService {
         if ("list".equals(instruction.getCollectBy())) {
             result = responses.collect(Collectors.toList());
         } else if ("string".equals(instruction.getCollectBy())) {
-            Optional res = responses.reduce((a, b) -> a + "\n" + b);
-            result = res.get();
+            result = responses.collect(Collectors.joining("\n", "", "\n"));
         }
         context.setResult(result);
         return result;
