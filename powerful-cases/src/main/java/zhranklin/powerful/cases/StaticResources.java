@@ -42,11 +42,18 @@ public class StaticResources {
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         File configFile = new File(CONFIG_PATH);
         if (configFile.exists()) {
+            //读取yaml配置, 例子见powerful-cases/config-example.yaml
             logger.info("use {}.", CONFIG_PATH);
             try {
                 Map<String, Object> config = (Map<String, Object>) new ObjectMapper(new YAMLFactory()).readValue(configFile, Object.class);
-                rawCases.putAll((Map<String, Object>) config.get("requestCases"));
-                targetMapping.putAll((Map<Object, Object>) config.get("targetMappings"));
+                Map<String, Object> cases = (Map<String, Object>) config.get("requestCases");
+                if (cases != null) {
+                    rawCases.putAll(cases);
+                }
+                Map<Object, Object> targetMappings = (Map<Object, Object>) config.get("targetMappings");
+                if (targetMappings != null) {
+                    targetMapping.putAll(targetMappings);
+                }
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
