@@ -1,23 +1,16 @@
 #!/bin/bash
 cd `dirname $0`
 if git diff-index --quiet HEAD --; then
-  REVISION=$(git rev-parse --short HEAD)
+  tag=$(git rev-parse --short HEAD)
 else
-  REVISION=$(git rev-parse --short HEAD)-dirty
+  tag=$(git rev-parse --short HEAD)-dirty
 fi
 
-image=zhranklin/powerful
+hub=hub.c.163.com/qingzhou
 mvn install
 
-image_with_tag=$image:mvc-$REVISION
-docker build ./powerful-spring-mvc -t $image_with_tag
-docker push $image_with_tag
-
-image_with_tag=$image:sb1-$REVISION
-docker build ./powerful-springboot-1 -t $image_with_tag
-docker push $image_with_tag
-
-image_with_tag=$image:sb2-$REVISION
-docker build ./powerful-springboot-2 -t $image_with_tag
-docker push $image_with_tag
-
+for module in spring-mvc springboot-1 springboot-2; do
+  image=$hub/powerful-$(echo $module | sed 's/springboot-/sb/g; s/spring-//g'):$tag
+  docker build ./powerful-$module -t $image
+  docker push $image
+done
