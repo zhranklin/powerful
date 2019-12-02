@@ -25,7 +25,7 @@ public class HttpController {
     @Autowired(required = false)
     private HttpPowerfulService httpPowerfulService;
 
-    @RequestMapping(value = "/execute")
+    @RequestMapping(value = {"/**/execute"})
     public Object execute(@RequestBody Instruction instruction, HttpServletRequest request) {
         try {
             RenderingContext context = new RenderingContext();

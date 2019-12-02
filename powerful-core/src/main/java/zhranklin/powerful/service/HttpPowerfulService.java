@@ -38,6 +38,9 @@ public class HttpPowerfulService extends AbstractPowerfulService {
         String url = stringRenderer.render(instruction.getTell() + "/execute", context);
         List<String> params = new ArrayList<>();
         instruction.getWithQuerys().forEach((k, v) -> params.add(k + "=" + stringRenderer.render(v, context)));
+        if (!url.startsWith("http")) {
+            url = "http://" + url;
+        }
         if (params.size() != 0) {
             url = url + "?" + StringUtils.join(params, "&");
         }
