@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: framew-e2e-config
+  namespace: {{ $.Release.Namespace }}
+data:
+  framew-e2e.yaml: |
+{{ toYaml (merge .Values.e2e.overrideYaml .Values.commonAgentYaml) | indent 4 -}}
+{{ range $key, $spec := .Values.powerful.services -}}
+  {{ $key }}.yml: |
+{{ toYaml (merge $spec.overrideYaml $.Values.commonAgentYaml) | indent 4 }}
+{{ end }}
