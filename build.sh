@@ -9,7 +9,7 @@ fi
 hub=hub.c.163.com/qingzhou
 mvn install
 
-for module in spring-mvc springboot-1 springboot-2; do
+for module in cases spring-mvc springboot-1 springboot-2; do
   image=$hub/powerful-$(echo $module | sed 's/springboot-/sb/g; s/spring-//g'):$tag
   docker build ./powerful-$module -t $image
   docker push $image

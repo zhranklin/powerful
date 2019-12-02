@@ -1,6 +1,6 @@
 package zhranklin.powerful.service;
 
-import zhranklin.powerful.grpc.service.EchoGrpc;
+import zhranklin.powerful.invoker.RemoteInvoker;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,9 +21,9 @@ import java.util.stream.Stream;
 /**
  * Created by 张武 at 2019/9/6
  */
-public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase {
+public class PowerfulService {
 
-    private static Logger logger = LoggerFactory.getLogger(AbstractPowerfulService.class);
+    private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
     private static Random rand = new Random();
     protected final StringRenderer stringRenderer;
 
@@ -30,11 +32,11 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase {
     @Autowired
     private TestingMethodService testingMethodService;
 
-    public AbstractPowerfulService(StringRenderer stringRenderer) {
+    private Map<String, RemoteInvoker> invokers = new HashMap<>();
+
+    public PowerfulService(StringRenderer stringRenderer) {
         this.stringRenderer = stringRenderer;
     }
-
-    public abstract Object remoteCall(Instruction instruction, RenderingContext context);
 
     public Object execute(Instruction instruction, RenderingContext context) {
         if (instruction.getForTimes() <= 1 || "none".equals(instruction.getCollectBy())) {
@@ -69,8 +71,12 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase {
 
     private void doExecuteSingle(Instruction instruction, RenderingContext context) {
         executeCount.incrementAndGet();
+        RemoteInvoker invoker = invokers.get(instruction.getBy());
+        if (invoker == null) {
+            throw new IllegalStateException(String.format("Protocol not supported in this instance: '%s'", instruction.getBy()));
+        }
         if (!StringUtils.isEmpty(instruction.getTell())) {
-            context.setResult(remoteCall(instruction, context));
+            context.setResult(invoker.invoke(instruction, context));
         }
         Integer tm = instruction.getThenCallTestMethod();
         if (tm != null) {
@@ -117,4 +123,11 @@ public abstract class AbstractPowerfulService extends EchoGrpc.EchoImplBase {
     private String fallback(Instruction instruction, RenderingContext context) {
         return "fallback";
     }
+
+    public void setInvoker(String protocol, RemoteInvoker invoker) {
+        if (invoker != null) {
+            invokers.put(protocol, invoker);
+        }
+    }
+
 }

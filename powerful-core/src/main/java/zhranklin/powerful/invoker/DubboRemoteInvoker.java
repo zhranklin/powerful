@@ -1,40 +1,38 @@
-package zhranklin.powerful.service;
+package zhranklin.powerful.invoker;
 
 import zhranklin.powerful.dubbo.DubboAService;
 import zhranklin.powerful.dubbo.DubboBService;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
+import zhranklin.powerful.service.PowerfulService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by twogoods on 2019/10/29.
  */
-public class DubboPowerfulService extends AbstractPowerfulService {
+public class DubboRemoteInvoker implements RemoteInvoker {
 
-    private static Logger logger = LoggerFactory.getLogger(AbstractPowerfulService.class);
-
-    private ApplicationContext applicationContext;
+    private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
 
     protected DubboAService dubboAService;
 
     protected DubboBService dubboBService;
 
-    public DubboPowerfulService(StringRenderer stringRenderer, ApplicationContext applicationContext) {
-        super(stringRenderer);
-        this.applicationContext = applicationContext;
+    @Autowired
+    protected PowerfulService powerful;
+
+    public DubboRemoteInvoker() {
     }
 
-    public DubboPowerfulService(StringRenderer stringRenderer, ApplicationContext applicationContext, DubboAService dubboAService, DubboBService dubboBService) {
-        super(stringRenderer);
-        this.applicationContext = applicationContext;
+    public DubboRemoteInvoker(DubboAService dubboAService, DubboBService dubboBService) {
         this.dubboAService=dubboAService;
         this.dubboBService=dubboBService;
     }
 
 
-    public Object remoteCall(Instruction instruction, RenderingContext context) {
+    public Object invoke(Instruction instruction, RenderingContext context) {
         String num = instruction.getWithQuerys().get("num");
         int param = 0;
         try {

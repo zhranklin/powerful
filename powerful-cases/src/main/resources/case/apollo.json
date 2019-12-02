@@ -1,0 +1,9 @@
+{
+    "tell": "http://http-a",
+    "by": "http",
+    "to": {
+      "thenDelay": 0,
+      "thenReturn": "{{apollo(key)}}"
+    },
+  "description": "apollo, 返回key对应的value"
+}

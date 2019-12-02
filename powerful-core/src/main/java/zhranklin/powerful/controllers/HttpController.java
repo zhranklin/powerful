@@ -2,7 +2,7 @@ package zhranklin.powerful.controllers;
 
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
-import zhranklin.powerful.service.HttpPowerfulService;
+import zhranklin.powerful.service.PowerfulService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +22,15 @@ import java.util.Map;
 @RestController
 public class HttpController {
 
-    @Autowired(required = false)
-    private HttpPowerfulService httpPowerfulService;
+    @Autowired
+    private PowerfulService powerful;
 
     @RequestMapping(value = {"/**/execute"})
     public Object execute(@RequestBody Instruction instruction, HttpServletRequest request) {
         try {
             RenderingContext context = new RenderingContext();
             context.setRequestHeaders(transformRequestHeaders(request));
-            Object result = httpPowerfulService.execute(instruction, context);
+            Object result = powerful.execute(instruction, context);
             Object res = context.getResult();
             if (res instanceof ResponseEntity) {
                 ResponseEntity<String> typed = (ResponseEntity<String>) res;
@@ -39,7 +39,7 @@ public class HttpController {
             return result;
         } catch (RuntimeException e) {
             e.printStackTrace();
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

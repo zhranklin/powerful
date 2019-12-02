@@ -1,0 +1,9 @@
+{
+    "tell": "dubboAService",
+    "by": "dubbo",
+    "to": {
+      "thenDelay": 0,
+      "thenReturn": "{{apollo(key)}}"
+    },
+  "description": "apollo, 返回key对应的value"
+}

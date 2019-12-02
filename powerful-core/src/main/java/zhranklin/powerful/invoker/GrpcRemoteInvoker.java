@@ -1,28 +1,30 @@
-package zhranklin.powerful.service;
+package zhranklin.powerful.invoker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import zhranklin.powerful.grpc.service.EchoGrpc;
 import zhranklin.powerful.grpc.service.EchoNum;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
+import zhranklin.powerful.service.GrpcClientInterceptor;
+import zhranklin.powerful.service.PowerfulService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Method;
 
 /**
  * Created by twogoods on 2019/10/29.
  */
-public class GrpcPowerfulService extends AbstractPowerfulService {
+public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteInvoker {
 
-    private static Logger logger = LoggerFactory.getLogger(GrpcPowerfulService.class);
+    private static Logger logger = LoggerFactory.getLogger(GrpcRemoteInvoker.class);
 
     @Autowired(required = false)
     private GrpcClientInterceptor grpcClientInterceptor;
 
-    private ApplicationContext applicationContext;
+    @Autowired
+    protected PowerfulService powerful;
 
     protected EchoGrpc.EchoBlockingStub grpcAEchoBlockingStub;
     protected EchoGrpc.EchoBlockingStub grpcBEchoBlockingStub;
@@ -32,13 +34,7 @@ public class GrpcPowerfulService extends AbstractPowerfulService {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public GrpcPowerfulService(StringRenderer stringRenderer, ApplicationContext applicationContext) {
-        super(stringRenderer);
-        this.applicationContext = applicationContext;
-    }
-
-
-    public Object remoteCall(Instruction instruction, RenderingContext context) {
+    public Object invoke(Instruction instruction, RenderingContext context) {
         String num = instruction.getWithQuerys().get("num");
         int param = 0;
         try {

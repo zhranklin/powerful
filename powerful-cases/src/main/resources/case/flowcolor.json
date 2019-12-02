@@ -1,0 +1,29 @@
+{
+  "tell": "http://http-a",
+  "by": "http",
+  "withHeaders": {
+    "header-e2e": "a"
+  },
+  "withQuerys": {
+    "time": "5"
+  },
+  "to": {
+    "forTimes": 5,
+    "collectBy": "string",
+    "tell": "http://http-b",
+    "by": "http",
+    "to": {
+      "tell": "http://http-a",
+      "by": "http",
+      "to": {
+        "thenDelay": 0.1,
+
+      },
+      "thenDelay": 0.1,
+
+    },
+    "thenDelay": 0.1,
+
+  },
+  "description": "路由"
+}

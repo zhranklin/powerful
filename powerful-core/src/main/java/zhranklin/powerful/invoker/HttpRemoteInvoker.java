@@ -1,7 +1,9 @@
-package zhranklin.powerful.service;
+package zhranklin.powerful.invoker;
 
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
+import zhranklin.powerful.service.PowerfulService;
+import zhranklin.powerful.service.StringRenderer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,17 +19,18 @@ import java.util.List;
 /**
  * Created by twogoods on 2019/10/29.
  */
-public class HttpPowerfulService extends AbstractPowerfulService {
+public class HttpRemoteInvoker implements RemoteInvoker {
 
-    private static Logger logger = LoggerFactory.getLogger(AbstractPowerfulService.class);
+    private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
+    private final StringRenderer stringRenderer;
     private RestTemplate restTemplate;
 
-    public HttpPowerfulService(StringRenderer stringRenderer, RestTemplate restTemplate) {
-        super(stringRenderer);
+    public HttpRemoteInvoker(StringRenderer stringRenderer, RestTemplate restTemplate) {
+        this.stringRenderer = stringRenderer;
         this.restTemplate = restTemplate;
     }
 
-    public ResponseEntity<String> remoteCall(Instruction instruction, RenderingContext context) {
+    public ResponseEntity<String> invoke(Instruction instruction, RenderingContext context) {
         HttpHeaders headers = new HttpHeaders();
         instruction.getWithHeaders().forEach((k, v) -> {
             String value = stringRenderer.render(v, context);

@@ -1,0 +1,11 @@
+{
+  "tell": "grpc-a",
+  "by": "grpc",
+  "to": {
+    "thenDelay": 0,
+    "thenThrowByPercent": 0,
+    "thenOKTurnByRoundRobin": 5,
+    "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
+  },
+  "description": "重试, 正常会返回name和version"
+}

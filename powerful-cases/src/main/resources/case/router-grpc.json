@@ -1,0 +1,33 @@
+{
+  "tell": "grpc-a",
+  "by": "grpc",
+  "withQuerys": {
+    "num": "5"
+  },
+  "to": {
+    "forTimes": 5,
+    "collectBy": "string",
+    "tell": "grpc-b",
+    "by": "grpc",
+    "withQuerys": {
+      "num": "4"
+    },
+    "to": {
+      "collectBy": "string",
+      "tell": "grpc-a",
+      "by": "grpc",
+      "withQuerys": {
+        "num": "3"
+      },
+      "to": {
+        "thenDelay": 0,
+        "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
+      },
+      "thenDelay": 0,
+      "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
+    },
+    "thenDelay": 0,
+    "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
+  },
+  "description": "路由"
+}

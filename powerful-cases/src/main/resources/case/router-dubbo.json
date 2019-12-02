@@ -1,0 +1,23 @@
+{
+  "tell": "dubboAService",
+  "by": "dubbo",
+  "withQuerys": {
+    "num": "5"
+  },
+  "to": {
+    "forTimes": 5,
+    "collectBy": "string",
+    "tell": "dubboBService",
+    "by": "dubbo",
+    "withQuerys": {
+      "num": "4"
+    },
+    "to": {
+      "thenDelay": 0,
+      "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
+    },
+    "thenDelay": 0,
+    "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
+  },
+  "description": "路由"
+}

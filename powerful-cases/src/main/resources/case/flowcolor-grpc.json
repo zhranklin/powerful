@@ -1,0 +1,29 @@
+{
+  "tell": "grpc-a",
+  "by": "grpc",
+  "withHeaders": {
+
+  },
+  "withQuerys": {
+    "num": "5"
+  },
+  "to": {
+    "forTimes": 5,
+    "collectBy": "string",
+    "tell": "grpc-b",
+    "by": "grpc",
+    "to": {
+      "tell": "grpc-a",
+      "by": "grpc",
+      "to": {
+        "thenDelay": 0.1,
+
+      },
+      "thenDelay": 0.1,
+
+    },
+    "thenDelay": 0.1,
+
+  },
+  "description": "流量染色"
+}

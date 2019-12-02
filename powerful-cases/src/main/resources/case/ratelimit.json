@@ -1,0 +1,10 @@
+{
+    "tell": "http://http-a",
+    "by": "http",
+    "to": {
+      "thenDelay": 0,
+      "thenCallTestMethod": 50,
+      "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
+    },
+  "description": "限流, 正常会返回name和version"
+}

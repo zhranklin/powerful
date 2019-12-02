@@ -1,6 +1,6 @@
 package zhranklin.powerful.configuration;
 
-import zhranklin.powerful.service.HttpPowerfulService;
+import zhranklin.powerful.invoker.HttpRemoteInvoker;
 import zhranklin.powerful.service.StringRenderer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -34,8 +34,8 @@ public class HttpConfiguration {
     }
 
     @Bean
-    HttpPowerfulService httpPowerfulService(@Qualifier("stringRenderer") StringRenderer stringRenderer, RestTemplate restTemplate) {
-        return new HttpPowerfulService(stringRenderer, restTemplate);
+	HttpRemoteInvoker httpRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, RestTemplate restTemplate) {
+        return new HttpRemoteInvoker(stringRenderer, restTemplate);
     }
 
 }
