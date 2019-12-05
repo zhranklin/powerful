@@ -117,6 +117,7 @@
 	</distributionManagement>
 
 	<build>
+		<finalName>powerful-cases</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
