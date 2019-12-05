@@ -29,7 +29,12 @@ public class PowerfulAutoConfiguration {
         powerful.setInvoker("http", http);
         powerful.setInvoker("dubbo", dubbo);
         powerful.setInvoker("grpc", grpc);
+        if (dubbo != null) {
+            dubbo.setPowerful(powerful);
+        }
+        if (grpc != null) {
+            grpc.setPowerful(powerful);
+        }
         return powerful;
     }
-
 }
