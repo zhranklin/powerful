@@ -23,8 +23,11 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
     @Autowired(required = false)
     private GrpcClientInterceptor grpcClientInterceptor;
 
-    @Autowired
     protected PowerfulService powerful;
+
+    public void setPowerful(PowerfulService powerful) {
+        this.powerful = powerful;
+    }
 
     protected EchoGrpc.EchoBlockingStub grpcAEchoBlockingStub;
     protected EchoGrpc.EchoBlockingStub grpcBEchoBlockingStub;

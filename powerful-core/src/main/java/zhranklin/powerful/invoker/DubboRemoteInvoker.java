@@ -20,8 +20,11 @@ public class DubboRemoteInvoker implements RemoteInvoker {
 
     protected DubboBService dubboBService;
 
-    @Autowired
     protected PowerfulService powerful;
+
+    public void setPowerful(PowerfulService powerful) {
+        this.powerful = powerful;
+    }
 
     public DubboRemoteInvoker() {
     }
