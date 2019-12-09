@@ -108,11 +108,11 @@ public class StaticResources {
 //        return "NOT FIND";
     }
 
-    public void processTargetMapping(RequestCase c) {
-        c.setTell(replaceTargets(c.getTell()));
+    public void processTargetMapping(Instruction instruction) {
+        instruction.setTell(replaceTargets(instruction.getTell()));
         try {
-            String to = replaceTargets(objectMapper.writeValueAsString(c.getTo()));
-            c.setTo(objectMapper.readValue(to, Instruction.class));
+            String to = replaceTargets(objectMapper.writeValueAsString(instruction.getTo()));
+            instruction.setTo(objectMapper.readValue(to, Instruction.class));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

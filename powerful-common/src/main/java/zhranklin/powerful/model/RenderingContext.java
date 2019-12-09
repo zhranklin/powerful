@@ -10,6 +10,7 @@ import java.util.Map;
 public class RenderingContext implements Serializable{
 
 	private Map<String, String> requestHeaders = new HashMap<>();
+	private Map<String, String> httpParams = new HashMap<>();
 	private Object result = null;
 	private String invokeResult;
 
@@ -35,5 +36,13 @@ public class RenderingContext implements Serializable{
 
 	public void setInvokeResult(String invokeResult) {
 		this.invokeResult = invokeResult;
+	}
+
+	public Map<String, String> getHttpParams() {
+		return httpParams;
+	}
+
+	public void setHttpParams(Map<String, String> httpParams) {
+		this.httpParams = httpParams;
 	}
 }

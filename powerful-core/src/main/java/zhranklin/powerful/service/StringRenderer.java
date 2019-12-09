@@ -56,6 +56,7 @@ public class StringRenderer implements EnvironmentAware {
             }
         });
         exprFuncs.put("p", context -> params -> System.getProperty(params.get(0)));
+        exprFuncs.put("param", context -> params -> context.getHttpParams().get(params.get(0)));
         exprFuncs.put("env", context -> params -> System.getenv(params.get(0)));
         exprFuncs.put("apollo", context -> params -> environment.getProperty(params.get(0)));
         exprFuncs.put("timestamp", context -> params -> {

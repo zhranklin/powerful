@@ -3,6 +3,7 @@ package zhranklin.powerful.cases.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import zhranklin.powerful.cases.RequestCase;
 import zhranklin.powerful.cases.StaticResources;
+import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
 import zhranklin.powerful.service.PowerfulService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created by 张武 at 2019/9/20
@@ -52,23 +54,26 @@ public class RequestCaseApiController {
 
     @RequestMapping(value = "/case/execute/{name}", method = RequestMethod.GET)
     @ResponseBody
-    Object rCase(@PathVariable String name) {
+    Object rCase(@PathVariable String name, @RequestParam Map<String, String> params) {
         RequestCase requestCase = staticResources.getCase(name);
         if (requestCase == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Instruction of name '%s' not found.", name));
         }
-        return execute(requestCase);
+        return execute(requestCase, params);
     }
 
 
     @RequestMapping(value = "/case/execute", method = RequestMethod.POST)
     @ResponseBody
-    Object eCase(@RequestBody RequestCase requestCase) throws IOException {
-        return execute(requestCase);
+    Object eCase(@RequestBody RequestCase requestCase, @RequestParam Map<String, String> params) {
+        return execute(requestCase, params);
     }
 
-    private Object execute(RequestCase requestCase) {
-        staticResources.processTargetMapping(requestCase);
-        return powerful.execute(requestCase, new RenderingContext());
+    private Object execute(RequestCase requestCase, Map<String, String> params) {
+        Instruction instruction = requestCase.translateTrace();
+        staticResources.processTargetMapping(instruction);
+        RenderingContext context = new RenderingContext();
+        context.setHttpParams(params);
+        return powerful.execute(instruction, context);
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,10 +27,11 @@ public class HttpController {
     private PowerfulService powerful;
 
     @RequestMapping(value = {"/**/execute"})
-    public Object execute(@RequestBody Instruction instruction, HttpServletRequest request) {
+    public Object execute(@RequestBody Instruction instruction, HttpServletRequest request, @RequestParam Map<String, String> params) {
         try {
             RenderingContext context = new RenderingContext();
             context.setRequestHeaders(transformRequestHeaders(request));
+            context.setHttpParams(params);
             Object result = powerful.execute(instruction, context);
             Object res = context.getResult();
             if (res instanceof ResponseEntity) {
