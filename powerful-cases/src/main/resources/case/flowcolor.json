@@ -4,7 +4,7 @@
   "withHeaders": {
     "header-e2e": "a"
   },
-  "withQuerys": {
+  "withQueries": {
     "time": "5"
   },
   "to": {

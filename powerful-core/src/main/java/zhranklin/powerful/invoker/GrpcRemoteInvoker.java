@@ -38,7 +38,7 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public Object invoke(Instruction instruction, RenderingContext context) {
-        String num = instruction.getWithQuerys().get("num");
+        String num = instruction.getWithQueries().get("num");
         int param = 0;
         try {
             param = Integer.parseInt(num);

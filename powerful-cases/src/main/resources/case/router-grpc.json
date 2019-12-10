@@ -1,7 +1,7 @@
 {
   "tell": "grpc-a",
   "by": "grpc",
-  "withQuerys": {
+  "withQueries": {
     "num": "5"
   },
   "to": {
@@ -9,14 +9,14 @@
     "collectBy": "string",
     "tell": "grpc-b",
     "by": "grpc",
-    "withQuerys": {
+    "withQueries": {
       "num": "4"
     },
     "to": {
       "collectBy": "string",
       "tell": "grpc-a",
       "by": "grpc",
-      "withQuerys": {
+      "withQueries": {
         "num": "3"
       },
       "to": {

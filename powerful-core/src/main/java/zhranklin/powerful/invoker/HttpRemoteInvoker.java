@@ -40,7 +40,7 @@ public class HttpRemoteInvoker implements RemoteInvoker {
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         String url = stringRenderer.render(instruction.getTell() + "/execute", context);
         List<String> params = new ArrayList<>();
-        instruction.getWithQuerys().forEach((k, v) -> params.add(k + "=" + stringRenderer.render(v, context)));
+        instruction.getWithQueries().forEach((k, v) -> params.add(k + "=" + stringRenderer.render(v, context)));
         if (!url.startsWith("http")) {
             url = "http://" + url;
         }

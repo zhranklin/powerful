@@ -4,7 +4,7 @@
   "withHeaders": {
 
   },
-  "withQuerys": {
+  "withQueries": {
     "num": "5"
   },
   "to": {

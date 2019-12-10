@@ -7,7 +7,6 @@ import zhranklin.powerful.model.RenderingContext;
 import zhranklin.powerful.service.PowerfulService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by twogoods on 2019/10/29.
@@ -36,7 +35,7 @@ public class DubboRemoteInvoker implements RemoteInvoker {
 
 
     public Object invoke(Instruction instruction, RenderingContext context) {
-        String num = instruction.getWithQuerys().get("num");
+        String num = instruction.getWithQueries().get("num");
         int param = 0;
         try {
             param = Integer.parseInt(num);

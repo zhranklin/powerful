@@ -1,7 +1,7 @@
 {
   "tell": "grpc-a",
   "by": "grpc",
-  "withQuerys": {
+  "withQueries": {
     "num": "5"
   },
   "to": {

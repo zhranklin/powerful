@@ -1,7 +1,7 @@
 {
   "tell": "dubboAService",
   "by": "dubbo",
-  "withQuerys": {
+  "withQueries": {
     "num": "5"
   },
   "to": {

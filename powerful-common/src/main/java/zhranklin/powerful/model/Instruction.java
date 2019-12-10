@@ -22,7 +22,7 @@ public class Instruction implements Serializable {
 
 	private Map<String, String> withHeaders = new HashMap<>();
 
-	private Map<String, String> withQuerys = new HashMap<>();
+	private Map<String, String> withQueries = new HashMap<>();
 
 	private Integer thenCallTestMethod = 0;
 
@@ -124,12 +124,12 @@ public class Instruction implements Serializable {
 		this.thenOKTurnByRoundRobin = thenOKTurnByRoundRobin;
 	}
 
-	public Map<String, String> getWithQuerys() {
-		return withQuerys;
+	public Map<String, String> getWithQueries() {
+		return withQueries;
 	}
 
-	public void setWithQuerys(Map<String, String> withQuerys) {
-		this.withQuerys = withQuerys;
+	public void setWithQueries(Map<String, String> withQueries) {
+		this.withQueries = withQueries;
 	}
 
 	public Integer getThenCallTestMethod() {

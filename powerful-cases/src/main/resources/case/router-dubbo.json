@@ -1,7 +1,7 @@
 {
   "tell": "dubboAService",
   "by": "dubbo",
-  "withQuerys": {
+  "withQueries": {
     "num": "5"
   },
   "to": {
@@ -9,7 +9,7 @@
     "collectBy": "string",
     "tell": "dubboBService",
     "by": "dubbo",
-    "withQuerys": {
+    "withQueries": {
       "num": "4"
     },
     "to": {
