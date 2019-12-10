@@ -13,7 +13,7 @@ public class RequestCase extends Instruction {
 
 	private List<Instruction> trace;
 
-	private String traceNodeTmpl = "{{env(VERSION)}}({{statusCode()}})";
+	private String traceNodeTmpl = "{{env(APP)}}({{statusCode()}})";
 
 	@JsonProperty(required = false)
 	private String name;
