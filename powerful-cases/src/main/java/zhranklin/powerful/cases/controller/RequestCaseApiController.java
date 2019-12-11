@@ -71,7 +71,7 @@ public class RequestCaseApiController {
         if (validate) {
             Map<String, Object> ret = new HashMap<>();
             ret.put("result", result);
-            ret.put("valid", CaseValidator.validate(requestCase.getExpect(), result));
+            ret.put("passed", CaseValidator.validate(requestCase.getExpect(), result));
             return ret;
         }
         return result;

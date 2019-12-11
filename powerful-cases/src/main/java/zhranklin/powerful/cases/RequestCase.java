@@ -60,6 +60,9 @@ public class RequestCase extends Instruction {
 		if (CollectionUtils.isEmpty(trace)) {
 			return this;
 		}
+		if (!StringUtils.isEmpty(trace.get(trace.size()-1).getTell())) {
+			trace.add(new Instruction());
+		}
 		Instruction prev = this;
 		for (Instruction current : trace) {
 			current.setThenReturn(String.format("%s -> {{resultBody()}}", traceNodeTmpl));
@@ -67,9 +70,6 @@ public class RequestCase extends Instruction {
 			prev = current;
 		}
 		prev.setThenReturn(traceNodeTmpl);
-		if (StringUtils.isEmpty(prev.getTell())) {
-			prev.setTo(new Instruction());
-		}
 		return trace.get(0);
 	}
 

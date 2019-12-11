@@ -18,6 +18,8 @@ public class Instruction implements Serializable {
 
 	private int forTimes = 1;
 
+	private int threads = 1;
+
 	//@JsonProperty(defaultValue = "{}")
 	private Instruction to;
 
@@ -139,5 +141,13 @@ public class Instruction implements Serializable {
 
 	public void setThenCallTestMethod(Integer thenCallTestMethod) {
 		this.thenCallTestMethod = thenCallTestMethod;
+	}
+
+	public int getThreads() {
+		return threads;
+	}
+
+	public void setThreads(int threads) {
+		this.threads = threads;
 	}
 }

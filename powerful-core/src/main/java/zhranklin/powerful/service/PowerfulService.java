@@ -12,6 +12,9 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -25,6 +28,7 @@ public class PowerfulService {
     private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
     private static Random rand = new Random();
     protected final StringRenderer stringRenderer;
+    private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(20, 200, 3, TimeUnit.MINUTES, new SynchronousQueue<>());
 
     private AtomicInteger executeCount = new AtomicInteger(0);
 
@@ -41,8 +45,7 @@ public class PowerfulService {
         if (instruction.getForTimes() <= 1) {
             return executeSingle(instruction, context, false);
         }
-        Stream<String> responses = IntStream.range(0, instruction.getForTimes())
-                .mapToObj(i -> executeSingle(instruction, context, true));
+        Stream<String> responses = executeForTimes(instruction, context);
         Object result = null;
         if ("list".equals(instruction.getCollectBy())) {
             result = responses.collect(Collectors.toList());
@@ -53,6 +56,36 @@ public class PowerfulService {
         }
         context.setResult(result);
         return result;
+    }
+
+    private Stream<String> executeForTimes(Instruction instruction, RenderingContext context) {
+        int totalTimes = instruction.getForTimes();
+        int threads = instruction.getThreads();
+        if (threads > 1) {
+            return IntStream.range(0, threads)
+                .mapToObj(i -> threadPool.submit(() -> {
+                    int times = totalTimes / threads;
+                    if (i < totalTimes % threads) {
+                        times += 1;
+                    }
+                    return IntStream.range(0, times)
+                        .mapToObj(j -> executeSingle(instruction, context, true))
+						.collect(Collectors.toList())
+                        .stream();
+                }))
+				.collect(Collectors.toList())
+                .stream()
+                .flatMap(future -> {
+                    try {
+                        return future.get();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+        } else {
+            return IntStream.range(0, totalTimes)
+                .mapToObj(i -> executeSingle(instruction, context, true));
+        }
     }
 
     private String executeSingle(Instruction instruction, RenderingContext context, boolean handleException) {
