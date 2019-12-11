@@ -1,9 +1,9 @@
 {
-    "tell": "http://http-a",
+    "call": "http://http-a",
     "by": "http",
     "to": {
-      "thenDelay": 0,
-      "thenReturn": "{{apollo(key)}}"
+      "delay": 0,
+      "responseFmt": "{{apollo(key)}}"
     },
   "description": "apollo, 返回key对应的value"
 }

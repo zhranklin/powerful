@@ -1,28 +1,28 @@
 {
-  "tell": "http://http-a",
+  "call": "http://http-a",
   "by": "http",
-  "withHeaders": {
+  "headers": {
     "header-e2e": "a"
   },
-  "withQueries": {
+  "queries": {
     "time": "5"
   },
   "to": {
-    "forTimes": 5,
+    "times": 5,
     "collectBy": "string",
-    "tell": "http://http-b",
+    "call": "http://http-b",
     "by": "http",
     "to": {
-      "tell": "http://http-a",
+      "call": "http://http-a",
       "by": "http",
       "to": {
-        "thenDelay": 0.1,
+        "delay": 0.1,
 
       },
-      "thenDelay": 0.1,
+      "delay": 0.1,
 
     },
-    "thenDelay": 0.1,
+    "delay": 0.1,
 
   },
   "description": "路由"

@@ -32,15 +32,15 @@ public class HttpRemoteInvoker implements RemoteInvoker {
 
     public ResponseEntity<String> invoke(Instruction instruction, RenderingContext context) {
         HttpHeaders headers = new HttpHeaders();
-        instruction.getWithHeaders().forEach((k, v) -> {
+        instruction.getHeaders().forEach((k, v) -> {
             String value = stringRenderer.render(v, context);
             headers.set(k, value);
             logger.info("with header: " + k + " - " + value);
         });
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        String url = stringRenderer.render(instruction.getTell() + "/execute", context);
+        String url = stringRenderer.render(instruction.getCall() + "/execute", context);
         List<String> params = new ArrayList<>();
-        instruction.getWithQueries().forEach((k, v) -> params.add(k + "=" + stringRenderer.render(v, context)));
+        instruction.getQueries().forEach((k, v) -> params.add(k + "=" + stringRenderer.render(v, context)));
         if (!url.startsWith("http")) {
             url = "http://" + url;
         }

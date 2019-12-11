@@ -1,12 +1,12 @@
 {
-  "tell": "dubboAService",
+  "call": "dubboAService",
   "by": "dubbo",
-  "withQueries": {
+  "queries": {
     "num": "5"
   },
   "to": {
-    "thenDelay": 0,
-    "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
+    "delay": 0,
+    "responseFmt": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
   },
   "description": "限流, 正常会返回name和version"
 }

@@ -42,7 +42,7 @@ public class PowerfulService {
     }
 
     public Object execute(Instruction instruction, RenderingContext context) {
-        if (instruction.getForTimes() <= 1) {
+        if (instruction.getTimes() <= 1) {
             return executeSingle(instruction, context, false);
         }
         Stream<String> responses = executeForTimes(instruction, context);
@@ -59,7 +59,7 @@ public class PowerfulService {
     }
 
     private Stream<String> executeForTimes(Instruction instruction, RenderingContext context) {
-        int totalTimes = instruction.getForTimes();
+        int totalTimes = instruction.getTimes();
         int threads = instruction.getThreads();
         if (threads > 1) {
             return IntStream.range(0, threads)
@@ -98,7 +98,7 @@ public class PowerfulService {
                 throw e;
             }
         }
-        String template = !StringUtils.isEmpty(instruction.getThenReturn()) ? instruction.getThenReturn() : "{{resultBody()}}";
+        String template = !StringUtils.isEmpty(instruction.getResponseFmt()) ? instruction.getResponseFmt() : "{{resultBody()}}";
         return stringRenderer.render(template, context);
     }
 
@@ -108,19 +108,19 @@ public class PowerfulService {
         if (invoker == null) {
             throw new IllegalStateException(String.format("Protocol not supported in this instance: '%s'", instruction.getBy()));
         }
-        if (!StringUtils.isEmpty(instruction.getTell())) {
+        if (!StringUtils.isEmpty(instruction.getCall())) {
             context.setResult(invoker.invoke(instruction, context));
         }
-        Integer tm = instruction.getThenCallTestMethod();
+        Integer tm = instruction.getCallTestMethod();
         if (tm != null) {
             context.setInvokeResult(invokeTestMethod(tm));
         }
-        int roundRobinNum = instruction.getThenOKTurnByRoundRobin();
+        int roundRobinNum = instruction.getOkByRoundRobin();
         if (executeCount.get() % roundRobinNum != 0) {
             logger.info("throw roundRobin error");
             throw new RuntimeException("roundRobin return error.");
         }
-        int delay = (int) (instruction.getThenDelay() * 1000);
+        int delay = (int) (instruction.getDelay() * 1000);
         if (delay > 0) {
             try {
                 Thread.sleep(delay);
@@ -128,7 +128,7 @@ public class PowerfulService {
                 e.printStackTrace();
             }
         }
-        Integer errorPercent = instruction.getThenThrowByPercent();
+        Integer errorPercent = instruction.getErrorByPercent();
         if (errorPercent > 0) {
             if (rand.nextInt(100) < errorPercent) {
                 logger.info("throw Random error");

@@ -35,7 +35,7 @@ public class DubboRemoteInvoker implements RemoteInvoker {
 
 
     public Object invoke(Instruction instruction, RenderingContext context) {
-        String num = instruction.getWithQueries().get("num");
+        String num = instruction.getQueries().get("num");
         int param = 0;
         try {
             param = Integer.parseInt(num);
@@ -43,7 +43,7 @@ public class DubboRemoteInvoker implements RemoteInvoker {
             logger.warn("query param num is illegal");
         }
 
-        String beanName = instruction.getTell();
+        String beanName = instruction.getCall();
         if (beanName.equals("dubboAService")) {
             return dubboAService.echo(param, instruction.getTo(), context);
         } else if (beanName.equals("dubboBService")) {

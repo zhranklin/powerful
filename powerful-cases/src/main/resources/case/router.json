@@ -1,23 +1,23 @@
 {
-  "tell": "http://http-a",
+  "call": "http://http-a",
   "by": "http",
   "to": {
-    "forTimes": 5,
+    "times": 5,
     "collectBy": "string",
-    "tell": "http://http-b",
+    "call": "http://http-b",
     "by": "http",
     "to": {
-      "tell": "http://http-a",
+      "call": "http://http-a",
       "by": "http",
       "to": {
-        "thenDelay": 0.1,
-        "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
+        "delay": 0.1,
+        "responseFmt": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
       },
-      "thenDelay": 0.1,
-      "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
+      "delay": 0.1,
+      "responseFmt": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
     },
-    "thenDelay": 0.1,
-    "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
+    "delay": 0.1,
+    "responseFmt": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
   },
   "description": "路由"
 }

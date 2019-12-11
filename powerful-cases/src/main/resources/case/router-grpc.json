@@ -1,33 +1,33 @@
 {
-  "tell": "grpc-a",
+  "call": "grpc-a",
   "by": "grpc",
-  "withQueries": {
+  "queries": {
     "num": "5"
   },
   "to": {
-    "forTimes": 5,
+    "times": 5,
     "collectBy": "string",
-    "tell": "grpc-b",
+    "call": "grpc-b",
     "by": "grpc",
-    "withQueries": {
+    "queries": {
       "num": "4"
     },
     "to": {
       "collectBy": "string",
-      "tell": "grpc-a",
+      "call": "grpc-a",
       "by": "grpc",
-      "withQueries": {
+      "queries": {
         "num": "3"
       },
       "to": {
-        "thenDelay": 0,
-        "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
+        "delay": 0,
+        "responseFmt": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
       },
-      "thenDelay": 0,
-      "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
+      "delay": 0,
+      "responseFmt": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
     },
-    "thenDelay": 0,
-    "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
+    "delay": 0,
+    "responseFmt": "{{p(framew.application.name)}}:{{p(framew.application.version)}} -> {{resultBody()}}"
   },
   "description": "路由"
 }

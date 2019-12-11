@@ -1,10 +1,10 @@
 {
-  "tell": "dubboAService",
+  "call": "dubboAService",
   "by": "dubbo",
   "to": {
-    "thenDelay": 0,
-    "thenThrowByPercent": 100,
-    "thenReturn": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
+    "delay": 0,
+    "errorByPercent": 100,
+    "responseFmt": "{{p(framew.application.name)}}:{{p(framew.application.version)}}"
   },
   "description": "熔断, 正常会返回name和version"
 }

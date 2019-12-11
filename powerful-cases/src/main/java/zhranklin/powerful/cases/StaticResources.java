@@ -109,7 +109,7 @@ public class StaticResources {
     }
 
     public void processTargetMapping(Instruction instruction) {
-        instruction.setTell(replaceTargets(instruction.getTell()));
+        instruction.setCall(replaceTargets(instruction.getCall()));
         try {
             String to = replaceTargets(objectMapper.writeValueAsString(instruction.getTo()));
             instruction.setTo(objectMapper.readValue(to, Instruction.class));

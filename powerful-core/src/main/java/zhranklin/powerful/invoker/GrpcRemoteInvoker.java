@@ -38,14 +38,14 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public Object invoke(Instruction instruction, RenderingContext context) {
-        String num = instruction.getWithQueries().get("num");
+        String num = instruction.getQueries().get("num");
         int param = 0;
         try {
             param = Integer.parseInt(num);
         } catch (Exception e) {
             logger.warn("query param num is illegal");
         }
-        String beanName = instruction.getTell();
+        String beanName = instruction.getCall();
         EchoNum.Builder builder = EchoNum.newBuilder();
         try {
             String instructionStr = objectMapper.writeValueAsString(instruction.getTo());
@@ -56,7 +56,7 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
         }
         builder.setNum(param);
         EchoNum echoNum = builder.build();
-        grpcClientInterceptor.addCustomizeHeaders(instruction.getWithHeaders());
+        grpcClientInterceptor.addCustomizeHeaders(instruction.getHeaders());
         if (beanName.equalsIgnoreCase("grpc-a")) {
             return grpcAEchoBlockingStub.echo(echoNum).getMessage();
         } else if (beanName.equalsIgnoreCase("grpc-b")) {

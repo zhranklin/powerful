@@ -9,42 +9,40 @@ import java.util.Map;
  */
 public class Instruction implements Serializable {
 
-	private String tell = "";
+	private String call = "";
 
 	private String by = "http";
 
 	private static final String defaultCollectBy = System.getProperty("defaultCollectBy", "string");
 	private String collectBy = defaultCollectBy;
 
-	private int forTimes = 1;
+	private int times = 1;
 
 	private int threads = 1;
 
 	//@JsonProperty(defaultValue = "{}")
 	private Instruction to;
 
-	private Map<String, String> withHeaders = new HashMap<>();
+	private Map<String, String> headers = new HashMap<>();
 
-	private Map<String, String> withQueries = new HashMap<>();
+	private Map<String, String> queries = new HashMap<>();
 
-	private Integer thenCallTestMethod = 0;
+	private Integer callTestMethod = 0;
 
-	private double thenDelay = 0;
+	private double delay = 0;
 
-	private Integer thenThrowByPercent = 0;
+	private Integer errorByPercent = 0;
 
-	private Integer thenOKTurnByRoundRobin = 1;
+	private Integer okByRoundRobin = 1;
 
-	private String thenReturn = "";
+	private String responseFmt = "";
 
-	private String description;
-
-	public String getTell() {
-		return tell;
+	public String getCall() {
+		return call;
 	}
 
-	public void setTell(String tell) {
-		this.tell = tell;
+	public void setCall(String call) {
+		this.call = call;
 	}
 
 	public Instruction getTo() {
@@ -55,28 +53,28 @@ public class Instruction implements Serializable {
 		this.to = to;
 	}
 
-	public Map<String, String> getWithHeaders() {
-		return withHeaders;
+	public Map<String, String> getHeaders() {
+		return headers;
 	}
 
-	public void setWithHeaders(Map<String, String> withHeaders) {
-		this.withHeaders = withHeaders;
+	public void setHeaders(Map<String, String> headers) {
+		this.headers = headers;
 	}
 
-	public String getThenReturn() {
-		return thenReturn;
+	public String getResponseFmt() {
+		return responseFmt;
 	}
 
-	public void setThenReturn(String thenReturn) {
-		this.thenReturn = thenReturn;
+	public void setResponseFmt(String responseFmt) {
+		this.responseFmt = responseFmt;
 	}
 
-	public int getForTimes() {
-		return forTimes;
+	public int getTimes() {
+		return times;
 	}
 
-	public void setForTimes(int forTimes) {
-		this.forTimes = forTimes;
+	public void setTimes(int times) {
+		this.times = times;
 	}
 
 	public String getCollectBy() {
@@ -95,52 +93,44 @@ public class Instruction implements Serializable {
 		this.by = by;
 	}
 
-	public double getThenDelay() {
-		return thenDelay;
+	public double getDelay() {
+		return delay;
 	}
 
-	public void setThenDelay(double thenDelay) {
-		this.thenDelay = thenDelay;
+	public void setDelay(double delay) {
+		this.delay = delay;
 	}
 
-	public String getDescription() {
-		return description;
+	public Integer getErrorByPercent() {
+		return errorByPercent;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setErrorByPercent(Integer errorByPercent) {
+		this.errorByPercent = errorByPercent;
 	}
 
-	public Integer getThenThrowByPercent() {
-		return thenThrowByPercent;
+	public Integer getOkByRoundRobin() {
+		return okByRoundRobin;
 	}
 
-	public void setThenThrowByPercent(Integer thenThrowByPercent) {
-		this.thenThrowByPercent = thenThrowByPercent;
+	public void setOkByRoundRobin(Integer okByRoundRobin) {
+		this.okByRoundRobin = okByRoundRobin;
 	}
 
-	public Integer getThenOKTurnByRoundRobin() {
-		return thenOKTurnByRoundRobin;
+	public Map<String, String> getQueries() {
+		return queries;
 	}
 
-	public void setThenOKTurnByRoundRobin(Integer thenOKTurnByRoundRobin) {
-		this.thenOKTurnByRoundRobin = thenOKTurnByRoundRobin;
+	public void setQueries(Map<String, String> queries) {
+		this.queries = queries;
 	}
 
-	public Map<String, String> getWithQueries() {
-		return withQueries;
+	public Integer getCallTestMethod() {
+		return callTestMethod;
 	}
 
-	public void setWithQueries(Map<String, String> withQueries) {
-		this.withQueries = withQueries;
-	}
-
-	public Integer getThenCallTestMethod() {
-		return thenCallTestMethod;
-	}
-
-	public void setThenCallTestMethod(Integer thenCallTestMethod) {
-		this.thenCallTestMethod = thenCallTestMethod;
+	public void setCallTestMethod(Integer callTestMethod) {
+		this.callTestMethod = callTestMethod;
 	}
 
 	public int getThreads() {
