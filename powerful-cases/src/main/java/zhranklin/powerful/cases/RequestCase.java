@@ -3,6 +3,7 @@ package zhranklin.powerful.cases;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import zhranklin.powerful.model.Instruction;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -66,6 +67,9 @@ public class RequestCase extends Instruction {
 			prev = current;
 		}
 		prev.setThenReturn(traceNodeTmpl);
+		if (StringUtils.isEmpty(prev.getTell())) {
+			prev.setTo(new Instruction());
+		}
 		return trace.get(0);
 	}
 
