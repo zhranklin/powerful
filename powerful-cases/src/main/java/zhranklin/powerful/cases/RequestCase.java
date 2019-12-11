@@ -20,6 +20,8 @@ public class RequestCase extends Instruction {
 
 	private String description;
 
+	private Object expect;
+
 	public String getName() {
 		return name;
 	}
@@ -68,4 +70,11 @@ public class RequestCase extends Instruction {
 
 	public static final String defaultTraceNodeTmpl = System.getProperty("defaultTraceNodeTmpl", "{{env(APP)}}({{statusCode()}})");
 
+	public Object getExpect() {
+		return expect;
+	}
+
+	public void setExpect(Object expect) {
+		this.expect = expect;
+	}
 }

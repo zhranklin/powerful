@@ -15,7 +15,12 @@
 </div>
 <div>
     <div style="float:left;width:49%;">
+      <div>
+        <input style="width:98%;" class="params" type="text">
+      </div>
+      <div>
         <textarea style="width:98%;height:60%;" class="json"></textarea>
+      </div>
     </div>
     <button id="execute">执行</button>
     <div style="float:right;width:48%;">
@@ -25,16 +30,18 @@
 </body>
 
 <script src="/js/jquery.min.js"></script>
+<script src="/js/esprima.js"></script>
+<script src="/js/js-yaml.min.js"></script>
 <script type="text/javascript">
     /*<![CDATA[*/
 
     $(".case").click(function () {
         $.ajax({
             type: 'GET',
-            url: '/e2e/case/' +this.text,
+            url: '/c/' +this.text,
             dataType: 'text',
             success: function (res) {
-                $(".json").val(res);
+                $(".json").val(jsyaml.dump(JSON.parse(res)));
             },
             error: function (res) {
                 $(".json").val(res);
@@ -44,11 +51,16 @@
 
 
     $("#execute").click(function () {
-        var json=JSON.parse($(".json").val());
+        var json = jsyaml.load($(".json").val());
         $(".response").text("loading...");
+        var url = '/e';
+        var params = $(".params").val();
+        if (params) {
+            url = url + "?" + params
+        }
         $.ajax({
             type: 'POST',
-            url: '/e2e/case/execute',
+            url: url,
             contentType: "application/json; charset=utf-8",
             dataType: 'text',
             data: JSON.stringify(json),
