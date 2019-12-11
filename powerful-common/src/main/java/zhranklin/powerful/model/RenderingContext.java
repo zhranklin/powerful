@@ -11,8 +11,11 @@ public class RenderingContext implements Serializable{
 
 	private Map<String, String> requestHeaders = new HashMap<>();
 	private Map<String, String> httpParams = new HashMap<>();
-	private Object result = null;
-	private String invokeResult;
+	private ThreadLocal<Result> results = new ThreadLocal<>();
+
+	{
+		results.set(new Result());
+	}
 
 	public Map<String, String> getRequestHeaders() {
 		return requestHeaders;
@@ -23,19 +26,19 @@ public class RenderingContext implements Serializable{
 	}
 
 	public Object getResult() {
-		return result;
+		return getResults().result;
 	}
 
 	public void setResult(Object result) {
-		this.result = result;
+		getResults().result = result;
 	}
 
 	public String getInvokeResult() {
-		return invokeResult;
+		return getResults().invokeResult;
 	}
 
 	public void setInvokeResult(String invokeResult) {
-		this.invokeResult = invokeResult;
+		getResults().invokeResult = invokeResult;
 	}
 
 	public Map<String, String> getHttpParams() {
@@ -45,4 +48,17 @@ public class RenderingContext implements Serializable{
 	public void setHttpParams(Map<String, String> httpParams) {
 		this.httpParams = httpParams;
 	}
+
+	private Result getResults() {
+		if (results.get() == null) {
+			results.set(new Result());
+		}
+		return results.get();
+	}
+
+	private class Result {
+		private Object result = null;
+		private String invokeResult;
+	}
+
 }
