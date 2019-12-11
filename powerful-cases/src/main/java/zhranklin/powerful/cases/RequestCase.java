@@ -14,6 +14,7 @@ public class RequestCase extends Instruction {
 	private List<Instruction> trace;
 
 	private String traceNodeTmpl = defaultTraceNodeTmpl;
+	public static final String defaultTraceNodeTmpl = System.getProperty("defaultTraceNodeTmpl", "{{env(APP)}}({{statusCode()}})");
 
 	@JsonProperty(required = false)
 	private String name;
@@ -67,8 +68,6 @@ public class RequestCase extends Instruction {
 		prev.setThenReturn(traceNodeTmpl);
 		return trace.get(0);
 	}
-
-	public static final String defaultTraceNodeTmpl = System.getProperty("defaultTraceNodeTmpl", "{{env(APP)}}({{statusCode()}})");
 
 	public Object getExpect() {
 		return expect;

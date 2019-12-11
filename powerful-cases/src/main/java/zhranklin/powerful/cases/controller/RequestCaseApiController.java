@@ -72,6 +72,7 @@ public class RequestCaseApiController {
             Map<String, Object> ret = new HashMap<>();
             ret.put("result", result);
             ret.put("valid", CaseValidator.validate(requestCase.getExpect(), result));
+            return ret;
         }
         return result;
     }

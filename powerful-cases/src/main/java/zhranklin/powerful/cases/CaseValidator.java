@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Created by 张武 at 2019/12/11
@@ -19,9 +20,10 @@ public class CaseValidator {
 		if (result == null) {
 			result = "";
 		}
-		if (expect instanceof String) {
+		if (expect instanceof String || expect instanceof Number) {
+			expect = expect.toString();
 			if (result instanceof String) {
-				return ((String) result).matches((String) expect);
+				return matchOrEquals((String) expect, (String) result);
 			} else if (result instanceof Number) {
 				return validateNumber((String) expect, ((Number) result));
 			} else {
@@ -49,6 +51,14 @@ public class CaseValidator {
 			return true;
 		} else {
 			throw new IllegalStateException(String.format("Unknown type: %s", expect.getClass().getSimpleName()));
+		}
+	}
+
+	private static boolean matchOrEquals(String regex, String str) {
+		try {
+			return regex.equals(str) || str.matches(regex);
+		} catch(PatternSyntaxException e) {
+			return false;
 		}
 	}
 

@@ -48,6 +48,8 @@ public class PowerfulService {
             result = responses.collect(Collectors.toList());
         } else if ("string".equals(instruction.getCollectBy())) {
             result = responses.collect(Collectors.joining("\n", "", "\n"));
+        } else if ("stat".equals(instruction.getCollectBy())) {
+            result = responses.collect(Collectors.toMap(i -> i, i -> 1, Integer::sum));
         }
         context.setResult(result);
         return result;
