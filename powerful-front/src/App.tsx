@@ -1,16 +1,12 @@
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
-import {
-  JsonForms,
-  JsonFormsDispatch,
-  JsonFormsReduxContext
-} from '@jsonforms/react';
-import { Provider } from 'react-redux';
+import { JsonForms } from '@jsonforms/react';
 import Grid from '@material-ui/core/Grid';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import withStyles, { WithStyles } from '@material-ui/core/styles/withStyles';
 import createStyles from '@material-ui/core/styles/createStyles';
-import { Tabs, Tab } from '@material-ui/core';
-import logo from './logo.svg';
 import './App.css';
 import schema from './schema.json';
 import uischema from './uischema.json';
@@ -20,8 +16,10 @@ import {
 } from '@jsonforms/material-renderers';
 import { Store } from 'redux';
 import { get } from 'lodash';
-import RatingControl from './RatingControl';
-import ratingControlTester from './ratingControlTester';
+import MyArrayLayout from "./MyArrayLayout";
+import * as $ from "jquery"
+import {ListItemText, TextField} from "@material-ui/core";
+import * as yaml from 'js-yaml'
 
 const styles = createStyles({
   container: {
@@ -33,7 +31,8 @@ const styles = createStyles({
   },
   dataContent: {
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    padding: '10px',
     borderRadius: '0.25em',
     backgroundColor: '#cecece'
   },
@@ -48,11 +47,7 @@ export interface AppProps extends WithStyles<typeof styles> {
 }
 
 const data = {
-  name: 'Send email to Adrian',
-  description: 'Confirm if you have passed the subject\nHereby ...',
-  done: true,
-  recurrence: 'Daily',
-  rating: 3
+  trace: [{}]
 };
 
 const getDataAsStringFromStore = (store: Store) =>
@@ -64,22 +59,26 @@ const getDataAsStringFromStore = (store: Store) =>
       )
     : '';
 
+var init = false;
+
 const App = ({ store, classes }: AppProps) => {
-  const [tabIdx, setTabIdx] = useState(0);
   const [displayDataAsString, setDisplayDataAsString] = useState('');
   const [standaloneData, setStandaloneData] = useState(data);
-  const handleTabChange = useCallback(
-    (event: any, newValue: number) => {
-      setTabIdx(newValue);
-      setDisplayDataAsString(
-        newValue === 0
-          ? getDataAsStringFromStore(store)
-          : JSON.stringify(standaloneData, null, 2)
-      );
-    },
-    [store, standaloneData]
-  );
+  const [displayResultAsString, setDisplayResultAsString] = useState('');
+  const [cases, setCases] = useState(["1", "2"]);
+  const [yamlStr, setYamlStr] = useState("");
+  const [yamlTextFocused, setYamlTextFocused] = useState(false);
 
+  if (!init) {
+    $.ajax({
+      url: '/c',
+      success: data1 => {
+        console.log(data1);
+        setCases(data1)
+      }
+    });
+    init = true;
+  }
   useEffect(() => {
     const updateStringData = () => {
       const stringData = getDataAsStringFromStore(store);
@@ -93,6 +92,64 @@ const App = ({ store, classes }: AppProps) => {
     setDisplayDataAsString(JSON.stringify(standaloneData, null, 2));
   }, [standaloneData]);
 
+  useEffect(() => {
+    if (!yamlTextFocused) {
+      setYamlStr(yaml.dump(standaloneData))
+    }
+  }, [standaloneData]);
+
+  function getCase(name: string) {
+    $.ajax({
+      method: "Post",
+      url: "/c/" + name,
+      success: data1 => {
+        var data = JSON.parse(data1);
+        console.log(data);
+        setStandaloneData(data)
+      }
+    })
+  }
+  function submit() {
+    setDisplayResultAsString("loading...");
+    window.console.log(displayDataAsString);
+    var json = JSON.parse(displayDataAsString);
+    var url = '/e';
+    var params = "validate=true";
+    if (params) {
+      url = url + "?" + params
+    }
+    $.ajax({
+      method: "POST",
+      url: url,
+      dataType: 'text',
+      data: JSON.stringify(json),
+      contentType: 'application/json',
+      success: data1 => {
+        setDisplayResultAsString(data1)
+      },
+      error: jqXHR => {
+        setDisplayResultAsString(jqXHR.responseText)
+      }
+    });
+  }
+  function editYaml(content: string) {
+    setYamlStr(content)
+    try {
+      var obj = yaml.load(content);
+      console.log(obj)
+      if (obj) {
+        var nul = obj.trace.indexOf(null);
+        if (nul === -1) {
+          setStandaloneData(obj)
+        } else {
+          obj.trace[nul] = {}
+        }
+      }
+    } catch {
+
+    }
+  }
+
   return (
     <Fragment>
       <Grid
@@ -101,18 +158,30 @@ const App = ({ store, classes }: AppProps) => {
         spacing={1}
         className={classes.container}
       >
-        <Grid item sm={6}>
-          <Typography variant={'h3'} className={classes.title}>
-            Bound data
+        <Grid item sm={2}>
+          <Typography variant="h6" className={classes.title}>
+            Cases
           </Typography>
-          <div className={classes.dataContent}>
-            <pre id='boundData'>{displayDataAsString}</pre>
-          </div>
+          <List dense={true} >
+            {cases.map(i => (
+              <ListItem button onClick={event => getCase(i)}>
+                <ListItemText primary={i} />
+              </ListItem>
+            ))}
+          </List>
         </Grid>
-        <Grid item sm={6}>
-          <Typography variant={'h3'} className={classes.title}>
-            Rendered form
-          </Typography>
+        <Grid item sm={5}>
+          <Grid
+            container
+            justify={'flex-end'}
+            spacing={1}
+            className={classes.container}
+          >
+              <Button
+                color="primary"
+                onClick={() => submit()}
+              >Submit</Button>
+          </Grid>
           <div className={classes.demoform}>
             <JsonForms
               schema={schema}
@@ -121,11 +190,32 @@ const App = ({ store, classes }: AppProps) => {
               renderers={[
                 ...materialRenderers,
                 //register custom renderer
-                { tester: ratingControlTester, renderer: RatingControl }
+                MyArrayLayout
               ]}
               cells={materialCells}
               onChange={({ errors, data }) => setStandaloneData(data)}
             />
+          </div>
+        </Grid>
+        <Grid item sm={5}>
+          <Typography variant={'h6'} className={classes.title}>
+            Edit as yaml
+          </Typography>
+          <TextField
+            id="outlined-multiline-flexible"
+            label="Multiline"
+            multiline
+            rows="10"
+            value={yamlStr}
+            onChange={event => editYaml(event.target.value)}
+            onFocus={event => setYamlTextFocused(true)}
+            onBlur={event => setYamlTextFocused(false)}
+            variant="outlined"
+            fullWidth
+          />
+          <p></p>
+          <div className={classes.dataContent}>
+            <pre id='resultData'>{displayResultAsString}</pre>
           </div>
         </Grid>
       </Grid>

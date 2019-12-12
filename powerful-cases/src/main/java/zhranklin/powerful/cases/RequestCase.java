@@ -3,7 +3,6 @@ package zhranklin.powerful.cases;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import zhranklin.powerful.model.Instruction;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -60,17 +59,17 @@ public class RequestCase extends Instruction {
 		if (CollectionUtils.isEmpty(trace)) {
 			return this;
 		}
-		if (!StringUtils.isEmpty(trace.get(trace.size()-1).getCall())) {
-			trace.add(new Instruction());
-		}
 		Instruction prev = this;
 		for (Instruction current : trace) {
-			current.setResponseFmt(String.format("%s -> {{resultBody()}}", traceNodeTmpl));
+			prev.setCall(current.getCall());
+			prev.setBy(current.getBy());
 			prev.setTo(current);
+			prev.setResponseFmt(String.format("%s -> {{resultBody()}}", traceNodeTmpl));
 			prev = current;
 		}
+		prev.setCall("");
 		prev.setResponseFmt(traceNodeTmpl);
-		return trace.get(0);
+		return this;
 	}
 
 	public Object getExpect() {

@@ -1,55 +1,70 @@
 {
   "type": "VerticalLayout",
-  "elements": [
-    {
+  "elements": [{
+    "type": "HorizontalLayout",
+    "elements": [{
       "type": "Control",
-      "label": false,
-      "scope": "#/properties/done"
-    },
-    {
+      "scope": "#/properties/times",
+      "label": "times"
+    }, {
       "type": "Control",
-      "scope": "#/properties/name"
-    },
-    {
-      "type": "HorizontalLayout",
-      "elements": [
-        {
-          "type": "Control",
-          "scope": "#/properties/due_date"
-        },
-        {
-          "type": "Control",
-          "scope": "#/properties/rating"
-        }
-      ]
-    },
-    {
-      "type": "Control",
-      "scope": "#/properties/description",
-      "options": {
-        "multi": true
-      }
-    },
-    {
-      "type": "HorizontalLayout",
-      "elements": [
-        {
-          "type": "Control",
-          "scope": "#/properties/recurrence"
-        },
-        {
-          "type": "Control",
-          "scope": "#/properties/recurrence_interval",
-          "rule": {
-            "effect": "HIDE",
-            "condition": {
-              "type": "LEAF",
-              "scope": "#/properties/recurrence",
-              "expectedValue": "Never"
+      "scope": "#/properties/threads",
+      "label": "threads"
+    }]
+  }, {
+    "type": "Control",
+    "scope": "#/properties/trace",
+    "options": {
+      "detail": {
+        "type": "VerticalLayout",
+        "elements": [{
+          "type": "Categorization",
+          "elements": [
+            {
+              "type": "Category",
+              "label": "Base",
+              "elements": [{
+                "type": "HorizontalLayout",
+                "elements": [{
+                  "type": "Control",
+                  "scope": "#/properties/call",
+                  "label": "call"
+                }, {
+                  "type": "Control",
+                  "scope": "#/properties/by",
+                  "label": "by"
+                }, {
+                  "type": "Control",
+                  "scope": "#/properties/delay",
+                  "label": "delay"
+                }, {
+                  "type": "Control",
+                  "scope": "#/properties/errorByPercent",
+                  "label": "error"
+                }, {
+                  "type": "Control",
+                  "scope": "#/properties/okByRoundRobin",
+                  "label": "ok round robin"
+                }]
+              }]
+            }, {
+              "type": "Category",
+              "label": "Headers",
+              "elements": [{
+                "type": "Control",
+                "scope": "#/properties/headers"
+              }]
+            }, {
+              "type": "Category",
+              "label": "Queries",
+              "elements": [{
+                "type": "Control",
+                "scope": "#/properties/queries"
+              }]
             }
-          }
-        }
-      ]
+          ]
+        }]
+      }
     }
-  ]
+  }]
 }

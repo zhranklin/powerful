@@ -44,7 +44,7 @@ public class RequestCaseApiController {
     @RequestMapping(value = "/", produces = "text/html")
     String casesHtml(ModelMap mm) {
         mm.put("cases", staticResources.rawCases.keySet());
-        return "cases_page";
+        return "redirect: /index.html";
     }
 
     @RequestMapping("/c/{name}")
@@ -78,7 +78,7 @@ public class RequestCaseApiController {
     }
 
     private Object execute(RequestCase requestCase, Map<String, String> params) {
-        Instruction instruction = requestCase.translateTrace();
+        Instruction instruction = staticResources.processTargetMappingForTrace(requestCase).translateTrace();
         staticResources.processTargetMapping(instruction);
         RenderingContext context = new RenderingContext();
         context.setHttpParams(params);

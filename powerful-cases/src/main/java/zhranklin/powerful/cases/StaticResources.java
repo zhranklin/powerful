@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -108,23 +109,39 @@ public class StaticResources {
 //        return "NOT FIND";
     }
 
+    public RequestCase processTargetMappingForTrace(RequestCase requestCase) {
+        if (!CollectionUtils.isEmpty(requestCase.getTrace())) {
+            requestCase.getTrace().forEach(t -> {
+                t.setCall(replaceTargets(t.getCall(), true));
+            });
+        }
+        return requestCase;
+    }
     public void processTargetMapping(Instruction instruction) {
-        instruction.setCall(replaceTargets(instruction.getCall()));
+        instruction.setCall(replaceTargets(instruction.getCall(), false));
         try {
-            String to = replaceTargets(objectMapper.writeValueAsString(instruction.getTo()));
+            String to = replaceTargets(objectMapper.writeValueAsString(instruction.getTo()), false);
             instruction.setTo(objectMapper.readValue(to, Instruction.class));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String replaceTargets(String src) {
+    private String replaceTargets(String src, boolean trace) {
         Properties mapping = targetMapping;
         for (Enumeration<?> e = mapping.propertyNames(); e.hasMoreElements(); ) {
             String name = (String) e.nextElement();
             String value = mapping.getProperty(name);
             if (!StringUtils.isEmpty(value)) {
-                src = src.replaceAll("<" + name + ">", value);
+                if (trace) {
+                    if (src.contains("/")) {
+                        src = src.replaceAll("^" + name + "/", value + "/");
+                    } else {
+                        src = src.replaceAll("^" + name + "$", value);
+                    }
+                } else {
+                    src = src.replaceAll("<" + name + ">", value);
+                }
             }
         }
         return src;

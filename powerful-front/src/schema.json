@@ -1,31 +1,90 @@
 {
   "type": "object",
   "properties": {
-    "name": {
-      "type": "string",
-      "minLength": 1
+    "trace": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "call": {
+            "type": "string"
+          },
+          "by": {
+            "type": "string",
+            "enum": [
+              "http"
+            ]
+          },
+          "times": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "threads": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "delay": {
+            "type": "number",
+            "minimum": 0,
+            "default": 0
+          },
+          "okByRoundRobin": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "errorByPercent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0
+          },
+          "callTestMethod": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     },
-    "description": {
-      "type": "string"
-    },
-    "done": {
-      "type": "boolean"
-    },
-    "due_date": {
-      "type": "string",
-      "format": "date"
-    },
-    "rating": {
+    "times": {
       "type": "integer",
-      "maximum": 5
+      "minimum": 1
     },
-    "recurrence": {
-      "type": "string",
-      "enum": ["Never", "Daily", "Weekly", "Monthly"]
-    },
-    "recurrence_interval": {
-      "type": "integer"
+    "threads": {
+      "type": "integer",
+      "minimum": 1
     }
-  },
-  "required": ["name", "due_date"]
+  }
 }

@@ -1,0 +1,67 @@
+
+#root .MuiExpansionPanelSummary-content.Mui-expanded {
+    margin: 0;
+}
+
+#root .MuiFormHelperText-root {
+    font-size: 0;
+}
+
+#root .MuiTableCell-root {
+    padding: 3px;
+}
+
+#root .MuiExpansionPanelDetails-root {
+    padding: 10px 20px 10px 20px;
+}
+
+#root .MuiAvatar-root {
+    width: 30px;
+    height: 30px;
+}
+
+#root .App-dataContent-3 {
+    justify-content: left;
+    padding: 15px;
+}
+
+#root .MuiTab-root {
+    min-height: 30px;
+}
+#root .MuiTabs-root {
+    min-height: 30px;
+}
+
+#root .MuiExpansionPanelSummary-root {
+    padding: 10px 20px 0 20px;
+}
+
+#root .MuiAppBar-colorPrimary {
+    color: #fff;
+    background-color: gray;
+}
+
+#root .PrivateTabIndicator-colorSecondary-380 {
+    background-color: white;
+}
+
+#root .MuiExpansionPanelSummary-root.Mui-expanded {
+    min-height: 0;
+}
+
+#root .PrivateTabIndicator-colorSecondary-399 {
+    background-color: white;
+}
+
+#root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(2) {
+    flex-grow: 0.3;
+}
+#root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(3) {
+    flex-grow: 0.3;
+}
+#root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(4) {
+    flex-grow: 0.3;
+}
+#root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(5) {
+    flex-grow: 0.3;
+}
