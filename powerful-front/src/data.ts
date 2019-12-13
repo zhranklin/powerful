@@ -1,3 +1,4 @@
+import * as $ from "jquery"
 export function viewToPost(display: any, name: string = ""): any {
   let data = JSON.parse(JSON.stringify(display));
   data.trace.forEach((tr: any) => {
