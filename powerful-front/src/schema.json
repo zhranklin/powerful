@@ -85,6 +85,9 @@
     "threads": {
       "type": "integer",
       "minimum": 1
+    },
+    "traceNodeTmpl": {
+      "type": "string"
     }
   }
 }

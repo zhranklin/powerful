@@ -49,19 +49,19 @@
     min-height: 0;
 }
 
-#root .PrivateTabIndicator-colorSecondary-399 {
+#root .MuiTabs-indicator {
     background-color: white;
 }
 
-#root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(2) {
+#root div.MuiExpansionPanelDetails-root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(2) {
     flex-grow: 0.3;
 }
-#root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(3) {
+#root div.MuiExpansionPanelDetails-root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(3) {
     flex-grow: 0.3;
 }
-#root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(4) {
+#root div.MuiExpansionPanelDetails-root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(4) {
     flex-grow: 0.3;
 }
-#root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(5) {
+#root div.MuiExpansionPanelDetails-root div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-true:nth-child(5) {
     flex-grow: 0.3;
 }

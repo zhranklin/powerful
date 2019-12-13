@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import zhranklin.powerful.model.Instruction;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -63,11 +64,15 @@ public class RequestCase extends Instruction {
 		for (Instruction current : trace) {
 			prev.setCall(current.getCall());
 			prev.setBy(current.getBy());
+			prev.setHeaders(current.getHeaders());
+			prev.setQueries(current.getQueries());
 			prev.setTo(current);
 			prev.setResponseFmt(String.format("%s -> {{resultBody()}}", traceNodeTmpl));
 			prev = current;
 		}
 		prev.setCall("");
+		prev.setHeaders(new HashMap<>());
+		prev.setQueries(new HashMap<>());
 		prev.setResponseFmt(traceNodeTmpl);
 		return this;
 	}

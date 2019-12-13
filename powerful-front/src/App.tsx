@@ -1,25 +1,24 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
-import { JsonForms } from '@jsonforms/react';
+import React, {Fragment, useEffect, useState} from 'react';
+import {JsonForms} from '@jsonforms/react';
 import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import withStyles, { WithStyles } from '@material-ui/core/styles/withStyles';
+import withStyles, {WithStyles} from '@material-ui/core/styles/withStyles';
 import createStyles from '@material-ui/core/styles/createStyles';
 import './App.css';
 import schema from './schema.json';
 import uischema from './uischema.json';
-import {
-  materialCells,
-  materialRenderers
-} from '@jsonforms/material-renderers';
-import { Store } from 'redux';
-import { get } from 'lodash';
+import {materialCells, materialRenderers} from '@jsonforms/material-renderers';
+import {Store} from 'redux';
+import {get} from 'lodash';
 import MyArrayLayout from "./MyArrayLayout";
 import * as $ from "jquery"
 import {ListItemText, TextField} from "@material-ui/core";
-import * as yaml from 'js-yaml'
+import SaveTools from "./SaveTools";
+import {fromYaml, toYaml} from './yaml';
+import {executeCase, postToView, viewToPost} from './data';
 
 const styles = createStyles({
   container: {
@@ -46,10 +45,6 @@ export interface AppProps extends WithStyles<typeof styles> {
   store: Store;
 }
 
-const data = {
-  trace: [{}]
-};
-
 const getDataAsStringFromStore = (store: Store) =>
   store
     ? JSON.stringify(
@@ -63,8 +58,8 @@ var init = false;
 
 const App = ({ store, classes }: AppProps) => {
   const [displayDataAsString, setDisplayDataAsString] = useState('');
-  const [standaloneData, setStandaloneData] = useState(data);
-  const [displayResultAsString, setDisplayResultAsString] = useState('');
+  const [displayData, setDisplayData] = useState({ trace: [{}] });
+  const [consoleData, setConsoleData] = useState('');
   const [cases, setCases] = useState(["1", "2"]);
   const [yamlStr, setYamlStr] = useState("");
   const [yamlTextFocused, setYamlTextFocused] = useState(false);
@@ -73,7 +68,6 @@ const App = ({ store, classes }: AppProps) => {
     $.ajax({
       url: '/c',
       success: data1 => {
-        console.log(data1);
         setCases(data1)
       }
     });
@@ -89,14 +83,14 @@ const App = ({ store, classes }: AppProps) => {
   }, [store]);
 
   useEffect(() => {
-    setDisplayDataAsString(JSON.stringify(standaloneData, null, 2));
-  }, [standaloneData]);
+    setDisplayDataAsString(JSON.stringify(displayData, null, 2));
+  }, [displayData]);
 
   useEffect(() => {
     if (!yamlTextFocused) {
-      setYamlStr(yaml.dump(standaloneData))
+      setYamlStr(toYaml(viewToPost(displayData)))
     }
-  }, [standaloneData]);
+  }, [displayData]);
 
   function getCase(name: string) {
     $.ajax({
@@ -105,42 +99,26 @@ const App = ({ store, classes }: AppProps) => {
       success: data1 => {
         var data = JSON.parse(data1);
         console.log(data);
-        setStandaloneData(data)
+        setDisplayData(data)
       }
     })
   }
-  function submit() {
-    setDisplayResultAsString("loading...");
-    window.console.log(displayDataAsString);
-    var json = JSON.parse(displayDataAsString);
-    var url = '/e';
-    var params = "validate=true";
-    if (params) {
-      url = url + "?" + params
-    }
-    $.ajax({
-      method: "POST",
-      url: url,
-      dataType: 'text',
-      data: JSON.stringify(json),
-      contentType: 'application/json',
-      success: data1 => {
-        setDisplayResultAsString(data1)
-      },
-      error: jqXHR => {
-        setDisplayResultAsString(jqXHR.responseText)
-      }
-    });
+
+  function submit(setResult: (_: string) => void) {
+    setResult("loading...");
+    window.console.log(yamlStr);
+    var json = fromYaml(yamlStr);
+
+    executeCase(json, setResult);
   }
   function editYaml(content: string) {
-    setYamlStr(content)
+    setYamlStr(content);
     try {
-      var obj = yaml.load(content);
-      console.log(obj)
+      var obj = fromYaml(content);
       if (obj) {
         var nul = obj.trace.indexOf(null);
         if (nul === -1) {
-          setStandaloneData(obj)
+          setDisplayData(postToView(obj));
         } else {
           obj.trace[nul] = {}
         }
@@ -162,10 +140,10 @@ const App = ({ store, classes }: AppProps) => {
           <Typography variant="h6" className={classes.title}>
             Cases
           </Typography>
-          <List dense={true} >
+          <List dense={true}>
             {cases.map(i => (
               <ListItem button onClick={event => getCase(i)}>
-                <ListItemText primary={i} />
+                <ListItemText primary={i}/>
               </ListItem>
             ))}
           </List>
@@ -177,25 +155,37 @@ const App = ({ store, classes }: AppProps) => {
             spacing={1}
             className={classes.container}
           >
-              <Button
-                color="primary"
-                onClick={() => submit()}
-              >Submit</Button>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => submit(setConsoleData)}
+            >Submit</Button>
           </Grid>
           <div className={classes.demoform}>
             <JsonForms
               schema={schema}
               uischema={uischema}
-              data={standaloneData}
+              data={displayData}
               renderers={[
                 ...materialRenderers,
                 //register custom renderer
                 MyArrayLayout
               ]}
               cells={materialCells}
-              onChange={({ errors, data }) => setStandaloneData(data)}
+              onChange={({errors, data}) => setDisplayData(data)}
             />
           </div>
+          <Grid
+            container
+            justify={'flex-end'}
+            spacing={1}
+            className={classes.container}
+          >
+            <SaveTools
+              displayData={displayData}
+              setDisplayString={setConsoleData}
+            />
+          </Grid>
         </Grid>
         <Grid item sm={5}>
           <Typography variant={'h6'} className={classes.title}>
@@ -213,9 +203,9 @@ const App = ({ store, classes }: AppProps) => {
             variant="outlined"
             fullWidth
           />
-          <p></p>
+          <p/>
           <div className={classes.dataContent}>
-            <pre id='resultData'>{displayResultAsString}</pre>
+            <pre id='resultData'>{consoleData}</pre>
           </div>
         </Grid>
       </Grid>
