@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=zhranklin.powerful.PowerfulAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=zhranklin.powerful.core.PowerfulAutoConfiguration
