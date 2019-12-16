@@ -5,6 +5,8 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,14 +66,19 @@ public class StringRenderer implements EnvironmentAware {
             String pattern = params.isEmpty() ? "yyyy-MM-dd hh:mm:ss" : params.get(0);
             return new SimpleDateFormat(pattern).format(now);
         });
-        exprFuncs.put("receivedHeader", context -> params -> "" + context.getRequestHeaders().get(params.get(0)));
-        exprFuncs.put("resultHeader", context -> params -> {
+        exprFuncs.put("header", context -> params -> {
+            List<String> result = new ArrayList<>();
+            String reqHeader = context.getRequestHeaders().get(params.get(0));
+            if (!StringUtils.isEmpty(reqHeader)) {
+                result.add(reqHeader);
+            }
             if (context.getResult() instanceof ResponseEntity) {
                 List<String> values = ((ResponseEntity) context.getResult()).getHeaders().get(params.get(0));
-                return values == null ? "null" : String.join(",", values);
-            } else {
-                return null;
+                if (!CollectionUtils.isEmpty(values)) {
+                    result.add(String.join(",", values));
+                }
             }
+            return String.join("|", result);
         });
         exprFuncs.put("result", context -> params -> "" + context.getResult());
         exprFuncs.put("resultBody", context -> params -> {
