@@ -11,6 +11,7 @@ import zhranklin.powerful.core.invoker.HttpRemoteInvoker;
 import zhranklin.powerful.core.service.GrpcClientInterceptor;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.core.service.StringRenderer;
+import zhranklin.powerful.core.service.TestingMethodService;
 import net.devh.boot.grpc.client.interceptor.GlobalClientInterceptorConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -52,6 +54,11 @@ public class PowerfulAutoConfiguration {
     }
 
     @Bean
+    TestingMethodService testingMethodService() {
+        return new TestingMethodService();
+    }
+
+    @Bean
     StaticResources staticResources() {
         return new StaticResources();
     }
@@ -76,6 +83,13 @@ public class PowerfulAutoConfiguration {
     @Bean
     HttpRemoteInvoker httpRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, RestTemplate restTemplate) {
         return new HttpRemoteInvoker(stringRenderer, restTemplate);
+    }
+
+    @Bean
+    Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilderCustomizer() {
+        Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+        builder.indentOutput(true);
+        return builder;
     }
 
     @ConditionalOnProperty(name = "framew.type", havingValue = "grpc")

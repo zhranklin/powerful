@@ -1,11 +1,8 @@
 package zhranklin.powerful.core.service;
 
-import org.springframework.stereotype.Component;
-
 /**
  * Created by 张武 at 2019/11/5
  */
-@Component
 public class TestingMethodService {
 
 	public String method00() { return "00"; }
