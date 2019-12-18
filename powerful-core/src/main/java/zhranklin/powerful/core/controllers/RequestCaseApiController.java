@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import zhranklin.powerful.core.cases.CaseValidator;
 import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.cases.StaticResources;
+import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
-import zhranklin.powerful.core.service.PowerfulService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -55,19 +55,27 @@ public class RequestCaseApiController {
 
     @RequestMapping(value = "/e/{name}", method = RequestMethod.GET)
     @ResponseBody
-    Object rCase(@PathVariable String name, @RequestParam Map<String, String> params) {
+    Object rCase(@PathVariable String name, @RequestParam(required = false, defaultValue = "false") boolean validate, @RequestParam Map<String, String> params) {
         RequestCase requestCase = staticResources.getCase(name);
         if (requestCase == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Instruction of name '%s' not found.", name));
         }
-        return execute(requestCase, params);
+        return execute(requestCase, params, validate);
     }
 
 
     @RequestMapping(value = "/e", method = RequestMethod.POST)
     @ResponseBody
     Object eCase(@RequestBody RequestCase requestCase, @RequestParam(required = false, defaultValue = "false") boolean validate, @RequestParam Map<String, String> params) {
-        Object result = execute(requestCase, params);
+        return execute(requestCase, params, validate);
+    }
+
+    private Object execute(RequestCase requestCase, Map<String, String> params, boolean validate) {
+        Instruction instruction = staticResources.processTargetMappingForTrace(requestCase).translateTrace();
+        staticResources.processTargetMapping(instruction);
+        RenderingContext context = new RenderingContext();
+        context.setHttpParams(params);
+        Object result = powerful.execute(instruction, context);
         if (validate) {
             Map<String, Object> ret = new HashMap<>();
             ret.put("result", result);
@@ -75,13 +83,5 @@ public class RequestCaseApiController {
             return ret;
         }
         return result;
-    }
-
-    private Object execute(RequestCase requestCase, Map<String, String> params) {
-        Instruction instruction = staticResources.processTargetMappingForTrace(requestCase).translateTrace();
-        staticResources.processTargetMapping(instruction);
-        RenderingContext context = new RenderingContext();
-        context.setHttpParams(params);
-        return powerful.execute(instruction, context);
     }
 }

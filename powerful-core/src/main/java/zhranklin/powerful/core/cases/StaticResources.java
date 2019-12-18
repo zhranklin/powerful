@@ -32,19 +32,18 @@ public class StaticResources {
     private static final PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(StaticResources.class);
-    private static final String CONFIG_PATH = "/etc/powerful-cases/config.yaml";
 
     public final Map<String, Object> rawCases = new LinkedHashMap<>();
     public final Properties targetMapping = new Properties();
 
     @SuppressWarnings("unchecked")
-    public StaticResources() {
+    public StaticResources(String configPath) {
         objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-        File configFile = new File(CONFIG_PATH);
+        File configFile = new File(configPath);
         if (configFile.exists()) {
             //读取yaml配置, 例子见powerful-cases/config-example.yaml
-            logger.info("use {}.", CONFIG_PATH);
+            logger.info("use {}.", configPath);
             try {
                 Map<String, Object> config = (Map<String, Object>) new ObjectMapper(new YAMLFactory()).readValue(configFile, Object.class);
                 Map<String, Object> cases = (Map<String, Object>) config.get("requestCases");

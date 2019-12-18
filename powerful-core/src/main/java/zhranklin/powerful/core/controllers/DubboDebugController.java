@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-@ConditionalOnProperty(name = "framew.type", havingValue = "dubbo")
+@ConditionalOnProperty(name = "powerful.dubbo.enabled", havingValue = "true")
 @RestController
 public class DubboDebugController {
 

@@ -23,7 +23,7 @@ import java.io.IOException;
  * Created by twogoods on 2019/10/30.
  */
 @GrpcService
-@ConditionalOnProperty(name = "framew.application.name", havingValue = "grpc-a")
+@ConditionalOnProperty(name = "powerful.grpc.name", havingValue = "grpc-a")
 public class GrpcAService extends GrpcRemoteInvoker implements InitializingBean {
     private static Logger logger = LoggerFactory.getLogger(GrpcAService.class);
 

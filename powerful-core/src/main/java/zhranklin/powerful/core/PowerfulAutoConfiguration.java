@@ -4,6 +4,9 @@ import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ProtocolConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
 import com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import zhranklin.powerful.core.cases.StaticResources;
 import zhranklin.powerful.core.invoker.DubboRemoteInvoker;
 import zhranklin.powerful.core.invoker.GrpcRemoteInvoker;
@@ -13,15 +16,16 @@ import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.core.service.StringRenderer;
 import zhranklin.powerful.core.service.TestingMethodService;
 import net.devh.boot.grpc.client.interceptor.GlobalClientInterceptorConfigurer;
+import net.devh.boot.grpc.server.serverfactory.GrpcServerLifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,6 +35,10 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @ComponentScan(basePackages = {"zhranklin.powerful.core.controllers"})
 public class PowerfulAutoConfiguration {
+
+    @Value("${configPath:/etc/powerful-cases/config.yaml}")
+	String configPath;
+
     @Bean
     StringRenderer stringRenderer() {
         return new StringRenderer();
@@ -60,7 +68,7 @@ public class PowerfulAutoConfiguration {
 
     @Bean
     StaticResources staticResources() {
-        return new StaticResources();
+        return new StaticResources(configPath);
     }
 
     @Bean
@@ -86,13 +94,14 @@ public class PowerfulAutoConfiguration {
     }
 
     @Bean
-    Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilderCustomizer() {
-        Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
-        builder.indentOutput(true);
-        return builder;
+    ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+        return mapper;
     }
 
-    @ConditionalOnProperty(name = "framew.type", havingValue = "grpc")
+    @ConditionalOnProperty(name = "powerful.grpc.enabled", havingValue = "true")
     @ComponentScan(basePackages = {"zhranklin.powerful.rpc.grpc"})
     public class GrpcConfiguration {
 
@@ -106,14 +115,37 @@ public class PowerfulAutoConfiguration {
         }
     }
 
-    @ConditionalOnProperty(name="framew.type", havingValue="dubbo")
-//@EnableDubbo(scanBasePackages = "zhranklin.powerful.dubbo")//不生效
+    @ConditionalOnClass(name="net.devh.boot.grpc.server.serverfactory.GrpcServerLifecycle")
+    @ConditionalOnProperty(name="powerful.grpc.enabled", havingValue = "false", matchIfMissing = true)
+    public static class GrpcDisableConfig {
+        @Bean
+        public GrpcServerLifecycle grpcServerLifecycle() {
+            return new GrpcServerLifecycle(null) {
+                @Override
+                public void start() {}
+                @Override
+                public void stop() {}
+                @Override
+                public void stop(Runnable callback) {}
+                @Override
+                public boolean isRunning() {
+                    return true;
+                }
+                @Override
+                public boolean isAutoStartup() {
+                    return true;
+                }
+            };
+        }
+    }
+
+    @ConditionalOnProperty(name="powerful.dubbo.enabled", havingValue="true")
     public static class DubboConfiguration {
 
         @Value("${framew.zk}")
         public String zk;
 
-        @Value("#{systemProperties['framew.application.name']}")
+        @Value("dubbo-${powerful.dubbo.name}")
         //@Value("${framew.app}")
         public String app;
 
@@ -146,11 +178,11 @@ public class PowerfulAutoConfiguration {
             return protocolConfig;
         }
 
-        @ConditionalOnProperty(name="framew.application.name", havingValue="dubbo-a")
+        @ConditionalOnProperty(name="powerful.dubbo.name", havingValue="dubbo-a")
         @DubboComponentScan(basePackages = "zhranklin.powerful.rpc.dubboa")
         public static class DubboA {}
 
-        @ConditionalOnProperty(name="framew.application.name", havingValue="dubbo-b")
+        @ConditionalOnProperty(name="powerful.dubbo.name", havingValue="dubbo-b")
         @DubboComponentScan(basePackages = "zhranklin.powerful.rpc.dubbob")
         public static class DubboB {}
     }
