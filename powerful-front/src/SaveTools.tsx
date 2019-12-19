@@ -18,9 +18,12 @@ export default ({ displayData, setDisplayString }: SaveToolsProps) => {
   console.log(displayData);
 
   function saveToCache(name: string) {
+    if (!name || name === '') {
+      return;
+    }
     var cache = localStorage.getItem(cacheKey);
-    var data: Array<any> = cache == null ? [] : fromYaml(cache);
-    data.push(viewToPost(displayData, name));
+    var data: any = cache == null ? {cases: {}} : fromYaml(cache);
+    data.cases[name] = viewToPost(displayData);
     localStorage.setItem(cacheKey, toYaml(data));
     showCache();
   }

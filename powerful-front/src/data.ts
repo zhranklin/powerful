@@ -1,5 +1,5 @@
 import * as $ from "jquery"
-export function viewToPost(display: any, name: string = ""): any {
+export function viewToPost(display: any): any {
   let data = JSON.parse(JSON.stringify(display));
   data.trace.forEach((tr: any) => {
     let headers = tr.headers;
@@ -19,9 +19,6 @@ export function viewToPost(display: any, name: string = ""): any {
       }
     }
   });
-  if (name != "") {
-    data.name = name;
-  }
   return data;
 }
 
