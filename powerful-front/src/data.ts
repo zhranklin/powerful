@@ -19,6 +19,7 @@ export function viewToPost(display: any): any {
       }
     }
   });
+  delete data.validate;
   return data;
 }
 
@@ -59,9 +60,8 @@ function arrayToObj(kvs: Array<{name: string, value: string}>) {
   return undefined;
 }
 
-export function executeCase(json: any, setResult: (_: string) => void) {
+export function executeCase(json: any, params: string | undefined, setResult: (_: string) => void) {
   var url = '/e';
-  var params = "validate=true";
   if (params) {
     url = url + "?" + params
   }

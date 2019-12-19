@@ -58,7 +58,7 @@ var init = false;
 
 const App = ({ store, classes }: AppProps) => {
   const [displayDataAsString, setDisplayDataAsString] = useState('');
-  const [displayData, setDisplayData] = useState({ trace: [{}] });
+  const [displayData, setDisplayData] = useState<any>({ trace: [{}] });
   const [consoleData, setConsoleData] = useState('');
   const [cases, setCases] = useState(["1", "2"]);
   const [yamlStr, setYamlStr] = useState("");
@@ -109,7 +109,7 @@ const App = ({ store, classes }: AppProps) => {
     window.console.log(yamlStr);
     var json = fromYaml(yamlStr);
 
-    executeCase(json, setResult);
+    executeCase(json, displayData.validate ? "validate=true" : undefined, setResult);
   }
   function editYaml(content: string) {
     setYamlStr(content);
