@@ -21,7 +21,7 @@ public class CaseValidator {
 			if (result instanceof String) {
 				return matchOrEquals((String) expect, (String) result);
 			} else if (result instanceof Number) {
-				return validateNumber((String) expect, ((Number) result));
+				return matchOrEquals((String) expect, result.toString()) || validateNumber((String) expect, ((Number) result));
 			} else {
 				throw new IllegalArgumentException(String.format("can't validate value for type '%s' and expr '%s'", result.getClass().getSimpleName(), expect));
 			}

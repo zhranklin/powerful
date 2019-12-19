@@ -172,7 +172,12 @@ const App = ({ store, classes }: AppProps) => {
                 MyArrayLayout
               ]}
               cells={materialCells}
-              onChange={({errors, data}) => setDisplayData(data)}
+              onChange={({errors, data}) => {
+                if (data.traceNodeTmpl === '') {
+                  delete data.traceNodeTmpl;
+                }
+                setDisplayData(data)
+              }}
             />
           </div>
           <Grid
