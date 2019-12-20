@@ -109,7 +109,7 @@ const App = ({ store, classes }: AppProps) => {
     window.console.log(yamlStr);
     var json = fromYaml(yamlStr);
 
-    executeCase(json, displayData.validate ? "validate=true" : undefined, setResult);
+    executeCase(json, displayData.expect ? "validate=true" : undefined, setResult);
   }
   function editYaml(content: string) {
     setYamlStr(content);

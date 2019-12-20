@@ -14,10 +14,6 @@
       "type": "Control",
       "scope": "#/properties/traceNodeTmpl",
       "label": "template"
-    }, {
-      "type": "Control",
-      "scope": "#/properties/validate",
-      "label": "validate"
     }]
   }, {
     "type": "Control",

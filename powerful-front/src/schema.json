@@ -88,9 +88,6 @@
     },
     "traceNodeTmpl": {
       "type": "string"
-    },
-    "validate": {
-      "type": "boolean"
     }
   }
 }
