@@ -99,7 +99,7 @@ const App = ({ store, classes }: AppProps) => {
       success: data1 => {
         var data = JSON.parse(data1);
         console.log(data);
-        setDisplayData(data)
+        setDisplayData(postToView(data))
       }
     })
   }
