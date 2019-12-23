@@ -79,10 +79,13 @@ public class RequestCaseApiController {
             writer.println(String.format("=======executing: %s=======", name));
             response.flushBuffer();
             Object result = execute(staticResources.getCase(name), params, true);
-            writer.println(objectMapper.writeValueAsString(result));
             Boolean passed = (Boolean) ((Map) result).get("passed");
-            if (!passed) {
+            if (passed) {
+                writer.println("OK\n");
+            } else {
                 writer.println(String.format("!!!!!!!failed: %s!!!!!!!", name));
+                writer.println("case:\n" + staticResources.getRawCaseString(name));
+                writer.println("result: " + objectMapper.writeValueAsString(result));
             }
             response.flushBuffer();
         }
