@@ -1,6 +1,7 @@
 package zhranklin.powerful.core.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import zhranklin.powerful.core.cases.CaseValidator;
 import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.cases.StaticResources;
@@ -19,9 +20,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by 张武 at 2019/9/20
@@ -34,6 +39,9 @@ public class RequestCaseApiController {
 
     @Autowired
     PowerfulService powerful;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @RequestMapping("/c")
     @ResponseBody
@@ -63,6 +71,23 @@ public class RequestCaseApiController {
         return execute(requestCase, params, validate);
     }
 
+    @RequestMapping(value = "/executeAll", method = RequestMethod.GET)
+    void executeAll(@RequestParam Map<String, String> params, HttpServletResponse response) throws IOException {
+        PrintWriter writer = response.getWriter();
+        Set<String> names = staticResources.rawCases.keySet();
+        for (String name : names) {
+            writer.println(String.format("=======executing: %s=======", name));
+            response.flushBuffer();
+            Object result = execute(staticResources.getCase(name), params, true);
+            writer.println(objectMapper.writeValueAsString(result));
+            Boolean passed = (Boolean) ((Map) result).get("passed");
+            if (!passed) {
+                writer.println(String.format("!!!!!!!failed: %s!!!!!!!", name));
+            }
+            response.flushBuffer();
+        }
+        writer.close();
+    }
 
     @RequestMapping(value = "/e", method = RequestMethod.POST)
     @ResponseBody
