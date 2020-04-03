@@ -7,6 +7,8 @@ import com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.cases.StaticResources;
 import zhranklin.powerful.core.invoker.DubboRemoteInvoker;
 import zhranklin.powerful.core.invoker.GrpcRemoteInvoker;
@@ -22,12 +24,22 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
 
 /**
  * Created by 张武 at 2019/9/24
@@ -38,6 +50,24 @@ public class PowerfulAutoConfiguration {
 
     @Value("${configPath:/etc/powerful-cases/config.yaml}")
 	String configPath;
+
+    @Bean
+    public FilterRegistrationBean filterRegist() {
+        FilterRegistrationBean<Filter> frBean = new FilterRegistrationBean();
+        frBean.setFilter(new Filter() {
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+                servletRequest.setAttribute("yamlBody",
+                    new ObjectMapper(new YAMLFactory()).readValue(servletRequest.getInputStream(), RequestCase.class));
+                filterChain.doFilter(servletRequest, servletResponse);
+            }
+            @Override public void init(FilterConfig filterConfig) { }
+            @Override public void destroy() { }
+        });
+        frBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        frBean.addUrlPatterns("/y");
+        return frBean;
+    }
 
     @Bean
     StringRenderer stringRenderer() {

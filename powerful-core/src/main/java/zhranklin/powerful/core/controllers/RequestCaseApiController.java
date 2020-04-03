@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -96,6 +97,12 @@ public class RequestCaseApiController {
     @ResponseBody
     Object eCase(@RequestBody RequestCase requestCase, @RequestParam(required = false, defaultValue = "false") boolean validate, @RequestParam Map<String, String> params) {
         return execute(requestCase, params, validate);
+    }
+
+    @RequestMapping(value = "/y", method = RequestMethod.POST)
+    @ResponseBody
+    Object yCase(HttpServletRequest request, @RequestParam(required = false, defaultValue = "false") boolean validate, @RequestParam Map<String, String> params) throws IOException {
+        return execute((RequestCase) request.getAttribute("yamlBody"), params, validate);
     }
 
     private Object execute(RequestCase requestCase, Map<String, String> params, boolean validate) {
