@@ -12,7 +12,10 @@
           "by": {
             "type": "string",
             "enum": [
-              "http"
+              "http",
+              "grpc",
+              "dubbo",
+              "thrift"
             ]
           },
           "times": {
