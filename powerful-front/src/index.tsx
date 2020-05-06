@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import registerServiceWorker from './registerServiceWorker';
+import registerServiceWorker, {unregister} from './registerServiceWorker';
 import { combineReducers, createStore, Reducer, AnyAction } from 'redux';
 import schema from './schema.json';
 import uischema from './uischema.json';
@@ -36,4 +36,4 @@ const store = createStore(rootReducer, initState, devToolsEnhancer({}));
 store.dispatch(Actions.init(data, schema, uischema));
 
 ReactDOM.render(<App store={store} />, document.getElementById('root'));
-registerServiceWorker();
+unregister()

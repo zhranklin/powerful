@@ -18,7 +18,7 @@ import * as $ from "jquery"
 import {ListItemText, TextField} from "@material-ui/core";
 import SaveTools from "./SaveTools";
 import {fromYaml, toYaml} from './yaml';
-import {executeCase, postToView, viewToPost} from './data';
+import {executeCase, postToView, scopedUri, viewToPost} from './data';
 
 const styles = createStyles({
   container: {
@@ -66,7 +66,7 @@ const App = ({ store, classes }: AppProps) => {
 
   if (!init) {
     $.ajax({
-      url: '/c',
+      url: scopedUri('/c'),
       success: data1 => {
         setCases(data1)
       }
@@ -95,7 +95,7 @@ const App = ({ store, classes }: AppProps) => {
   function getCase(name: string) {
     $.ajax({
       method: "Post",
-      url: "/c/" + name,
+      url: scopedUri("/c/" + name),
       success: data1 => {
         var data = JSON.parse(data1);
         console.log(data);

@@ -67,7 +67,7 @@ export function executeCase(json: any, params: string | undefined, setResult: (_
   }
   $.ajax({
     method: "POST",
-    url: url,
+    url: scopedUri(url),
     dataType: 'text',
     data: JSON.stringify(json),
     contentType: 'application/json',
@@ -78,4 +78,27 @@ export function executeCase(json: any, params: string | undefined, setResult: (_
       setResult(jqXHR.responseText)
     }
   });
+}
+
+function getQueryValue(key: string): string | undefined {
+  const query = window.location.search.substring(1);
+  const vars = query.split("&");
+  for (let i=0; i<vars.length; i++) {
+    const pair = vars[i].split("=");
+    if(pair[0] == key) {
+      return pair[1]
+    }
+  }
+  return undefined
+}
+
+
+export function scopedUri(uri: string): string{
+  const scope = getQueryValue("scope")
+  if (scope == undefined) {
+    return uri
+  } else {
+    const splitter = uri.indexOf('?') == -1 ? '?' : '&'
+    return uri + splitter + 'scope=' + scope
+  }
 }

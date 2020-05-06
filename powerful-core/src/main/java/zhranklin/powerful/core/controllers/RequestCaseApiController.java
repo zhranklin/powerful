@@ -50,10 +50,15 @@ public class RequestCaseApiController {
         return staticResources.rawCases.keySet();
     }
 
-    @RequestMapping(value = "/", produces = "text/html")
-    String casesHtml(ModelMap mm) {
+    @RequestMapping(value = {"/", ""}, produces = "text/html")
+    String casesHtml(ModelMap mm, @RequestParam(required = false) String scope) {
         mm.put("cases", staticResources.rawCases.keySet());
-        return "redirect:index.html";
+        if (scope == null) {
+            return "redirect:index.html";
+        } else {
+            mm.put("scope", scope);
+            return "scoped_index";
+        }
     }
 
     @RequestMapping("/c/{name}")
