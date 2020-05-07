@@ -54,7 +54,7 @@ public class RequestCaseApiController {
     String casesHtml(ModelMap mm, @RequestParam(required = false) String scope) {
         mm.put("cases", staticResources.rawCases.keySet());
         if (scope == null) {
-            return "redirect:index.html";
+            return "forward:/index.html";
         } else {
             mm.put("scope", scope);
             return "scoped_index";
