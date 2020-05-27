@@ -1,0 +1,25 @@
+apiVersion: zhranklin.io/v1alpha1
+kind: Powerful
+metadata:
+  finalizers:
+  - uninstall-helm-release
+  name: debug-0
+spec:
+  appLabelName: framew.zhranklin.io/app
+  versionLabelName: version
+  serviceAppLabelName: framew.zhranklin.io/app
+  hub: zhranklin
+  image: powerful:8d34d2d
+  apps:
+    a:
+      deploys:
+      - version: default
+    b:
+      deploys:
+      - version: v1
+      - version: v2
+    c:
+      deploys:
+      - version: default
+  targetMappings:
+    testA: a

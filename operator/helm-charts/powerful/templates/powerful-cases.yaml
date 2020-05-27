@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerful-cases
+  namespace: {{ include "namespace" .}}
+  labels:
+    release: {{ .Release.Name }}
+    framew-env: prod
+    framew.zhranklin.io/project: project1
+    {{ .Values.serviceAppLabelName }}: powerful-cases
+spec:
+  type: ClusterIP
+  selector:
+    {{ .Values.appLabelName }}: powerful-cases
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    release: {{ .Release.Name }}
+    {{ .Values.appLabelName }}: powerful-cases
+  name: powerful-cases
+  namespace: {{ include "namespace" .}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{ .Values.appLabelName }}: powerful-cases
+  template:
+    metadata:
+      annotations:
+        framew.zhranklin.io/istioEnv: {{ .Values.istioEnv }}
+      labels:
+        release: {{ .Release.Name }}
+        {{ .Values.appLabelName }}: powerful-cases
+    spec:
+      containers:
+      - name: app
+        image: "{{ .Values.hub }}/{{ .Values.image }}"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: JAVA_OPTS
+          value: "{{ "-Dserver.port=8080 -DdefaultTraceNodeTmpl={{env(APP)}}|{{env(VERSION)}}({{statusCode()}}) -DdefaultCollectBy=stat" }}"
+        - name: APP
+          value: cases
+        - name: VERSION
+          value: v0
+        volumeMounts:
+        - name: powerful-cases
+          mountPath: /etc/powerful-cases
+      volumes:
+      - name: powerful-cases
+        configMap:
+          name: powerful-cases
+      imagePullSecrets:
+{{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+{{- end }}
+{{- if $.Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml $.Values.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 6 }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: powerful-cases
+  namespace: {{ include "namespace" .}}
+  labels:
+    release: {{ .Release.Name }}
+data:
+  config.yaml: |-
+{{ .Files.Get "files/cases.yaml" | indent 4 }}
+    targetMappings:
+{{ .Values.targetMappings | toYaml | indent 6 }}

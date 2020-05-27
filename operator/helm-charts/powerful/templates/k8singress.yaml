@@ -1,0 +1,19 @@
+{{ if .Values.k8sIngress.enabled }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    release: {{ .Release.Name }}
+  name: powerful
+  namespace: {{ include "namespace" .}}
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+  - host: {{ .Values.k8sIngress.domain }}
+    http:
+      paths:
+      - backend:
+          serviceName: powerful-cases
+          servicePort: 80
+{{- end }}

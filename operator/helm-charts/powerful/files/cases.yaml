@@ -1,0 +1,262 @@
+requestCases:
+  a-b-1000:
+    times: 1000
+    threads: 30
+    trace:
+    - call: a
+    - call: b
+    expect:
+      cases|v0(200) -> a|v0(200) -> b|v2(null): '480:520'
+      cases|v0(200) -> a|v0(200) -> b|v1(null): '480:520'
+    description: a访问b, 重复1000次
+  a_delay_1s:
+    trace:
+    - call: a
+      delay: 1
+    description: 访问a, a加入1s时延
+  a_1000_ex60:
+    times: 1000
+    threads: 30
+    trace:
+    - call: a
+      errorByPercent: 60
+    expect:
+      "cases|v0(200) -> a|v0(null)": "350:450"
+      "cases|v0(500) -> Random Error.": "550:650"
+    description: '访问a, 60%概率报错'
+  a_c_delay0_5:
+    trace:
+    - call: a
+      delay: 0.5
+    - call: c
+      delay: 0.5
+    description: 让a访问c, 加入0.5时延
+  normal_b:
+    times: 1000
+    threads: 30
+    trace:
+    - call: b
+    description: 正常访问b
+    expect:
+      "cases|v0(200) -> b|v2(null)" : '499:501'
+      "cases|v0(200) -> b|v1(null)" : '499:501'
+  normal_all_v1:
+    times: 1000
+    threads: 30
+    trace:
+    - call: b/normalTest
+    description: 将所有流量流向v1版本
+    expect:
+      "cases|v0(200) -> b|v1(null)": 1000
+  port_miss:
+    description: '按端口匹配，未命中'
+    trace:
+      - call: b:81
+  prefix_url_hit:
+    threads: 30
+    times: 1000
+    trace:
+    - call: b/matchTest/uri/preEcho
+    description: '前缀uri，命中按9:1分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '880:920'
+      cases|v0(200) -> b|v2(null): '80:120'
+  prefix_url_miss:
+    threads: 30
+    times: 1000
+    trace:
+    - call: b/matchTest/uri/mypreEcho
+    description: '前缀uri，未命中按5:5分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '499:501'
+      cases|v0(200) -> b|v2(null): '499:501'
+  exact_url_hit:
+    threads: 30
+    times: 1000
+    trace:
+    - call: b/matchTest/uri/exEcho
+    description: '精准uri，命中按9:1分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '880:920'
+      cases|v0(200) -> b|v2(null): '80:120'
+  regex_url_hit:
+    threads: 30
+    times: 1000
+    trace:
+    - call: b/matchTest/uri/regXcho
+    description: '正则uri，命中按9:1分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '880:920'
+      cases|v0(200) -> b|v2(null): '80:120'
+  prefix_header_hit:
+    threads: 30
+    times: 1000
+    trace:
+    - call: b
+      headers:
+        source: 'yanxuan-test'
+    description: '前缀header(需要source是yanxuan-test开头)，命中按9:1分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '880:920'
+      cases|v0(200) -> b|v2(null): '80:120'
+  exact_header_hit:
+    threads: 30
+    times: 1000
+    trace:
+    - call: b
+      headers:
+        source: test
+    description: '精准header(需要source=test)，命中按9:1分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '880:920'
+      cases|v0(200) -> b|v2(null): '80:120'
+  regex_header_hit:
+    threads: 30
+    times: 1000
+    trace:
+    - call: b
+      headers:
+        source: '12311'
+    description: '正则header(需要source是5位数字)，命中按9:1分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '880:920'
+      cases|v0(200) -> b|v2(null): '80:120'
+  exact_queryparams_hit:
+    threads: 30
+    times: 1000
+    trace:
+    - call: b
+      queries:
+        key: yanxuan-test
+    description: '精准queryparams(需要key=yanxuan-test)，命中按9:1分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '880:920'
+      cases|v0(200) -> b|v2(null): '80:120'
+  regex_queryparams_hit:
+    threads: 30
+    times: 1000
+    trace:
+    - call: b
+      queries:
+        key: 21321
+    description: '正则queryparams(需要key是5位数字)，命中按9:1分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '880:920'
+      cases|v0(200) -> b|v2(null): '80:120'
+  logic_and_hit:
+    times: 1000
+    threads: 30
+    trace:
+    - call: b/loginTest
+      headers:
+        mysource: test
+    description: '测试与逻辑（精准url和精准header），命中按9:1分流'
+    expect:
+      cases|v0(200) -> b|v1(null): '880:920'
+      cases|v0(200) -> b|v2(null): '80:120'
+  delay_all_10s:
+    description: '100%流量延迟10s'
+    expect: cases|v0(200) -> a|v0(null)
+    trace:
+      - call: a/delayTest
+        delay: 10
+  abort_all_500:
+    description: 100%流量阻断，返回状态码500
+    expect:
+      "cases|v0(500) -> Random Error.": 1000
+    threads: 30
+    times: 1000
+    trace:
+      - call: a/abortTest
+        errorByPercent: 100
+  redirect_url:
+    trace:
+    - call: b/redirectURL
+    traceNodeTmpl: '{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(location)}})'
+    description: URL重定向到/normalTest
+    expect: "cases|v0(301|http://b/normalTest) -> null"
+  redirect_authority:
+    traceNodeTmpl: '{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(location)}})'
+    trace:
+    - call: b/redirectAuthority
+    description: authority重定向到new-b
+    expect: "cases|v0(301|http://new-b/redirectAuthority/execute) -> null"
+  rewrite_url:
+    trace:
+    - call: b/rewriteURL
+    description: URL重写到/normalTest
+    expect: "cases|v0(200) -> b|v1(null)"
+  rewrite_authority:
+    trace:
+    - call: b/rewriteAuthority
+    description: authority重写到new-b
+    expect: "cases|v0(200) -> b|v1(null)"
+  timeout_1s:
+    threads: 50
+    times: 1000
+    trace:
+    - call: b/timeoutTest
+    - call: a/abortTest
+      errorByPercent: 100
+    description: '容错超时1000ms'
+    expect:
+      "cases|v0(500) -> b|v1(500) -> Random Error." : 1000
+  retry_5_1s_500:
+    times: 100
+    threads: 50
+    trace:
+    - call: b/retryTest
+    - call: a/abortTest
+      errorByPercent: 100
+    description: '容错超时时间1000ms，重试5次'
+    expect:
+      "cases|v0(500) -> b|v1(500) -> Random Error." : 100
+  header_req_add:
+    traceNodeTmpl: '{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(test)}})'
+    trace:
+    - call: b/headerTest/req/add
+    description: 将request增加test：test
+    expect: cases|v0(200|) -> b|v1(null|test)
+  header_req_set:
+    traceNodeTmpl: '{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(test)}})'
+    trace:
+    - call: b/headerTest/req/set
+      headers:
+        test: '123'
+    description: 将request修改为test：test
+    expect: cases|v0(200|) -> b|v1(null|test)
+  header_req_remove:
+    traceNodeTmpl: '{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(test)}})'
+    trace:
+    - call: b/headerTest/req/remove
+      headers:
+        test: '123'
+    description: 将request删除header
+    expect: cases|v0(200|) -> b|v1(null|)
+  header_resp_add:
+    traceNodeTmpl: '{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(test)}})'
+    trace:
+    - call: b/headerTest/resp/add
+    description: 将repsonse增加test：test
+    expect: cases|v0(200|test) -> b|v1(null|)
+  header_resp_set:
+    traceNodeTmpl: '{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(test)}})'
+    trace:
+    - call: b/headerTest/resp/set
+      headers:
+        test: '123'
+    description: 将repsonse修改为test：test
+    expect: cases|v0(200|test) -> b|v1(null|123)
+  header_resp_remove:
+    traceNodeTmpl: '{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(test)}})'
+    trace:
+    - call: b/headerTest/resp/remove
+      headers:
+        test: '123'
+    description: 将response删除header
+    expect: cases|v0(200|) -> b|v1(null|123)
+  mirror_all:
+    trace:
+    - call: b/mirrorTest
+    description: 将流量复制给a
+    expect: cases|v0(200) -> b|v1(null)

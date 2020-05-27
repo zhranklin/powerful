@@ -1,0 +1,317 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: powerful-b
+  namespace: {{ include "namespace" .}}
+  labels:
+    release: {{ .Release.Name }}
+spec:
+  host: b
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: powerful-b
+  namespace: {{ include "namespace" .}}
+  labels:
+    release: {{ .Release.Name }}
+spec:
+  hosts:
+  - b
+  http:
+  - match:
+    - uri:
+        regex: /matchTest/uri/reg.cho/execute
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 90
+    - destination:
+        host: b
+        subset: v2
+      weight: 10
+  - match:
+    - uri:
+        prefix: /matchTest/uri/preEcho
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 90
+    - destination:
+        host: b
+        subset: v2
+      weight: 10
+  - match:
+    - uri:
+        exact: /matchTest/uri/exEcho/execute
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 90
+    - destination:
+        host: b
+        subset: v2
+      weight: 10
+  - match:
+    - headers:
+        mysource:
+          exact: test
+      uri:
+        exact: /loginTest/execute
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 90
+    - destination:
+        host: b
+        subset: v2
+      weight: 10
+  - match:
+    - headers:
+        source:
+          exact: test
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 90
+    - destination:
+        host: b
+        subset: v2
+      weight: 10
+  - match:
+    - headers:
+        source:
+          prefix: yanxuan-test
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 90
+    - destination:
+        host: b
+        subset: v2
+      weight: 10
+  - match:
+    - queryParams:
+        key:
+          exact: yanxuan-test
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 90
+    - destination:
+        host: b
+        subset: v2
+      weight: 10
+  - match:
+    - headers:
+        source:
+          regex: ^[0-9]{5}$
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 90
+    - destination:
+        host: b
+        subset: v2
+      weight: 10
+  - match:
+    - queryParams:
+        key:
+          regex: ^[0-9]{5}$
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 90
+    - destination:
+        host: b
+        subset: v2
+      weight: 10
+  - match:
+    - uri:
+        prefix: /normalTest
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 100
+  - fault:
+      delay:
+        fixedDelay: 10s
+        percentage:
+          value: 100
+    match:
+    - uri:
+        prefix: /delayTest
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 100
+  - match:
+    - uri:
+        prefix: /redirectURL
+    redirect:
+      uri: /normalTest
+  - match:
+    - uri:
+        prefix: /redirectAuthority
+    redirect:
+      authority: new-b
+  - match:
+    - uri:
+        prefix: /rewriteURL
+    rewrite:
+      uri: /normalTest
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 100
+  - match:
+    - uri:
+        prefix: /rewriteAuthority
+    rewrite:
+      authority: b/normalTest
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 100
+  - fault:
+      abort:
+        httpStatus: 500
+        percentage:
+          value: 100
+    match:
+    - uri:
+        prefix: /abortTest
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 100
+  - match:
+    - uri:
+        prefix: /retryTest
+    retries:
+      attempts: 5
+      perTryTimeout: 1000ms
+      retryOn: 5xx
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 100
+  - match:
+    - uri:
+        prefix: /timeoutTest
+    retries:
+      attempts: 1
+      perTryTimeout: 1000ms
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 100
+  - match:
+    - uri:
+        prefix: /headerTest/req/add
+    route:
+    - destination:
+        host: b
+        subset: v1
+      headers:
+        request:
+          add:
+            test: test
+      weight: 100
+  - match:
+    - uri:
+        prefix: /headerTest/req/set
+    route:
+    - destination:
+        host: b
+        subset: v1
+      headers:
+        request:
+          set:
+            test: test
+      weight: 100
+  - match:
+    - uri:
+        prefix: /headerTest/req/remove
+    route:
+    - destination:
+        host: b
+        subset: v1
+      headers:
+        request:
+          remove:
+          - test
+      weight: 100
+  - match:
+    - uri:
+        prefix: /headerTest/resp/add
+    route:
+    - destination:
+        host: b
+        subset: v1
+      headers:
+        response:
+          add:
+            test: test
+      weight: 100
+  - match:
+    - uri:
+        prefix: /headerTest/resp/set
+    route:
+    - destination:
+        host: b
+        subset: v1
+      headers:
+        response:
+          set:
+            test: test
+      weight: 100
+  - match:
+    - uri:
+        prefix: /headerTest/resp/remove
+    route:
+    - destination:
+        host: b
+        subset: v1
+      headers:
+        response:
+          remove:
+          - test
+      weight: 100
+  - match:
+    - uri:
+        prefix: /mirrorTest
+    mirror:
+      host: b
+      subset: v2
+    route:
+    - destination:
+        host: b
+        subset: v1
+      weight: 100
+  - route:
+    - destination:
+        host: b

@@ -1,0 +1,85 @@
+{{- range $_, $app := .Values.apps }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $app.name }}
+  namespace: {{ include "namespace" $}}
+  labels:
+    release: {{ $.Release.Name }}
+    framew-env: prod
+    framew.zhranklin.io/project: project1
+    {{ $.Values.serviceAppLabelName }}: {{ $app.name }}
+spec:
+  type: ClusterIP
+  selector:
+    {{ $.Values.appLabelName }}: {{ $app.name }}
+  ports:
+  - name: http
+    port: {{ if $app.port }} {{ $app.port }} {{ else }} 80 {{ end }}
+    targetPort: 8080
+---
+{{- $deploys := list (dict "version" "default") -}}
+{{- if $app.deploys -}}
+{{- $deploys = $app.deploys -}}
+{{- end -}}
+{{- range $index, $deploy := $deploys }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $app.name }}{{ if not (eq $deploy.version "default") }}-{{ $deploy.version }}{{ end }}
+  namespace: {{ include "namespace" $}}
+  labels:
+    release: {{ $.Release.Name }}
+    {{ $.Values.appLabelName }}: {{ $app.name }}
+    {{ $.Values.versionLabelName }}: {{ $deploy.version }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{ $.Values.appLabelName }}: {{ $app.name }}
+      {{ $.Values.versionLabelName }}: {{ $deploy.version }}
+{{- if $deploy.labels }}
+{{ $deploy.labels | toYaml | indent 6 }}
+{{- end }}
+  template:
+    metadata:
+      annotations:
+        framew.zhranklin.io/istioEnv: {{ $.Values.istioEnv }}
+      labels:
+        {{ $.Values.appLabelName }}: {{ $app.name }}
+        release: {{ $.Release.Name }}
+        {{ $.Values.versionLabelName }}: {{ $deploy.version }}
+{{- if $deploy.labels }}
+{{ $deploy.labels | toYaml | indent 8 }}
+{{- end }}
+    spec:
+      containers:
+      - name: app
+        env:
+        - name: JAVA_OPTS
+          value: "-Dserver.port=8080 -DdefaultCollectBy=stat"
+        - name: APP
+          value: {{ $app.name }}
+        - name: VERSION
+          value: {{ $deploy.name | quote }}
+{{- if $deploy.image }}
+        image: "{{ $.Values.hub }}/{{ $deploy.image }}"
+{{- else }}
+        image: "{{ $.Values.hub }}/{{ $.Values.image }}"
+{{- end }}
+        imagePullPolicy: IfNotPresent
+      imagePullSecrets:
+{{- range $.Values.imagePullSecrets }}
+      - name: {{ . }}
+{{- end }}
+{{- if $.Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml $.Values.nodeSelector | indent 8 }}
+{{- end }}
+{{- if $.Values.tolerations }}
+      tolerations:
+{{ toYaml $.Values.tolerations | indent 6 }}
+{{- end }}
+---
+{{- end }}
+{{- end }}
