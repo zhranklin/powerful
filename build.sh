@@ -20,7 +20,7 @@ else
   tag=dev
 fi
 
-hub=hub.c.163.com/qingzhou
+hub=zhranklin
 if [[ $BUILD_POWERFUL = "1" ]]; then
   mvn install
 
@@ -34,13 +34,16 @@ if [[ $BUILD_POWERFUL = "1" ]]; then
     image=powerful-$(echo $module | sed 's/springboot-/sb/g; s/spring-//g'):$tag
     docker build ./powerful-$module -t $hub/$image
     docker push $hub/$image
-    docker tag $hub/$image $hub/istio/$image
-    docker push $hub/istio/$image
+    if [[ $module != "springboot-2" ]]; then
+      docker rmi $hub/$image
+    fi
   done
   docker tag $hub/powerful-sb2:$tag $hub/powerful:$tag
-  docker tag $hub/powerful-sb2:$tag $hub/istio/powerful:$tag
   docker push $hub/powerful:$tag
-  docker push $hub/istio/powerful:$tag
+  docker rmi $hub/powerful-sb2:$tag
+  docker rmi $hub/powerful:$tag
+  docker rmi zhranklin/powerful-base-java
+  docker rmi zhranklin/powerful-base-tomcat
 fi
 
 cd $GOPATH/src/github.com/operator-framework/operator-sdk
