@@ -6,8 +6,8 @@ metadata:
   namespace: {{ include "namespace" $}}
   labels:
     release: {{ $.Release.Name }}
-    framew-env: prod
-    framew.zhranklin.io/project: project1
+    framew-env: {{ $.Values.framewEnv }}
+    framew.zhranklin.io/project: {{ $.Values.framewProject }}
     {{ $.Values.serviceAppLabelName }}: {{ $app.name }}
 spec:
   type: ClusterIP
