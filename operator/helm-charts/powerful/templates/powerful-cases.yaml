@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: "{{ .Values.hub }}/{{ .Values.image }}"
+        image: "{{ include "hub" .}}/{{ .Values.image }}"
         imagePullPolicy: IfNotPresent
         env:
         - name: JAVA_OPTS

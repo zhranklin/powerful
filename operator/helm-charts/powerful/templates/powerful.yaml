@@ -63,9 +63,9 @@ spec:
         - name: VERSION
           value: {{ $deploy.name | quote }}
 {{- if $deploy.image }}
-        image: "{{ $.Values.hub }}/{{ $deploy.image }}"
+        image: "{{ include "hub" $}}/{{ $deploy.image }}"
 {{- else }}
-        image: "{{ $.Values.hub }}/{{ $.Values.image }}"
+        image: "{{ include "hub" $}}/{{ $.Values.image }}"
 {{- end }}
         imagePullPolicy: IfNotPresent
       imagePullSecrets:
