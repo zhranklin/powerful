@@ -25,7 +25,7 @@ metadata:
   name: powerful-cases
   namespace: {{ include "namespace" .}}
 spec:
-  replicas: 1
+  replicas: {{ .Values.cases.replicaCount }}
   selector:
     matchLabels:
       {{ .Values.appLabelName }}: powerful-cases
@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: "{{ include "hub" .}}/{{ .Values.image }}"
+        image: "{{ .Values.hub }}/{{ .Values.image }}"
         imagePullPolicy: IfNotPresent
         env:
         - name: JAVA_OPTS
@@ -51,6 +51,13 @@ spec:
         volumeMounts:
         - name: powerful-cases
           mountPath: /etc/powerful-cases
+{{- if .Values.cases.resources }}
+        resources:
+{{ .Values.cases.resources | toYaml | indent 10 }}
+{{- else }}
+        resources:
+{{- .Values.defaultResources | toYaml | indent 10 }}
+{{ end }}
       volumes:
       - name: powerful-cases
         configMap:

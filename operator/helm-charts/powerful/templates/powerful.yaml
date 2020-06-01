@@ -33,7 +33,7 @@ metadata:
     {{ $.Values.appLabelName }}: {{ $app.name }}
     {{ $.Values.versionLabelName }}: {{ $deploy.version }}
 spec:
-  replicas: 1
+  replicas: {{ if $deploy.replicaCount }}{{ $deploy.replicaCount }}{{ else }}1{{ end }}
   selector:
     matchLabels:
       {{ $.Values.appLabelName }}: {{ $app.name }}
@@ -63,11 +63,18 @@ spec:
         - name: VERSION
           value: {{ $deploy.name | quote }}
 {{- if $deploy.image }}
-        image: "{{ include "hub" $}}/{{ $deploy.image }}"
+        image: "{{ $.Values.hub }}/{{ $deploy.image }}"
 {{- else }}
-        image: "{{ include "hub" $}}/{{ $.Values.image }}"
+        image: "{{ $.Values.hub }}/{{ $.Values.image }}"
 {{- end }}
         imagePullPolicy: IfNotPresent
+{{- if $deploy.resources }}
+        resources:
+{{ $deploy.resources | toYaml | indent 10 }}
+{{- else }}
+        resources:
+{{- $.Values.defaultResources | toYaml | indent 10 }}
+{{ end }}
       imagePullSecrets:
 {{- range $.Values.imagePullSecrets }}
       - name: {{ . }}
