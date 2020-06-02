@@ -47,7 +47,7 @@ spec:
         - name: APP
           value: cases
         - name: VERSION
-          value: v0
+          value: ""
         volumeMounts:
         - name: powerful-cases
           mountPath: /etc/powerful-cases
