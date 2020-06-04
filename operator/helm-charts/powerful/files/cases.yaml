@@ -1,28 +1,28 @@
 requestCases:
   a-b-1000:
-    times: 1000
+    times: 10000
     threads: 30
     trace:
     - call: a
     - call: b
     expect:
-      cases|v0(200) -> a|v0(200) -> b|v2(null): 480:520
-      cases|v0(200) -> a|v0(200) -> b|v1(null): 480:520
-    description: a访问b, 重复1000次
+      cases|v0(200) -> a|v0(200) -> b|v2(null): 4800:5200
+      cases|v0(200) -> a|v0(200) -> b|v1(null): 4800:5200
+    description: a访问b, 重复10000次
   a_delay_1s:
     trace:
     - call: a
       delay: 1
     description: 访问a, a加入1s时延
   a_1000_ex60:
-    times: 1000
+    times: 5000
     threads: 30
     trace:
     - call: a
       errorByPercent: 60
     expect:
-      cases|v0(200) -> a|v0(null): 350:450
-      cases|v0(500) -> Random Error.: 550:650
+      cases|v0(200) -> a|v0(null): 1700:2300
+      cases|v0(500) -> Random Error.: 2700:3300
     description: 访问a, 60%概率报错
   a_c_delay0_5:
     trace:
@@ -32,14 +32,14 @@ requestCases:
       delay: 0.5
     description: 让a访问c, 加入0.5s时延
   normal_b:
-    times: 1000
+    times: 10000
     threads: 30
     trace:
     - call: b
     description: 正常访问b
     expect:
-      cases|v0(200) -> b|v2(null): 499:501
-      cases|v0(200) -> b|v1(null): 499:501
+      cases|v0(200) -> b|v2(null): 4990:5010
+      cases|v0(200) -> b|v1(null): 4990:5010
   normal_all_v1:
     times: 1000
     threads: 30
@@ -50,97 +50,97 @@ requestCases:
       cases|v0(200) -> b|v1(null): 1000
   prefix_url_hit:
     threads: 30
-    times: 1000
+    times: 10000
     trace:
     - call: b/matchTest/uri/preEcho
     description: 前缀uri，命中按9:1分流
     expect:
-      cases|v0(200) -> b|v1(null): 880:920
-      cases|v0(200) -> b|v2(null): 80:120
+      cases|v0(200) -> b|v1(null): 8700:9200
+      cases|v0(200) -> b|v2(null): 800:1300
   prefix_url_miss:
     threads: 30
-    times: 1000
+    times: 10000
     trace:
     - call: b/matchTest/uri/mypreEcho
     description: 前缀uri，未命中按5:5分流
     expect:
-      cases|v0(200) -> b|v1(null): 499:501
-      cases|v0(200) -> b|v2(null): 499:501
+      cases|v0(200) -> b|v1(null): 4990:5010
+      cases|v0(200) -> b|v2(null): 4990:5010
   exact_url_hit:
     threads: 30
-    times: 1000
+    times: 10000
     trace:
     - call: b/matchTest/uri/exEcho
     description: 精准uri，命中按9:1分流
     expect:
-      cases|v0(200) -> b|v1(null): 880:920
-      cases|v0(200) -> b|v2(null): 80:120
+      cases|v0(200) -> b|v1(null): 8800:9200
+      cases|v0(200) -> b|v2(null): 800:1200
   regex_url_hit:
     threads: 30
-    times: 1000
+    times: 10000
     trace:
     - call: b/matchTest/uri/regXcho
     description: 正则uri，命中按9:1分流
     expect:
-      cases|v0(200) -> b|v1(null): 880:920
-      cases|v0(200) -> b|v2(null): 80:120
+      cases|v0(200) -> b|v1(null): 8800:9200
+      cases|v0(200) -> b|v2(null): 800:1200
   prefix_header_hit:
     threads: 30
-    times: 1000
+    times: 10000
     trace:
     - call: b
       headers:
         source: yanxuan-test
     description: 前缀header(需要source是yanxuan-test开头)，命中按9:1分流
     expect:
-      cases|v0(200) -> b|v1(null): 880:920
-      cases|v0(200) -> b|v2(null): 80:120
+      cases|v0(200) -> b|v1(null): 8800:9200
+      cases|v0(200) -> b|v2(null): 800:1200
   exact_header_hit:
     threads: 30
-    times: 1000
+    times: 10000
     trace:
     - call: b
       headers:
         source: test
     description: 精准header(需要source=test)，命中按9:1分流
     expect:
-      cases|v0(200) -> b|v1(null): 880:920
-      cases|v0(200) -> b|v2(null): 80:120
+      cases|v0(200) -> b|v1(null): 8800:9200
+      cases|v0(200) -> b|v2(null): 800:1200
   regex_header_hit:
     threads: 30
-    times: 1000
+    times: 10000
     trace:
     - call: b
       headers:
         source: yanxuan-test
     description: 前缀header(需要source是yanxuan-test开头)，命中按9:1分流
     expect:
-      cases|v0(200) -> b|v1(null): 880:920
-      cases|v0(200) -> b|v2(null): 80:120
+      cases|v0(200) -> b|v1(null): 8700:9300
+      cases|v0(200) -> b|v2(null): 700:1300
   exact_queryparams_hit:
     threads: 30
-    times: 1000
+    times: 10000
     trace:
     - call: b
       queries:
         key: yanxuan-test
     description: 精准queryparams(需要key=yanxuan-test)，命中按9:1分流
     expect:
-      cases|v0(200) -> b|v1(null): 880:920
-      cases|v0(200) -> b|v2(null): 80:120
+      cases|v0(200) -> b|v1(null): 8800:9200
+      cases|v0(200) -> b|v2(null): 800:1200
   regex_queryparams_hit:
     threads: 30
-    times: 1000
+    times: 10000
     trace:
     - call: b
       queries:
         key: '42615'
     description: 正则queryparams(需要key是5位数字)，命中按9:1分流
     expect:
-      cases|v0(200) -> b|v1(null): 880:920
-      cases|v0(200) -> b|v2(null): 80:120
+      cases|v0(200) -> b|v1(null): 8700:9200
+      cases|v0(200) -> b|v2(null): 800:1300
   logic_and_hit:
-    times: 1000
+    times: 10000
     threads: 30
     trace:
     - call: b/loginTest
@@ -148,8 +148,8 @@ requestCases:
         mysource: test
     description: 测试与逻辑（精准url和精准header），命中按9:1分流
     expect:
-      cases|v0(200) -> b|v1(null): 880:920
-      cases|v0(200) -> b|v2(null): 80:120
+      cases|v0(200) -> b|v1(null): 8700:9200
+      cases|v0(200) -> b|v2(null): 800:1300
   delay_all_10s:
     trace:
     - call: b/delayTest
