@@ -112,8 +112,8 @@ requestCases:
     trace:
     - call: b
       headers:
-        source: '12311'
-    description: 正则header(需要source是5位数字)，命中按9:1分流
+        source: yanxuan-test
+    description: 前缀header(需要source是yanxuan-test开头)，命中按9:1分流
     expect:
       cases|v0(200) -> b|v1(null): 880:920
       cases|v0(200) -> b|v2(null): 80:120
@@ -134,7 +134,7 @@ requestCases:
     trace:
     - call: b
       queries:
-        key: '21321'
+        key: '42615'
     description: 正则queryparams(需要key是5位数字)，命中按9:1分流
     expect:
       cases|v0(200) -> b|v1(null): 880:920
@@ -151,20 +151,18 @@ requestCases:
       cases|v0(200) -> b|v1(null): 880:920
       cases|v0(200) -> b|v2(null): 80:120
   delay_all_10s:
-    description: 100%流量延迟10s
-    expect: cases|v0(200) -> a|v0(null)
     trace:
-      - call: a/delayTest
-        delay: 10
+    - call: b/delayTest
+    description: 100%流量延迟10s
+    expect: cases|v0(200) -> b|v1(null)
   abort_all_500:
+    times: 1000
+    threads: 30
+    trace:
+    - call: b/abortTest
     description: 100%流量阻断，返回状态码500
     expect:
-      cases|v0(500) -> Random Error.: 1000
-    threads: 30
-    times: 1000
-    trace:
-      - call: a/abortTest
-        errorByPercent: 100
+      cases|v0(500) -> fault filter abort: 1000
   redirect_url:
     trace:
     - call: b/redirectURL
@@ -183,30 +181,29 @@ requestCases:
     description: URL重写到/normalTest
     expect: cases|v0(200) -> b|v1(null)
   rewrite_authority:
+    traceNodeTmpl: "{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(location)}})"
     trace:
-    - call: b/rewriteAuthority
-    description: authority重写到new-b
-    expect: cases|v0(200) -> b|v1(null)
+    - call: b/redirectAuthority
+    description: authority重定向到new-b
+    expect: cases|v0(301|http://new-b/redirectAuthority/execute) -> null
   timeout_1s:
     threads: 50
     times: 1000
     trace:
     - call: b/timeoutTest
-    - call: a/abortTest
-      errorByPercent: 100
+    - call: b/abortTest
     description: 容错超时1000ms
     expect:
-      cases|v0(500) -> b|v1(500) -> Random Error.: 1000
+      cases|v0(500) -> b|v1(500) -> fault filter abort: 1000
   retry_5_1s_500:
-    times: 100
+    times: 1000
     threads: 50
     trace:
     - call: b/retryTest
-    - call: a/abortTest
-      errorByPercent: 100
+    - call: b/abortTest
     description: 容错超时时间1000ms，重试5次
     expect:
-      cases|v0(500) -> b|v1(500) -> Random Error.: 100
+      cases|v0(500) -> b|v1(500) -> fault filter abort: 1000
   header_req_add:
     traceNodeTmpl: "{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(test)}})"
     trace:
@@ -249,10 +246,20 @@ requestCases:
     - call: b/headerTest/resp/remove
       headers:
         test: '123'
-    description: 将response删除header
+    description: 将response删除test：test
     expect: cases|v0(200|) -> b|v1(null|123)
   mirror_all:
     trace:
     - call: b/mirrorTest
     description: 将流量复制给a
     expect: cases|v0(200) -> b|v1(null)
+  a_b_matchtest_pathweight:
+    times: 10000
+    threads: 30
+    trace:
+    - call: a
+    - call: b/matchTest/pathWeight
+    expect:
+      cases|v0(200) -> a|v0(200) -> b|v2(null): 800:1200
+      cases|v0(200) -> a|v0(200) -> b|v1(null): 8800:9200
+    description: ''
