@@ -60,8 +60,12 @@ fi
 cd -
 if [[ $BUILD_OPERATOR = "1" ]]; then
   OPERATOR_IMAGE="zhranklin/powerful-operator:$tag"
-  SED_CMD='1c\
-    FROM '$SDK_IMAGE
+  if [[ $SDK_IMAGE =~ .*:dev ]]; then
+    SED_CMD='1c\
+      FROM '$SDK_IMAGE
+  else
+    SED_CMD=' '
+  fi
   cat operator/build/Dockerfile | sed "$SED_CMD" | docker build operator -t $OPERATOR_IMAGE -f -
   docker push $OPERATOR_IMAGE
   docker rmi $OPERATOR_IMAGE
