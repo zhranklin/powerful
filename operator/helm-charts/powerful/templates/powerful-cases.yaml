@@ -33,6 +33,7 @@ spec:
     metadata:
       annotations:
         framew.zhranklin.io/istioEnv: {{ .Values.istioEnv }}
+        checksum/config-volume: {{ .Files.Get "files/cases.yaml" | sha256sum }}
       labels:
         release: {{ .Release.Name }}
         {{ .Values.appLabelName }}: powerful-cases
