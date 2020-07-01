@@ -1,3 +1,4 @@
+{{ if .Values.enableCRs }}
 apiVersion: networking.istio.io/v1alpha3
 kind: GatewayPlugin
 metadata:
@@ -109,3 +110,4 @@ data:
         unit: MINUTE
       value: Service[d.{{ include "namespace" .}}]-User[none]-Gateway[null]-Api[null]-Id[hash:114909968]
     domain: qingzhou
+{{ end }}
