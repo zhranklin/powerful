@@ -37,6 +37,9 @@ spec:
       labels:
         release: {{ .Release.Name }}
         {{ .Values.appLabelName }}: powerful-cases
+{{- if .Values.istioCluster }}
+        istio-cluster: {{ .Values.istioCluster }}
+{{ end }}
     spec:
       containers:
       - name: app

@@ -52,6 +52,9 @@ spec:
         {{ $.Values.appLabelName }}: {{ $app.name }}
         release: {{ $.Release.Name }}
         {{ $.Values.versionLabelName }}: {{ $deploy.version }}
+{{- if $.Values.istioCluster }}
+        istio-cluster: {{ $.Values.istioCluster }}
+{{ end }}
 {{- if $deploy.labels }}
 {{ $deploy.labels | toYaml | indent 8 }}
 {{- end }}
