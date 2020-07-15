@@ -68,6 +68,12 @@ spec:
           value: {{ $app.name }}
         - name: VERSION
           value: {{ if eq $deploy.version "default" }}""{{ else }}{{ $deploy.version | quote }}{{ end }}
+{{- if $deploy.env }}
+{{- range $envName, $envValue := $deploy.env }}
+        - name: {{ $envName }}
+          value: {{ $envValue | quote }}
+{{- end }}
+{{- end }}
 {{- if $deploy.image }}
         image: "{{ $.Values.hub }}/{{ $deploy.image }}"
 {{- else }}
