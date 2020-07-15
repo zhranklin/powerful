@@ -26,7 +26,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $app.name }}{{ if not (eq $deploy.version "default") }}-{{ $deploy.version }}{{ end }}
+  name: {{ $app.name }}{{ include "deployName" $deploy}}
   namespace: {{ include "namespace" $}}
   labels:
     release: {{ $.Release.Name }}
