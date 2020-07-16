@@ -36,11 +36,8 @@ spec:
   replicas: {{ if $deploy.replicaCount }}{{ $deploy.replicaCount }}{{ else }}1{{ end }}
   selector:
     matchLabels:
+      deployName: {{ $app.name }}{{ include "deployName" $deploy}}
       {{ $.Values.appLabelName }}: {{ $app.name }}
-      {{ $.Values.versionLabelName }}: {{ $deploy.version }}
-{{- if $deploy.labels }}
-{{ $deploy.labels | toYaml | indent 6 }}
-{{- end }}
   template:
     metadata:
       annotations:
@@ -49,12 +46,16 @@ spec:
 {{ $deploy.annotations | toYaml | indent 8 }}
 {{- end }}
       labels:
-        {{ $.Values.appLabelName }}: {{ $app.name }}
         release: {{ $.Release.Name }}
+        deployName: {{ $app.name }}{{ include "deployName" $deploy}}
+        {{ $.Values.appLabelName }}: {{ $app.name }}
         {{ $.Values.versionLabelName }}: {{ $deploy.version }}
 {{- if $.Values.istioCluster }}
         istio-cluster: {{ $.Values.istioCluster }}
 {{ end }}
+{{- if $deploy.color }}
+        framew.zhranklin.io/color: {{ $deploy.color | quote }}
+{{- end }}
 {{- if $deploy.labels }}
 {{ $deploy.labels | toYaml | indent 8 }}
 {{- end }}
@@ -68,6 +69,10 @@ spec:
           value: {{ $app.name }}
         - name: VERSION
           value: {{ if eq $deploy.version "default" }}""{{ else }}{{ $deploy.version | quote }}{{ end }}
+{{- if $deploy.color }}
+        - name: COLOR
+          value: {{ $deploy.color | quote }}
+{{- end }}
 {{- if $deploy.env }}
 {{- range $envName, $envValue := $deploy.env }}
         - name: {{ $envName }}
