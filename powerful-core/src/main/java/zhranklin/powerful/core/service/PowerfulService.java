@@ -9,9 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -107,6 +105,21 @@ public class PowerfulService {
         RemoteInvoker invoker = invokers.get(instruction.getBy());
         if (invoker == null) {
             throw new IllegalStateException(String.format("Protocol not supported in this instance: '%s'", instruction.getBy()));
+        }
+        if (context.getRequestHeaders() != null && !StringUtils.isEmpty(instruction.getPropagateHeaders())) {
+            HashSet<String> propagateHeaders = new HashSet<>(Arrays.asList(instruction.getPropagateHeaders().split(",")));
+            propagateHeaders.retainAll(context.getRequestHeaders().keySet());
+            if (instruction.getHeaders() != null) {
+                propagateHeaders.removeAll(instruction.getHeaders().keySet());
+            }
+            if (!propagateHeaders.isEmpty()) {
+                if (instruction.getHeaders() == null) {
+                    instruction.setHeaders(new HashMap<>());
+                }
+                propagateHeaders.forEach(headerName -> {
+                    instruction.getHeaders().put(headerName, context.getRequestHeaders().get(headerName));
+                });
+            }
         }
         if (!StringUtils.isEmpty(instruction.getCall())) {
             context.setResult(invoker.invoke(instruction, context));

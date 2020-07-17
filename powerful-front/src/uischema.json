@@ -12,6 +12,10 @@
       "label": "threads"
     }, {
       "type": "Control",
+      "scope": "#/properties/propagateHeaders",
+      "label": "propagateHeaders"
+    },{
+      "type": "Control",
       "scope": "#/properties/traceNodeTmpl",
       "label": "template"
     }]

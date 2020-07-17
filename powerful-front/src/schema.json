@@ -91,6 +91,9 @@
     },
     "traceNodeTmpl": {
       "type": "string"
+    },
+    "propagateHeaders": {
+      "type": "string"
     }
   }
 }

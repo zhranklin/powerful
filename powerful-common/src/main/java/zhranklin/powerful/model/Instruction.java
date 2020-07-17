@@ -37,6 +37,8 @@ public class Instruction implements Serializable {
 
 	private String responseFmt = "";
 
+	private String propagateHeaders = "";
+
 	public String getCall() {
 		return call;
 	}
@@ -139,5 +141,13 @@ public class Instruction implements Serializable {
 
 	public void setThreads(int threads) {
 		this.threads = threads;
+	}
+
+	public String getPropagateHeaders() {
+		return propagateHeaders;
+	}
+
+	public void setPropagateHeaders(String propagateHeaders) {
+		this.propagateHeaders = propagateHeaders;
 	}
 }

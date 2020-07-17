@@ -68,6 +68,7 @@ public class RequestCase extends Instruction {
 			prev.setQueries(current.getQueries());
 			prev.setTo(current);
 			prev.setResponseFmt(String.format("%s -> {{resultBody()}}", traceNodeTmpl));
+			current.setPropagateHeaders(getPropagateHeaders());
 			prev = current;
 		}
 		prev.setCall("");
