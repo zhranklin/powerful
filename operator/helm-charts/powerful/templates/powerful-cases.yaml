@@ -78,6 +78,9 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 6 }}
 {{- end }}
+{{- if .Values.serviceAccount }}
+      serviceAccountName: {{ .Values.serviceAccount }}
+{{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap
