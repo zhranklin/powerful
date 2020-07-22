@@ -9,13 +9,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -111,7 +105,8 @@ public class StringRenderer implements EnvironmentAware {
             throw new IllegalArgumentException(String.format("function '%s' not found", functionName));
         }
         List<String> params = paramsStr.isEmpty() ? new ArrayList<>() : Arrays.asList(paramsStr.split(","));
-        return "" + function.apply(context).apply(params);
+        Object result = function.apply(context).apply(params);
+        return result == null ? "" : "" + result;
     }
 
     public String render(String source, RenderingContext requestContext) {
