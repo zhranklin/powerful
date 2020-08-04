@@ -41,7 +41,12 @@ spec:
   template:
     metadata:
       annotations:
+{{- if $.Values.istioEnv }}
         framew.zhranklin.io/istioEnv: {{ $.Values.istioEnv }}
+{{- end }}
+{{- if $.Values.revision }}
+        framew.zhranklin.io/revision: {{ $.Values.revision }}
+{{- end }}
 {{- if $deploy.annotations }}
 {{ $deploy.annotations | toYaml | indent 8 }}
 {{- end }}
