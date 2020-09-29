@@ -47,6 +47,7 @@ spec:
 {{- if $.Values.revision }}
         framew.zhranklin.io/revision: {{ $.Values.revision }}
 {{- end }}
+        sidecar.istio.io/inject: "{{ $deploy.inject | default $.Values.inject }}"
 {{- if $deploy.annotations }}
 {{ $deploy.annotations | toYaml | indent 8 }}
 {{- end }}

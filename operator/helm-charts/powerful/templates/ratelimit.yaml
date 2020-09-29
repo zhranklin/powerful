@@ -1,4 +1,4 @@
-{{ if .Values.enableCRs }}
+{{ if and .Values.enableCRs .Values.enableRatelimit }}
 apiVersion: networking.istio.io/v1alpha3
 kind: GatewayPlugin
 metadata:
