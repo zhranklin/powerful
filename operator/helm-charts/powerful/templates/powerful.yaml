@@ -59,8 +59,8 @@ spec:
 {{- if $.Values.istioCluster }}
         istio-cluster: {{ $.Values.istioCluster }}
 {{ end }}
-{{- if $deploy.color }}
-        framew.zhranklin.io/color: {{ $deploy.color | quote }}
+{{- if $deploy.mark }}
+        framew.zhranklin.io/mark: {{ $deploy.mark | quote }}
 {{- end }}
 {{- if $deploy.labels }}
 {{ $deploy.labels | toYaml | indent 8 }}
@@ -75,9 +75,9 @@ spec:
           value: {{ $app.name }}
         - name: VERSION
           value: {{ if eq $deploy.version "default" }}""{{ else }}{{ $deploy.version | quote }}{{ end }}
-{{- if $deploy.color }}
-        - name: COLOR
-          value: {{ $deploy.color | quote }}
+{{- if $deploy.mark }}
+        - name: MARK
+          value: {{ $deploy.mark | quote }}
 {{- end }}
 {{- if $deploy.env }}
 {{- range $envName, $envValue := $deploy.env }}

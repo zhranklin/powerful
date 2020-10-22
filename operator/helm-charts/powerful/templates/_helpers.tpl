@@ -9,8 +9,8 @@ powerful{{- if not (eq .Release.Name "default") }}-{{ .Release.Name }}{{ end -}}
     {{- if and .version (not (eq .version "default")) -}}
       -{{ .version -}}
     {{- end -}}
-    {{- if .color -}}
-      -{{ .color -}}
+    {{- if .mark -}}
+      -{{ .mark -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
