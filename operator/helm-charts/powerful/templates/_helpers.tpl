@@ -6,11 +6,11 @@ powerful{{- if not (eq .Release.Name "default") }}-{{ .Release.Name }}{{ end -}}
   {{- if .name -}}
     -{{ .name -}}
   {{- else -}}
-    {{- if and .version (not (eq .version "default")) -}}
-      -{{ .version -}}
-    {{- end -}}
     {{- if .mark -}}
       -{{ .mark -}}
+    {{- end -}}
+    {{- if and .version (not (eq .version "default")) -}}
+      -{{ .version -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

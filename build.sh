@@ -10,6 +10,7 @@ while [ $# -ge 1 ] ; do
 done
 
 cd `dirname $0`
+git status
 if git diff-index --quiet HEAD --; then
   commit=$(git rev-parse --short HEAD)
   tag=$(git show-ref --tags| grep $commit | awk -F"[/]" '{print $3}')
@@ -55,6 +56,7 @@ if [[ $BUILD_OPERATOR_SDK = "1" ]]; then
   fi
 fi
 if [[ $BUILD_OPERATOR = "1" ]]; then
+  git status
   SDK_IMAGE=$(./build.sh -noinstall)
 fi
 cd -
