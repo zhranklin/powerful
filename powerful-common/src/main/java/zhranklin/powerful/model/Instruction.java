@@ -20,6 +20,8 @@ public class Instruction implements Serializable {
 
 	private int threads = 1;
 
+	private int qps = 0;
+
 	//@JsonProperty(defaultValue = "{}")
 	private Instruction to;
 
@@ -149,5 +151,13 @@ public class Instruction implements Serializable {
 
 	public void setPropagateHeaders(String propagateHeaders) {
 		this.propagateHeaders = propagateHeaders;
+	}
+
+	public int getQps() {
+		return qps;
+	}
+
+	public void setQps(int qps) {
+		this.qps = qps;
 	}
 }

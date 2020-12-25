@@ -91,6 +91,7 @@ public class StringRenderer implements EnvironmentAware {
             }
         });
         exprFuncs.put("invokeResult", context -> params -> "" + context.getInvokeResult());
+        exprFuncs.put("delay", context -> params -> "" + context.getDelayMillis());
     }
 
     private String calc(String expr, RenderingContext context) {

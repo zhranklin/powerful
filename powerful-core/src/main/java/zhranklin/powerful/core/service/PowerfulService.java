@@ -41,24 +41,43 @@ public class PowerfulService {
 
     public Object execute(Instruction instruction, RenderingContext context) {
         if (instruction.getTimes() <= 1) {
-            return executeSingle(instruction, context, false);
+            return executeSingle(instruction, context, false, 0, 0, 0).renderResult;
         }
-        Stream<String> responses = executeForTimes(instruction, context);
+        Stream<Result> responses = executeForTimes(instruction, context);
         Object result = null;
-        if ("list".equals(instruction.getCollectBy())) {
-            result = responses.collect(Collectors.toList());
-        } else if ("string".equals(instruction.getCollectBy())) {
-            result = responses.collect(Collectors.joining("\n", "", "\n"));
-        } else if ("stat".equals(instruction.getCollectBy())) {
-            result = responses.collect(Collectors.toMap(i -> i, i -> 1, Integer::sum));
+        String collectBy = instruction.getCollectBy();
+        if ("list".equals(collectBy)) {
+            result = responses.map(r -> r.renderResult).collect(Collectors.toList());
+        } else if ("string".equals(collectBy)) {
+            result = responses.map(r -> r.renderResult).collect(Collectors.joining("\n", "", "\n"));
+        } else if (collectBy.startsWith("stat_")) {
+            result = responses.collect(
+                Collectors.groupingBy(r -> r.renderResult,
+                    Collectors.collectingAndThen(Collectors.toList(), data -> {
+                        String stat = collectBy.substring(5);
+                        if (stat.equals("count")) {
+                            return data.size();
+                        } else if (stat.equals("avg")) {
+                            return data.stream().mapToDouble(i -> i.delayMillis).sum() / data.size();
+                        } else {
+                            long quantile = Integer.parseInt(stat);
+                            int index = Math.min(Math.max((int) (data.size() * quantile / 1000) - 1, 0), data.size()-1);
+                            double[] doubles = data.stream().mapToDouble(i -> i.delayMillis).sorted().toArray();
+                            System.out.println(Arrays.toString(doubles));
+                            return doubles[index];
+                        }
+                    })
+                )
+            );
         }
         context.setResult(result);
         return result;
     }
 
-    private Stream<String> executeForTimes(Instruction instruction, RenderingContext context) {
+    private Stream<Result> executeForTimes(Instruction instruction, RenderingContext context) {
         int totalTimes = instruction.getTimes();
         int threads = instruction.getThreads();
+        long startTime = System.nanoTime();
         if (threads > 1) {
             return IntStream.range(0, threads)
                 .mapToObj(i -> threadPool.submit(() -> {
@@ -67,7 +86,7 @@ public class PowerfulService {
                         times += 1;
                     }
                     return IntStream.range(0, times)
-                        .mapToObj(j -> executeSingle(instruction, context, true))
+                        .mapToObj(j -> executeSingle(instruction, context, true, instruction.getQps() / (double)threads, startTime, j))
 						.collect(Collectors.toList())
                         .stream();
                 }))
@@ -82,22 +101,35 @@ public class PowerfulService {
                 });
         } else {
             return IntStream.range(0, totalTimes)
-                .mapToObj(i -> executeSingle(instruction, context, true));
+                .mapToObj(i -> executeSingle(instruction, context, true, instruction.getQps(), startTime, i));
         }
     }
 
-    private String executeSingle(Instruction instruction, RenderingContext context, boolean handleException) {
+    private Result executeSingle(Instruction instruction, RenderingContext context, boolean handleException, double qps, long startTime, int executed) {
+        long waitTimeMillis = qps == 0 ? 0 : (long) (executed / qps * 1000) - (System.nanoTime() - startTime) / 1000000;
+        long requestStarts = 0;
         try {
+            if (waitTimeMillis >= 5) {
+                Thread.sleep(waitTimeMillis);
+            }
+            requestStarts = System.nanoTime();
             doExecuteSingle(instruction, context);
         } catch (Exception e) {
             if (handleException) {
                 context.setResult(e.getMessage());
             } else {
-                throw e;
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException)e;
+                } else {
+                    throw new RuntimeException(e);
+                }
             }
+        } finally {
+            double delayMillis = (System.nanoTime() - requestStarts) / 1000000f;
+            context.setDelayMillis(delayMillis);
         }
         String template = !StringUtils.isEmpty(instruction.getResponseFmt()) ? instruction.getResponseFmt() : "{{resultBody()}}";
-        return stringRenderer.render(template, context);
+        return new Result(context.getDelayMillis(), stringRenderer.render(template, context));
     }
 
     private void doExecuteSingle(Instruction instruction, RenderingContext context) {
@@ -173,6 +205,16 @@ public class PowerfulService {
     public void setInvoker(String protocol, RemoteInvoker invoker) {
         if (invoker != null) {
             invokers.put(protocol, invoker);
+        }
+    }
+
+    public static class Result {
+        public final double delayMillis;
+        public final String renderResult;
+
+        public Result(double delayMillis, String renderResult) {
+            this.delayMillis = delayMillis;
+            this.renderResult = renderResult;
         }
     }
 

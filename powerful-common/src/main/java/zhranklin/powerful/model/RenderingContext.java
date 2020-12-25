@@ -41,6 +41,14 @@ public class RenderingContext implements Serializable{
 		getResults().invokeResult = invokeResult;
 	}
 
+	public double getDelayMillis() {
+		return getResults().delayMillis;
+	}
+
+	public void setDelayMillis(double delay) {
+		getResults().delayMillis = delay;
+	}
+
 	public Map<String, String> getHttpParams() {
 		return httpParams;
 	}
@@ -59,6 +67,7 @@ public class RenderingContext implements Serializable{
 	private class Result {
 		private Object result = null;
 		private String invokeResult;
+		private double delayMillis;
 	}
 
 }
