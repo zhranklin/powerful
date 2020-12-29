@@ -107,6 +107,7 @@ public class PowerfulService {
 
     private Result executeSingle(Instruction instruction, RenderingContext context, boolean handleException, double qps, long startTime, int executed) {
         long waitTimeMillis = qps == 0 ? 0 : (long) (executed / qps * 1000) - (System.nanoTime() - startTime) / 1000000;
+        String template = !StringUtils.isEmpty(instruction.getResponseFmt()) ? instruction.getResponseFmt() : "{{resultBody()}}";
         long requestStarts = 0;
         try {
             if (waitTimeMillis >= 5) {
@@ -118,17 +119,12 @@ public class PowerfulService {
             if (handleException) {
                 context.setResult(e.getMessage());
             } else {
-                if (e instanceof RuntimeException) {
-                    throw (RuntimeException)e;
-                } else {
-                    throw new RuntimeException(e);
-                }
+                throw new RuntimeException(stringRenderer.render(template, context) + ": " + e.getMessage(), e);
             }
         } finally {
             double delayMillis = (System.nanoTime() - requestStarts) / 1000000f;
             context.setDelayMillis(delayMillis);
         }
-        String template = !StringUtils.isEmpty(instruction.getResponseFmt()) ? instruction.getResponseFmt() : "{{resultBody()}}";
         return new Result(context.getDelayMillis(), stringRenderer.render(template, context));
     }
 
