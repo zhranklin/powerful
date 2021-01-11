@@ -70,7 +70,7 @@ spec:
       - name: app
         env:
         - name: JAVA_OPTS
-          value: "-Dserver.port=8080 -DdefaultCollectBy=stat_count"
+          value: "-Dserver.port=8080"
         - name: APP
           value: {{ $app.name }}
         - name: VERSION

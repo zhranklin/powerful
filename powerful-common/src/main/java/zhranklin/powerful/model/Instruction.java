@@ -13,7 +13,7 @@ public class Instruction implements Serializable {
 
 	private String by = "http";
 
-	private static final String defaultCollectBy = System.getProperty("defaultCollectBy", "string");
+	private static final String defaultCollectBy = System.getProperty("defaultCollectBy", "stat_count");
 	private String collectBy = defaultCollectBy;
 
 	private int times = 1;

@@ -15,7 +15,7 @@ public class RequestCase extends Instruction {
 	private List<Instruction> trace;
 
 	private String traceNodeTmpl = defaultTraceNodeTmpl;
-	public static final String defaultTraceNodeTmpl = System.getProperty("defaultTraceNodeTmpl", "{{env(APP)}}({{statusCode()}})");
+	public static final String defaultTraceNodeTmpl = System.getProperty("defaultTraceNodeTmpl", "{{env(APP)}}|{{env(VERSION)}}({{statusCode()}})");
 
 	@JsonProperty(required = false)
 	private String name;
