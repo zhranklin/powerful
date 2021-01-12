@@ -30,9 +30,9 @@ import java.util.*;
  */
 public class HttpRemoteInvoker implements RemoteInvoker {
 
-    private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PowerfulService.class);
     private final StringRenderer stringRenderer;
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
     private static final Set<String> METHODS_WITHOUT_BODY = Sets.newHashSet("GET", "DELETE");
     private static final Set<String> METHODS_WITH_BODY = Sets.newHashSet("POST", "PUT");
     private final ObjectMapper jsonMapper = new ObjectMapper();

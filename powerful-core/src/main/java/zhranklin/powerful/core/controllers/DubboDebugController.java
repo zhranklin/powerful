@@ -16,19 +16,16 @@ public class DubboDebugController {
     public Object getDebugConfig(@RequestParam(name = "key", required = false, defaultValue = "") String preFix,
                                  @RequestParam(name = "type", required = false, defaultValue = "html") String type) {
         try {
-            Class clazz = Thread.currentThread().getContextClassLoader().loadClass("zhranklin.agent.configdebuginfo.ConfigDebugManager");
+            Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass("zhranklin.agent.configdebuginfo.ConfigDebugManager");
             Method getConfig = clazz.getDeclaredMethod("getDebugConfig", String.class, String.class);
-            Object obj = getConfig.invoke(null, preFix, type);
-            return obj;
+            return getConfig.invoke(null, preFix, type);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return "zhranklin.agent.configdebuginfo.ConfigDebugManager not find";
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
             return "method getDebugConfig not find";
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return "error !!!";

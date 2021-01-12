@@ -25,14 +25,14 @@ import java.io.IOException;
 @GrpcService
 @ConditionalOnProperty(name = "powerful.grpc.name", havingValue = "grpc-b")
 public class GrpcBService extends GrpcRemoteInvoker implements InitializingBean {
-    private static Logger logger = LoggerFactory.getLogger(GrpcBService.class);
+    private static final Logger logger = LoggerFactory.getLogger(GrpcBService.class);
 
     @GrpcClient("grpc-a")
     private EchoGrpc.EchoBlockingStub grpcAEchoBlockingStub;
     @GrpcClient("grpc-a")
     private EchoGrpc.EchoStub grpcAEchoStub;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
     private void init() {
@@ -66,7 +66,7 @@ public class GrpcBService extends GrpcRemoteInvoker implements InitializingBean 
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         setGrpcAEchoBlockingStub(grpcAEchoBlockingStub);
         setGrpcAEchoStub(grpcAEchoStub);
     }

@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DubboRemoteInvoker implements RemoteInvoker {
 
-    private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PowerfulService.class);
 
     protected DubboAService dubboAService;
 

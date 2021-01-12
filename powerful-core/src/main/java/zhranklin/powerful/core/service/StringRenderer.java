@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Nullable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
@@ -20,10 +21,10 @@ import java.util.stream.IntStream;
  * Created by 张武 at 2019/9/10
  */
 public class StringRenderer implements EnvironmentAware {
-    private Map<String, Function<RenderingContext, Function<List<String>, Object>>> exprFuncs = new HashMap<>();
-    private static Random rand = new Random();
-    private static Pattern EXPR_PATTERN = Pattern.compile("\\{\\{(.+?)}}");
-    private static Pattern FUNCTION_PATTERN = Pattern.compile("([-a-zA-Z_]+)\\((.*)\\)");
+    private final Map<String, Function<RenderingContext, Function<List<String>, Object>>> exprFuncs = new HashMap<>();
+    private static final Random rand = new Random();
+    private static final Pattern EXPR_PATTERN = Pattern.compile("\\{\\{(.+?)}}");
+    private static final Pattern FUNCTION_PATTERN = Pattern.compile("([-a-zA-Z_]+)\\((.*)\\)");
     public Environment environment;
 
     public StringRenderer() {
@@ -68,7 +69,7 @@ public class StringRenderer implements EnvironmentAware {
                 result.add(reqHeader);
             }
             if (context.getResult() instanceof ResponseEntity) {
-                List<String> values = ((ResponseEntity) context.getResult()).getHeaders().get(params.get(0));
+                List<String> values = ((ResponseEntity<?>) context.getResult()).getHeaders().get(params.get(0));
                 if (!CollectionUtils.isEmpty(values)) {
                     result.add(String.join(",", values));
                 }
@@ -78,14 +79,14 @@ public class StringRenderer implements EnvironmentAware {
         exprFuncs.put("result", context -> params -> "" + context.getResult());
         exprFuncs.put("resultBody", context -> params -> {
             if (context.getResult() instanceof HttpEntity) {
-                return "" + ((HttpEntity) context.getResult()).getBody();
+                return "" + ((HttpEntity<?>) context.getResult()).getBody();
             }else{
                 return String.valueOf(context.getResult());
             }
         });
         exprFuncs.put("statusCode", context -> params -> {
             if (context.getResult() instanceof ResponseEntity) {
-                return "" + ((ResponseEntity) context.getResult()).getStatusCodeValue();
+                return "" + ((ResponseEntity<?>) context.getResult()).getStatusCodeValue();
             } else {
                 return "null";
             }
@@ -125,7 +126,7 @@ public class StringRenderer implements EnvironmentAware {
     }
 
     @Override
-    public void setEnvironment(Environment environment) {
+    public void setEnvironment(@Nullable Environment environment) {
         this.environment = environment;
     }
 }

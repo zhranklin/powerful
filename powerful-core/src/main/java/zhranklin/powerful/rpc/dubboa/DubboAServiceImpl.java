@@ -18,7 +18,7 @@ import javax.annotation.PostConstruct;
  */
 @Service
 public class DubboAServiceImpl extends DubboRemoteInvoker implements DubboAService, InitializingBean {
-    private static Logger logger = LoggerFactory.getLogger(DubboAServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(DubboAServiceImpl.class);
 
     @Reference(check = false)
     private DubboBService bService;
@@ -34,12 +34,13 @@ public class DubboAServiceImpl extends DubboRemoteInvoker implements DubboAServi
         return powerful.execute(instruction, context);
     }
 
+    @SuppressWarnings("SameReturnValue")
     public Object fallback(Integer num, Instruction instruction, RenderingContext context) {
         return "fallback";
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         super.dubboBService = bService;
     }
 }

@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
  */
 public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteInvoker {
 
-    private static Logger logger = LoggerFactory.getLogger(GrpcRemoteInvoker.class);
+    private static final Logger logger = LoggerFactory.getLogger(GrpcRemoteInvoker.class);
 
     @Autowired(required = false)
     private GrpcClientInterceptor grpcClientInterceptor;
@@ -35,7 +35,7 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
     protected EchoGrpc.EchoStub grpcAEchoStub;
     protected EchoGrpc.EchoStub grpcBEchoStub;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Object invoke(Instruction instruction, RenderingContext context) {
         String num = instruction.getQueries().get("num");
@@ -68,7 +68,7 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
 
     protected String getColor() {
         try {
-            Class clazz = this.getClass().getClassLoader().loadClass("zhranklin.agent.core.flowcolor.GlobalContext");
+            Class<?> clazz = this.getClass().getClassLoader().loadClass("zhranklin.agent.core.flowcolor.GlobalContext");
             Method method = clazz.getDeclaredMethod("getFlowColor");
             Object color = method.invoke(null);
             if (color == null) {

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.InitializingBean;
  */
 @Service
 public class DubboBServiceImpl extends DubboRemoteInvoker implements DubboBService, InitializingBean {
-    private static Logger logger = LoggerFactory.getLogger(DubboBServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(DubboBServiceImpl.class);
 
     @Reference(check = false)
     private DubboAService aService;
@@ -28,7 +28,7 @@ public class DubboBServiceImpl extends DubboRemoteInvoker implements DubboBServi
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         super.dubboAService = aService;
     }
 }

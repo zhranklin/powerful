@@ -33,17 +33,17 @@ import java.util.stream.Stream;
 public class PowerfulService {
 
     private final ObjectMapper jsonMapper = new ObjectMapper();
-    private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
-    private static Random rand = new Random();
+    private static final Logger logger = LoggerFactory.getLogger(PowerfulService.class);
+    private static final Random rand = new Random();
     protected final StringRenderer stringRenderer;
-    private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(20, 200, 3, TimeUnit.MINUTES, new SynchronousQueue<>());
+    private final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(20, 200, 3, TimeUnit.MINUTES, new SynchronousQueue<>());
 
-    private AtomicInteger executeCount = new AtomicInteger(0);
+    private final AtomicInteger executeCount = new AtomicInteger(0);
 
     @Autowired
     private TestingMethodService testingMethodService;
 
-    private Map<String, RemoteInvoker> invokers = new HashMap<>();
+    private final Map<String, RemoteInvoker> invokers = new HashMap<>();
 
     public PowerfulService(StringRenderer stringRenderer) {
         this.stringRenderer = stringRenderer;
@@ -224,6 +224,7 @@ public class PowerfulService {
         }
     }
 
+    @SuppressWarnings("SameReturnValue")
     private String fallback(Instruction instruction, RenderingContext context) {
         return "fallback";
     }

@@ -3,6 +3,7 @@ package zhranklin.powerful.core.service;
 /**
  * Created by 张武 at 2019/11/5
  */
+@SuppressWarnings("SameReturnValue")
 public class TestingMethodService {
 
 	public String method00() { return "00"; }

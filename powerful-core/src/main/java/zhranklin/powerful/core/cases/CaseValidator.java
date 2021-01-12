@@ -9,6 +9,7 @@ import java.util.regex.PatternSyntaxException;
  */
 public class CaseValidator {
 
+	@SuppressWarnings("unchecked")
 	public static boolean validate(Object expect, Object result) {
 		if (expect == null) {
 			return true;

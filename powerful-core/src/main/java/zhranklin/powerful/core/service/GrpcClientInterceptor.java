@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class GrpcClientInterceptor implements ClientInterceptor {
 
-    private Map<String, String> customizeHeaders = new HashMap<>();
+    private final Map<String, String> customizeHeaders = new HashMap<>();
 
     @Override
     public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> methodDescriptor, CallOptions callOptions, Channel channel) {

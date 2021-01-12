@@ -60,9 +60,12 @@ public class StaticResources {
         } else {
             try {
                 for (Resource resource : resourceResolver.getResources("classpath*:case/*.json")) {
-                    String name = resource.getFilename().replaceAll("\\.json$", "");
-                    Object caseObj = objectMapper.readValue(resource.getInputStream(), Object.class);
-                    rawCases.put(name, caseObj);
+                    String fn = resource.getFilename();
+                    if (fn != null) {
+                        String name = fn.replaceAll("\\.json$", "");
+                        Object caseObj = objectMapper.readValue(resource.getInputStream(), Object.class);
+                        rawCases.put(name, caseObj);
+                    }
                 }
                 Resource[] targetMappingFiles = resourceResolver.getResources("classpath*:/target-mapping.properties");
                 if (targetMappingFiles.length > 0) {
@@ -97,22 +100,11 @@ public class StaticResources {
         } else {
             return objectMapper.writeValueAsString(result);
         }
-//        Resource[] cases = StaticResources.getResources("classpath*:case/" + name + ".json");
-//        if (cases != null && cases.length != 0) {
-//            try {
-//                return IOUtils.toString(cases[0].getInputStream(), Charset.forName("UTF-8"));
-//            } catch (IOException e) {
-//                return "IOException";
-//            }
-//        }
-//        return "NOT FIND";
     }
 
     public RequestCase processTargetMappingForTrace(RequestCase requestCase) {
         if (!CollectionUtils.isEmpty(requestCase.getTrace())) {
-            requestCase.getTrace().forEach(t -> {
-                t.setCall(replaceTargets(t.getCall(), true));
-            });
+            requestCase.getTrace().forEach(t -> t.setCall(replaceTargets(t.getCall(), true)));
         }
         return requestCase;
     }

@@ -129,7 +129,7 @@ public class PowerfulAutoConfiguration {
 
     @ConditionalOnProperty(name = "powerful.grpc.enabled", havingValue = "true")
     @ComponentScan(basePackages = {"zhranklin.powerful.rpc.grpc"})
-    public class GrpcConfiguration {
+    public static class GrpcConfiguration {
 
         @Bean
         public GrpcClientInterceptor grpcClientInterceptor() {

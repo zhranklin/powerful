@@ -12,7 +12,7 @@ public class RenderingContext implements Serializable{
 	private Map<String, String> requestHeaders = new HashMap<>();
 	private Map<String, String> httpParams = new HashMap<>();
 	private String method = "";
-	private ThreadLocal<Result> results = new ThreadLocal<>();
+	private final ThreadLocal<Result> results = new ThreadLocal<>();
 
 	{
 		results.set(new Result());
@@ -73,7 +73,7 @@ public class RenderingContext implements Serializable{
 		this.method = method;
 	}
 
-	private class Result {
+	private static class Result {
 		private Object result = null;
 		private String invokeResult;
 		private double delayMillis;
