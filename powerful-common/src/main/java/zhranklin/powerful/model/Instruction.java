@@ -2,6 +2,7 @@ package zhranklin.powerful.model;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,6 +16,12 @@ public class Instruction implements Serializable {
 
 	private static final String defaultCollectBy = System.getProperty("defaultCollectBy", "stat_count");
 	private String collectBy = defaultCollectBy;
+
+	private String method = "POST";
+
+	private boolean log = true;
+
+	private Map<String, List<Object>> rr = new HashMap<>();
 
 	private int times = 1;
 
@@ -34,8 +41,6 @@ public class Instruction implements Serializable {
 	private double delay = 0;
 
 	private Integer errorByPercent = 0;
-
-	private Integer okByRoundRobin = 1;
 
 	private String responseFmt = "";
 
@@ -113,14 +118,6 @@ public class Instruction implements Serializable {
 		this.errorByPercent = errorByPercent;
 	}
 
-	public Integer getOkByRoundRobin() {
-		return okByRoundRobin;
-	}
-
-	public void setOkByRoundRobin(Integer okByRoundRobin) {
-		this.okByRoundRobin = okByRoundRobin;
-	}
-
 	public Map<String, String> getQueries() {
 		return queries;
 	}
@@ -159,5 +156,29 @@ public class Instruction implements Serializable {
 
 	public void setQps(int qps) {
 		this.qps = qps;
+	}
+
+	public String getMethod() {
+		return method;
+	}
+
+	public void setMethod(String method) {
+		this.method = method;
+	}
+
+	public boolean isLog() {
+		return log;
+	}
+
+	public void setLog(boolean log) {
+		this.log = log;
+	}
+
+	public Map<String, List<Object>> getRr() {
+		return rr;
+	}
+
+	public void setRr(Map<String, List<Object>> rr) {
+		this.rr = rr;
 	}
 }

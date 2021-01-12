@@ -11,6 +11,7 @@ public class RenderingContext implements Serializable{
 
 	private Map<String, String> requestHeaders = new HashMap<>();
 	private Map<String, String> httpParams = new HashMap<>();
+	private String method = "";
 	private ThreadLocal<Result> results = new ThreadLocal<>();
 
 	{
@@ -62,6 +63,14 @@ public class RenderingContext implements Serializable{
 			results.set(new Result());
 		}
 		return results.get();
+	}
+
+	public String getMethod() {
+		return method;
+	}
+
+	public void setMethod(String method) {
+		this.method = method;
 	}
 
 	private class Result {

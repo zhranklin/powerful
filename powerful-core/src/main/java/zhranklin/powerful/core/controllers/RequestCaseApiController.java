@@ -2,6 +2,8 @@ package zhranklin.powerful.core.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import zhranklin.powerful.core.cases.CaseValidator;
 import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.cases.StaticResources;
@@ -12,12 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -85,7 +82,7 @@ public class RequestCaseApiController {
             writer.println(String.format("=======executing: %s=======", name));
             response.flushBuffer();
             Object result = execute(staticResources.getCase(name), params, true);
-            Boolean passed = (Boolean) ((Map) result).get("passed");
+            @SuppressWarnings("rawtypes") Boolean passed = (Boolean) ((Map) result).get("passed");
             if (passed) {
                 writer.println("OK\n");
             } else {
@@ -107,7 +104,27 @@ public class RequestCaseApiController {
     @RequestMapping(value = "/y", method = RequestMethod.POST)
     @ResponseBody
     Object yCase(HttpServletRequest request, @RequestParam(required = false, defaultValue = "false") boolean validate, @RequestParam Map<String, String> params) throws IOException {
-        return execute((RequestCase) request.getAttribute("yamlBody"), params, validate);
+        String realBody = (String) request.getAttribute("realBody");
+        return execute(new ObjectMapper(new YAMLFactory()).readValue(realBody, RequestCase.class), params, validate);
+    }
+
+    @RequestMapping(value = "/y/{body}", method = RequestMethod.GET)
+    @ResponseBody
+    Object yCase(@PathVariable String body, @RequestParam(required = false, defaultValue = "false") boolean validate, @RequestParam Map<String, String> params) throws IOException {
+        String decodedBody = PowerfulService.decodeURLBase64(body);
+        RequestCase requestCase = new ObjectMapper(new YAMLFactory()).readValue(decodedBody, RequestCase.class);
+        return "----REQUEST----\n" +
+            decodedBody +
+            "\n\n---RESPONSE----\n" +
+            new ObjectMapper(new YAMLFactory().configure(YAMLGenerator.Feature.WRITE_DOC_START_MARKER, false))
+                .writeValueAsString(execute(requestCase, params, validate));
+    }
+
+    @RequestMapping(value = "/b", method = RequestMethod.POST)
+    @ResponseBody
+    String base64(HttpServletRequest request) {
+        String realBody = (String) request.getAttribute("realBody");
+        return PowerfulService.encodeURLBase64(realBody);
     }
 
     private Object execute(RequestCase requestCase, Map<String, String> params, boolean validate) {

@@ -1,18 +1,17 @@
 package zhranklin.powerful.core.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
-import zhranklin.powerful.core.service.PowerfulService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,16 +25,17 @@ public class HttpController {
     @Autowired
     private PowerfulService powerful;
 
-    @RequestMapping(value = {"/**/execute"})
+    @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.POST, RequestMethod.PUT})
     public Object execute(@RequestBody Instruction instruction, HttpServletRequest request, @RequestParam Map<String, String> params) {
         try {
             RenderingContext context = new RenderingContext();
+            context.setMethod(request.getMethod());
             context.setRequestHeaders(transformRequestHeaders(request));
             context.setHttpParams(params);
             Object result = powerful.execute(instruction, context);
             Object res = context.getResult();
             if (res instanceof ResponseEntity) {
-                ResponseEntity<String> typed = (ResponseEntity<String>) res;
+                @SuppressWarnings("unchecked") ResponseEntity<String> typed = (ResponseEntity<String>) res;
                 return new ResponseEntity<>("" + result, typed.getStatusCode());
             }
             return result;
@@ -44,7 +44,14 @@ public class HttpController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.GET, RequestMethod.DELETE})
+    public Object execute(String _body, HttpServletRequest request, @RequestParam Map<String, String> params) throws IOException {
+        Instruction instruction = new ObjectMapper().readValue(PowerfulService.decodeURLBase64(_body), Instruction.class);
+        params.remove("_body");
+        return execute(instruction, request, params);
+    }
 
+    @SuppressWarnings("unchecked")
     private static Map<String, String> transformRequestHeaders(HttpServletRequest request) {
         Enumeration<String> names = request.getHeaderNames();
         HashMap<String, String> result = new HashMap<>();

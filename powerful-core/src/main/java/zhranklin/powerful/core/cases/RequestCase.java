@@ -17,7 +17,7 @@ public class RequestCase extends Instruction {
 	private String traceNodeTmpl = defaultTraceNodeTmpl;
 	public static final String defaultTraceNodeTmpl = System.getProperty("defaultTraceNodeTmpl", "{{env(APP)}}|{{env(VERSION)}}({{statusCode()}})");
 
-	@JsonProperty(required = false)
+	@JsonProperty
 	private String name;
 
 	private String description;
@@ -66,9 +66,11 @@ public class RequestCase extends Instruction {
 			prev.setBy(current.getBy());
 			prev.setHeaders(current.getHeaders());
 			prev.setQueries(current.getQueries());
+			prev.setMethod(current.getMethod());
 			prev.setTo(current);
 			prev.setResponseFmt(String.format("%s -> {{resultBody()}}", traceNodeTmpl));
 			current.setPropagateHeaders(getPropagateHeaders());
+			current.setLog(isLog());
 			prev = current;
 		}
 		prev.setCall("");

@@ -7,8 +7,6 @@ import com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.cases.StaticResources;
 import zhranklin.powerful.core.invoker.DubboRemoteInvoker;
 import zhranklin.powerful.core.invoker.GrpcRemoteInvoker;
@@ -30,16 +28,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.annotation.Nullable;
+import javax.servlet.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by 张武 at 2019/9/24
@@ -52,13 +48,12 @@ public class PowerfulAutoConfiguration {
 	String configPath;
 
     @Bean
-    public FilterRegistrationBean filterRegist() {
-        FilterRegistrationBean<Filter> frBean = new FilterRegistrationBean();
+    public FilterRegistrationBean<Filter> filterRegist() {
+        FilterRegistrationBean<Filter> frBean = new FilterRegistrationBean<>();
         frBean.setFilter(new Filter() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-                servletRequest.setAttribute("yamlBody",
-                    new ObjectMapper(new YAMLFactory()).readValue(servletRequest.getInputStream(), RequestCase.class));
+                servletRequest.setAttribute("realBody", StreamUtils.copyToString(servletRequest.getInputStream(), StandardCharsets.UTF_8));
                 filterChain.doFilter(servletRequest, servletResponse);
             }
             @Override public void init(FilterConfig filterConfig) { }
@@ -66,6 +61,7 @@ public class PowerfulAutoConfiguration {
         });
         frBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         frBean.addUrlPatterns("/y");
+        frBean.addUrlPatterns("/b");
         return frBean;
     }
 
@@ -106,12 +102,12 @@ public class PowerfulAutoConfiguration {
         return new RestTemplate() {{
             setErrorHandler(new ResponseErrorHandler() {
                 @Override
-                public boolean hasError(ClientHttpResponse clientHttpResponse) {
+                public boolean hasError(@Nullable ClientHttpResponse clientHttpResponse) {
                     return true;
                 }
 
                 @Override
-                public void handleError(ClientHttpResponse clientHttpResponse) {
+                public void handleError(@Nullable ClientHttpResponse clientHttpResponse) {
 
                 }
             });

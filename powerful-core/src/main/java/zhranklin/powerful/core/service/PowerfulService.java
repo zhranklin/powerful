@@ -1,5 +1,11 @@
 package zhranklin.powerful.core.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.flipkart.zjsonpatch.JsonPatch;
+import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.invoker.RemoteInvoker;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
@@ -7,8 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Base64Utils;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -23,6 +32,7 @@ import java.util.stream.Stream;
  */
 public class PowerfulService {
 
+    private final ObjectMapper jsonMapper = new ObjectMapper();
     private static Logger logger = LoggerFactory.getLogger(PowerfulService.class);
     private static Random rand = new Random();
     protected final StringRenderer stringRenderer;
@@ -114,7 +124,7 @@ public class PowerfulService {
                 Thread.sleep(waitTimeMillis);
             }
             requestStarts = System.nanoTime();
-            doExecuteSingle(instruction, context);
+            doExecuteSingle(processLoop(instruction, executed), context);
         } catch (Exception e) {
             if (handleException) {
                 context.setResult(e.getMessage());
@@ -126,6 +136,33 @@ public class PowerfulService {
             context.setDelayMillis(delayMillis);
         }
         return new Result(context.getDelayMillis(), stringRenderer.render(template, context));
+    }
+
+    private Instruction processLoop(Instruction instruction, int i) {
+    	if (instruction.getRr().isEmpty()) {
+    	    return instruction;
+        }
+        try {
+            ArrayNode patches = JsonNodeFactory.instance.arrayNode();
+            for (Map.Entry<String, List<Object>> entry : instruction.getRr().entrySet()) {
+                List<Object> values = entry.getValue();
+                String path = "/" + entry.getKey().replaceAll("\\.", "/");
+                String indexStr = path.replaceAll("^(/trace\\[(\\d+)])?.*", "$2");
+                if (!indexStr.isEmpty()) {
+                    int index = Integer.parseInt(indexStr);
+                    path = Stream.generate(() -> "/to").limit(index).collect(Collectors.joining())
+                        + path.replaceAll("^/trace\\[(\\d+)]", "");
+                }
+                ObjectNode patch = patches.addObject();
+                patch.put("op", "replace");
+                patch.put("path", path);
+                Object value = values.get(i % values.size());
+                patch.replace("value", jsonMapper.readTree(jsonMapper.writeValueAsString(value)));
+            }
+            return jsonMapper.readValue(jsonMapper.writeValueAsString(JsonPatch.apply(patches, jsonMapper.readTree(jsonMapper.writeValueAsString(instruction)))), RequestCase.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void doExecuteSingle(Instruction instruction, RenderingContext context) {
@@ -144,9 +181,7 @@ public class PowerfulService {
                 if (instruction.getHeaders() == null) {
                     instruction.setHeaders(new HashMap<>());
                 }
-                propagateHeaders.forEach(headerName -> {
-                    instruction.getHeaders().put(headerName, context.getRequestHeaders().get(headerName));
-                });
+                propagateHeaders.forEach(headerName -> instruction.getHeaders().put(headerName, context.getRequestHeaders().get(headerName)));
             }
         }
         if (!StringUtils.isEmpty(instruction.getCall())) {
@@ -155,11 +190,6 @@ public class PowerfulService {
         Integer tm = instruction.getCallTestMethod();
         if (tm != null) {
             context.setInvokeResult(invokeTestMethod(tm));
-        }
-        int roundRobinNum = instruction.getOkByRoundRobin();
-        if (executeCount.get() % roundRobinNum != 0) {
-            logger.info("throw roundRobin error");
-            throw new RuntimeException("roundRobin return error.");
         }
         int delay = (int) (instruction.getDelay() * 1000);
         if (delay > 0) {
@@ -212,6 +242,14 @@ public class PowerfulService {
             this.delayMillis = delayMillis;
             this.renderResult = renderResult;
         }
+    }
+
+    public static String encodeURLBase64(String body) {
+        return Base64Utils.encodeToUrlSafeString(body.trim().getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String decodeURLBase64(String base64) {
+        return new String(Base64Utils.decodeFromUrlSafeString(base64));
     }
 
 }
