@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: powerful-cases
+  namespace: {{ include "namespace" .}}
+  labels:
+    release: {{ .Release.Name }}
+data:
+  config.yaml: |-
+{{ .Files.Get "files/cases.yaml" | indent 4 }}
+    targetMappings:
+{{ .Values.targetMappings | toYaml | indent 6 }}
