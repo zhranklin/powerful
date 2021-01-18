@@ -73,8 +73,6 @@ spec:
       containers:
       - name: app
         env:
-        - name: JAVA_OPTS
-          value: "-Dserver.port=8080"
         - name: APP
           value: {{ $app.name }}
         - name: VERSION
@@ -92,6 +90,10 @@ spec:
         volumeMounts:
         - name: powerful-cases
           mountPath: /etc/powerful-cases
+{{- range $i, $mount := $deploy.mounts }}
+        - name: custom-volume-{{ $i }}
+          mountPath: {{ $mount.mountPath }}
+{{- end }}
 {{- if $deploy.image }}
         image: "{{ $.Values.hub }}/{{ $deploy.image }}"
 {{- else }}
@@ -109,6 +111,11 @@ spec:
       - name: powerful-cases
         configMap:
           name: powerful-cases
+{{- range $i, $mount := $deploy.mounts }}
+      - name: custom-volume-{{ $i }}
+        hostPath:
+          path: {{ $mount.hostPath }}
+{{- end }}
       imagePullSecrets:
 {{- range $.Values.imagePullSecrets }}
       - name: {{ . }}

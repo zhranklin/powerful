@@ -1,4 +1,0 @@
-apiVersion: v1
-name: powerful-framew
-version: 1.0.0
-engine: gotpl
