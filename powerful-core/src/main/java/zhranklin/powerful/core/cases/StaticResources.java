@@ -8,6 +8,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import zhranklin.powerful.model.Instruction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.CollectionUtils;
@@ -15,14 +16,10 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Created by 张武 at 2019/9/20
@@ -40,42 +37,22 @@ public class StaticResources {
     public StaticResources(String configPath) {
         objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-        File configFile = new File(configPath);
-        if (configFile.exists()) {
+        try {
+            Resource resource = new File(configPath).exists() ?
+                new FileSystemResource(configPath) : resourceResolver.getResources("classpath*:config.yaml")[0];
             //读取yaml配置, 例子见powerful-cases/config-example.yaml
-            logger.info("use {}.", configPath);
-            try {
-                Map<String, Object> config = (Map<String, Object>) new ObjectMapper(new YAMLFactory()).readValue(configFile, Object.class);
-                Map<String, Object> cases = (Map<String, Object>) config.get("requestCases");
-                if (cases != null) {
-                    rawCases.putAll(cases);
-                }
-                Map<Object, Object> targetMappings = (Map<Object, Object>) config.get("targetMappings");
-                if (targetMappings != null) {
-                    targetMapping.putAll(targetMappings);
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
+            logger.info("use {}.", resource.getFilename());
+            Map<String, Object> config = (Map<String, Object>) new ObjectMapper(new YAMLFactory()).readValue(resource.getInputStream(), Object.class);
+            Map<String, Object> cases = (Map<String, Object>) config.get("requestCases");
+            if (cases != null) {
+                rawCases.putAll(cases);
             }
-        } else {
-            try {
-                for (Resource resource : resourceResolver.getResources("classpath*:case/*.json")) {
-                    String fn = resource.getFilename();
-                    if (fn != null) {
-                        String name = fn.replaceAll("\\.json$", "");
-                        Object caseObj = objectMapper.readValue(resource.getInputStream(), Object.class);
-                        rawCases.put(name, caseObj);
-                    }
-                }
-                Resource[] targetMappingFiles = resourceResolver.getResources("classpath*:/target-mapping.properties");
-                if (targetMappingFiles.length > 0) {
-                    targetMapping.load(new InputStreamReader(targetMappingFiles[0].getInputStream(), UTF_8));
-                } else {
-                    logger.info("No target mapping file skipped");
-                }
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+            Map<Object, Object> targetMappings = (Map<Object, Object>) config.get("targetMappings");
+            if (targetMappings != null) {
+                targetMapping.putAll(targetMappings);
             }
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 

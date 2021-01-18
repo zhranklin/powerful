@@ -1,9 +1,0 @@
-{
-    "call": "grpc-a",
-    "by": "grpc",
-    "to": {
-      "delay": 0,
-      "responseFmt": "{{apollo(key)}}"
-    },
-  "description": "apollo, 返回key对应的value"
-}
