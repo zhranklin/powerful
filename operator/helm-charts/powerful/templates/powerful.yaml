@@ -113,8 +113,13 @@ spec:
           name: powerful-cases
 {{- range $i, $mount := $deploy.mounts }}
       - name: custom-volume-{{ $i }}
+{{- if $mount.hostPath }}
         hostPath:
           path: {{ $mount.hostPath }}
+{{- else if $mount.configMap }}
+        configMap:
+          name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-{{ $i }}
+{{- end }}
 {{- end }}
       imagePullSecrets:
 {{- range $.Values.imagePullSecrets }}
@@ -132,5 +137,21 @@ spec:
       serviceAccountName: {{ $.Values.serviceAccount }}
 {{- end }}
 ---
+{{- range $i, $mount := $deploy.mounts }}
+{{- if $mount.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-{{ $i }}
+  namespace: {{ include "namespace" $}}
+  labels:
+    release: {{ $.Release.Name }}
+data:
+{{- range $k, $v := $mount.configMap }}
+  {{ $k }}: {{ $v | quote }}
+{{- end }}
+---
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
