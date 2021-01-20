@@ -51,7 +51,12 @@ spec:
         framew.zhranklin.io/revision: {{ $.Values.revision }}
 {{- end }}
         sidecar.istio.io/inject: "{{ $deploy.inject | default $.Values.inject }}"
-        checksum/config-volume: {{ $.Files.Get "files/cases.yaml" | sha256sum }}
+        checksum/cases: {{ $.Files.Get "files/cases.yaml" | sha256sum }}
+{{- range $i, $mount := $deploy.mounts }}
+{{- if $mount.configMap }}
+        checksum/volume-{{ $i }}: {{ $mount.configMap | toYaml | sha256sum }}
+{{- end }}
+{{- end }}
 {{- if $deploy.annotations }}
 {{ $deploy.annotations | toYaml | indent 8 }}
 {{- end }}
