@@ -100,6 +100,13 @@ public class HttpRemoteInvoker implements RemoteInvoker {
             //noinspection unchecked
             curNode = (Map<String, Object>) curNode.get("to");
         }
+        //解决apply diff时报错
+        if (!instruction.getTo().getHeaders().isEmpty()) {
+            baseInstruction.setHeaders(null);
+        }
+        if (!instruction.getTo().getQueries().isEmpty()) {
+            baseInstruction.setQueries(null);
+        }
         ArrayNode diff = (ArrayNode)JsonDiff.asJson(
             jsonMapper.readTree(jsonMapper.writeValueAsString(baseInstruction)),
             jsonMapper.readTree(jsonMapper.writeValueAsString(instruction.getTo())), DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone()
