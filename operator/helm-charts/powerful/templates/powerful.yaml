@@ -26,6 +26,10 @@ spec:
 {{- $deploys = $app.deploys -}}
 {{- end -}}
 {{- range $index, $deploy := $deploys }}
+{{- $agent := (dict "enabled" false) }}
+{{- if kindIs "map" $deploy.agent }}
+{{- $agent = merge $deploy.agent (dict "framew" (dict "application" (dict "name" $app.name "version" $deploy.version "mark" $deploy.mark))) (deepCopy $.Values.agent) }}
+{{- end -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -86,6 +90,12 @@ spec:
         - name: MARK
           value: {{ $deploy.mark | quote }}
 {{- end }}
+{{- if $agent.enabled }}
+        - name: JAVA_OPTS
+          value: "-javaagent:/home/framew-agent/framew-agent.jar=conf/conf"
+        - name: PAU
+          value: {{ $agent.jar | quote }}
+{{- end }}
 {{- if $deploy.env }}
 {{- range $envName, $envValue := $deploy.env }}
         - name: {{ $envName }}
@@ -98,6 +108,10 @@ spec:
 {{- range $i, $mount := $deploy.mounts }}
         - name: custom-volume-{{ $i }}
           mountPath: {{ $mount.mountPath }}
+{{- end }}
+{{- if $agent.enabled }}
+        - name: volume-agent
+          mountPath: /home/framew-agent/conf
 {{- end }}
 {{- if $deploy.image }}
         image: "{{ $.Values.hub }}/{{ $deploy.image }}"
@@ -113,6 +127,11 @@ spec:
 {{- $.Values.defaultResources | toYaml | indent 10 }}
 {{ end }}
       volumes:
+{{- if $agent.enabled }}
+      - name: volume-agent
+        configMap:
+          name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-agent
+{{- end }}
       - name: powerful-cases
         configMap:
           name: powerful-cases
@@ -158,5 +177,19 @@ data:
 ---
 {{- end }}
 {{- end }}
+{{- if $agent.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-agent
+  namespace: {{ include "namespace" $}}
+  labels:
+    release: {{ $.Release.Name }}
+data:
+  conf.yml: |-
+    framew:
+{{ $agent.framew | toYaml | indent 6}}
+---
+{{- end}}
 {{- end }}
 {{- end }}
