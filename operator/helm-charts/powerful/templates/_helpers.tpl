@@ -12,5 +12,10 @@ powerful{{- if not (eq .Release.Name "default") }}-{{ .Release.Name }}{{ end -}}
     {{- if and .version (not (eq .version "default")) -}}
       -{{ .version -}}
     {{- end -}}
+  {{- if or .agent.enabled .inject -}}
+  .
+  {{- if .inject -}}s{{- end -}}
+  {{- if .agent.enabled -}}a{{- end -}}
+  {{- end -}}
   {{- end -}}
 {{- end -}}

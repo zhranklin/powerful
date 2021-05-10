@@ -23,13 +23,19 @@ spec:
 ---
 {{- $deploys := list (dict "version" "default") -}}
 {{- if $app.deploys -}}
-{{- $deploys = $app.deploys -}}
+  {{- $deploys = $app.deploys -}}
 {{- end -}}
 {{- range $index, $deploy := $deploys }}
 {{- $agent := (dict "enabled" false) }}
 {{- if kindIs "map" $deploy.agent }}
-{{- $agent = merge $deploy.agent (dict "framew" (dict "application" (dict "name" $app.name "version" $deploy.version "mark" $deploy.mark))) (deepCopy $.Values.agent) }}
+  {{- $agent = merge $deploy.agent (dict "framew" (dict "application" (dict "name" $app.name))) (deepCopy $.Values.agent) -}}
+  {{- if $deploy.version -}} {{- $_ := set $deploy.agent.framew.application "version" $deploy.version -}} {{- end -}}
+  {{- if $deploy.mark -}} {{- $_ := set $deploy.agent.framew.application "mark" $deploy.mark -}} {{- end -}}
 {{- end -}}
+{{- $_ := set $deploy "agent" $agent -}}
+{{- if not (kindIs "bool" $deploy.inject) }}
+  {{- $_ := set $deploy "inject" $.Values.inject -}}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -44,7 +50,6 @@ spec:
   selector:
     matchLabels:
       deployName: {{ $app.name }}{{ include "deployName" $deploy}}
-      {{ $.Values.appLabelName }}: {{ $app.name }}
   template:
     metadata:
       annotations:
@@ -54,7 +59,7 @@ spec:
 {{- if $.Values.revision }}
         framew.zhranklin.io/revision: {{ $.Values.revision }}
 {{- end }}
-        sidecar.istio.io/inject: "{{ $deploy.inject | default $.Values.inject }}"
+        sidecar.istio.io/inject: "{{ $deploy.inject }}"
         checksum/cases: {{ $.Files.Get "files/cases.yaml" | sha256sum }}
 {{- range $i, $mount := $deploy.mounts }}
 {{- if $mount.configMap }}
@@ -67,7 +72,9 @@ spec:
       labels:
         release: {{ $.Release.Name }}
         deployName: {{ $app.name }}{{ include "deployName" $deploy}}
+{{- if or $deploy.appLabel (kindIs "invalid" $deploy.appLabel) }}
         {{ $.Values.appLabelName }}: {{ $app.name }}
+{{- end }}
         {{ $.Values.versionLabelName }}: {{ $deploy.version }}
 {{- if $.Values.istioCluster }}
         istio-cluster: {{ $.Values.istioCluster }}
@@ -90,11 +97,11 @@ spec:
         - name: MARK
           value: {{ $deploy.mark | quote }}
 {{- end }}
-{{- if $agent.enabled }}
+{{- if $deploy.agent.enabled }}
         - name: JAVA_OPTS
           value: "-javaagent:/home/framew-agent/framew-agent.jar=conf/conf"
         - name: PAU
-          value: {{ $agent.jar | quote }}
+          value: {{ $deploy.agent.jar | quote }}
 {{- end }}
 {{- if $deploy.env }}
 {{- range $envName, $envValue := $deploy.env }}
@@ -109,7 +116,7 @@ spec:
         - name: custom-volume-{{ $i }}
           mountPath: {{ $mount.mountPath }}
 {{- end }}
-{{- if $agent.enabled }}
+{{- if $deploy.agent.enabled }}
         - name: volume-agent
           mountPath: /home/framew-agent/conf
 {{- end }}
@@ -118,7 +125,7 @@ spec:
 {{- else }}
         image: "{{ $.Values.hub }}/{{ $.Values.image }}"
 {{- end }}
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
 {{- if $deploy.resources }}
         resources:
 {{ $deploy.resources | toYaml | indent 10 }}
@@ -127,7 +134,7 @@ spec:
 {{- $.Values.defaultResources | toYaml | indent 10 }}
 {{ end }}
       volumes:
-{{- if $agent.enabled }}
+{{- if $deploy.agent.enabled }}
       - name: volume-agent
         configMap:
           name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-agent
@@ -153,31 +160,8 @@ spec:
       nodeSelector:
 {{ toYaml $.Values.nodeSelector | indent 8 }}
 {{- end }}
-{{- if $.Values.tolerations }}
-      tolerations:
-{{ toYaml $.Values.tolerations | indent 6 }}
-{{- end }}
-{{- if $.Values.serviceAccount }}
-      serviceAccountName: {{ $.Values.serviceAccount }}
-{{- end }}
 ---
-{{- range $i, $mount := $deploy.mounts }}
-{{- if $mount.configMap }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-{{ $i }}
-  namespace: {{ include "namespace" $}}
-  labels:
-    release: {{ $.Release.Name }}
-data:
-{{- range $k, $v := $mount.configMap }}
-  {{ $k }}: {{ $v | quote }}
-{{- end }}
----
-{{- end }}
-{{- end }}
-{{- if $agent.enabled }}
+{{- if $deploy.agent.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -188,8 +172,8 @@ metadata:
 data:
   conf.yml: |-
     framew:
-{{ $agent.framew | toYaml | indent 6}}
+{{ $deploy.agent.framew | toYaml | indent 6}}
 ---
-{{- end}}
+{{- end }}
 {{- end }}
 {{- end }}
