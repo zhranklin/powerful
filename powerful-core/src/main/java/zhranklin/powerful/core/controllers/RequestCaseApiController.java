@@ -21,10 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by 张武 at 2019/9/20
@@ -43,8 +41,9 @@ public class RequestCaseApiController {
 
     @RequestMapping("/c")
     @ResponseBody
-    Collection<String> cases() {
-        return staticResources.rawCases.keySet();
+    Map<String, Collection<String>> cases() {
+        return staticResources.rawCaseSets.entrySet().stream()
+            .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().keySet(), (i, j) -> i, LinkedHashMap::new));
     }
 
     @RequestMapping(value = {"/", ""}, produces = "text/html")
@@ -74,25 +73,39 @@ public class RequestCaseApiController {
         return execute(requestCase, params, validate);
     }
 
+    @RequestMapping(value = "/executeAll/{set}", method = RequestMethod.GET)
+    void executeAll(@PathVariable String set, @RequestParam Map<String, String> params, HttpServletResponse response) throws IOException {
+        PrintWriter writer = response.getWriter();
+        Set<String> names = staticResources.rawCaseSets.getOrDefault(set, Collections.emptyMap()).keySet();
+        for (String name : names) {
+            executeDuringResponse(params, response, writer, name);
+        }
+        writer.close();
+    }
+
     @RequestMapping(value = "/executeAll", method = RequestMethod.GET)
     void executeAll(@RequestParam Map<String, String> params, HttpServletResponse response) throws IOException {
         PrintWriter writer = response.getWriter();
         Set<String> names = staticResources.rawCases.keySet();
         for (String name : names) {
-            writer.println(String.format("=======executing: %s=======", name));
-            response.flushBuffer();
-            Object result = execute(staticResources.getCase(name), params, true);
-            @SuppressWarnings("rawtypes") Boolean passed = (Boolean) ((Map) result).get("passed");
-            if (passed) {
-                writer.println("OK\n");
-            } else {
-                writer.println(String.format("!!!!!!!failed: %s!!!!!!!", name));
-                writer.println("case:\n" + staticResources.getRawCaseString(name));
-                writer.println("result: " + objectMapper.writeValueAsString(result));
-            }
-            response.flushBuffer();
+            executeDuringResponse(params, response, writer, name);
         }
         writer.close();
+    }
+
+    private void executeDuringResponse(Map<String, String> params, HttpServletResponse response, PrintWriter writer, String name) throws IOException {
+        writer.println(String.format("=======executing: %s=======", name));
+        response.flushBuffer();
+        Object result = execute(staticResources.getCase(name), params, true);
+        @SuppressWarnings("rawtypes") Boolean passed = (Boolean) ((Map) result).get("passed");
+        if (passed) {
+            writer.println("OK\n");
+        } else {
+            writer.println(String.format("!!!!!!!failed: %s!!!!!!!", name));
+            writer.println("case:\n" + staticResources.getRawCaseString(name));
+            writer.println("result: " + objectMapper.writeValueAsString(result));
+        }
+        response.flushBuffer();
     }
 
     @RequestMapping(value = "/e", method = RequestMethod.POST)

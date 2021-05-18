@@ -33,6 +33,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.servlet.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -71,18 +72,12 @@ public class PowerfulAutoConfiguration {
     }
 
     @Bean
-    PowerfulService powerfulService(HttpRemoteInvoker http,
-                                    @Autowired(required = false) DubboRemoteInvoker dubbo,
-                                    @Autowired(required = false) GrpcRemoteInvoker grpc) {
+    PowerfulService powerfulService(HttpRemoteInvoker http, @Autowired(required = false) DubboRemoteInvoker dubbo) {
         PowerfulService powerful = new PowerfulService(stringRenderer());
         powerful.setInvoker("http", http);
         powerful.setInvoker("dubbo", dubbo);
-        powerful.setInvoker("grpc", grpc);
         if (dubbo != null) {
             dubbo.setPowerful(powerful);
-        }
-        if (grpc != null) {
-            grpc.setPowerful(powerful);
         }
         return powerful;
     }
@@ -139,6 +134,15 @@ public class PowerfulAutoConfiguration {
         public GlobalClientInterceptorConfigurer globalInterceptorConfigurerAdapter() {
             return registry -> registry.addClientInterceptors(grpcClientInterceptor());
         }
+
+        @PostConstruct
+        public void init(@Autowired PowerfulService powerful, @Autowired(required = false) GrpcRemoteInvoker grpc) {
+            powerful.setInvoker("grpc", grpc);
+            if (grpc != null) {
+                grpc.setPowerful(powerful);
+            }
+        }
+
     }
 
     @ConditionalOnClass(name="net.devh.boot.grpc.server.serverfactory.GrpcServerLifecycle")

@@ -16,10 +16,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by 张武 at 2019/9/20
@@ -31,6 +28,7 @@ public class StaticResources {
     private static final Logger logger = LoggerFactory.getLogger(StaticResources.class);
 
     public final Map<String, Object> rawCases = new LinkedHashMap<>();
+    public final Map<String, Map<String, Object>> rawCaseSets;
     public final Properties targetMapping = new Properties();
 
     @SuppressWarnings("unchecked")
@@ -38,14 +36,24 @@ public class StaticResources {
         objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         try {
-            Resource resource = new File(configPath).exists() ?
-                new FileSystemResource(configPath) : resourceResolver.getResources("classpath*:config.yaml")[0];
-            //读取yaml配置, 例子见powerful-cases/config-example.yaml
-            logger.info("use {}.", resource.getFilename());
+            Resource resource = resourceResolver.getResources("classpath*:config.yaml")[0];
             Map<String, Object> config = (Map<String, Object>) new ObjectMapper(new YAMLFactory()).readValue(resource.getInputStream(), Object.class);
-            Map<String, Object> cases = (Map<String, Object>) config.get("requestCases");
-            if (cases != null) {
-                rawCases.putAll(cases);
+            if (new File(configPath).exists()) {
+                FileSystemResource extResource = new FileSystemResource(configPath);
+                config.putAll((Map<String, Object>) new ObjectMapper(new YAMLFactory()).readValue(extResource.getInputStream(), Object.class));
+            }
+            Map<String, Map<String, Object>> caseSets = (Map<String, Map<String, Object>>) config.get("requestCases");
+            if (!StringUtils.isEmpty(System.getProperty("caseSets"))) {
+                HashSet<String> caseSetNames = new HashSet<>(Arrays.asList(System.getProperty("caseSets").split(",")));
+                for (String name : new ArrayList<>(caseSets.keySet())) {
+                    if (!caseSetNames.contains(name)) {
+                        caseSets.remove(name);
+                    }
+                }
+            }
+            this.rawCaseSets = caseSets;
+            if (caseSets != null) {
+            	caseSets.values().forEach(rawCases::putAll);
             }
             Map<Object, Object> targetMappings = (Map<Object, Object>) config.get("targetMappings");
             if (targetMappings != null) {
