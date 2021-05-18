@@ -2,6 +2,9 @@
 {{- $_ := set .Values.cases "deploys" (list $casesDeploy) -}}
 {{- $_ := set .Values.cases "name" "powerful-cases" -}}
 {{- range $_, $app := append .Values.apps .Values.cases }}
+{{- if $app.Name }}
+{{- $_ := set $app "name" $app.Name }}
+{{- end }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -99,14 +102,16 @@ spec:
 {{- end }}
 {{- if $deploy.agent.enabled }}
         - name: JAVA_OPTS
-          value: "-javaagent:/home/framew-agent/framew-agent.jar=conf/conf"
+          value: "{{ if $deploy.env }}{{ if $deploy.env.JAVA_OPTS }}{{ $deploy.env.JAVA_OPTS }} {{ end }}{{ end }}-javaagent:/home/framew-agent/framew-agent.jar=conf/conf"
         - name: PAU
           value: {{ $deploy.agent.jar | quote }}
 {{- end }}
 {{- if $deploy.env }}
 {{- range $envName, $envValue := $deploy.env }}
+{{- if not (and (eq $envName "JAVA_OPTS") $deploy.agent.enabled) }}
         - name: {{ $envName }}
           value: {{ $envValue | quote }}
+{{- end }}
 {{- end }}
 {{- end }}
         volumeMounts:

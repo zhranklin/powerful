@@ -23,7 +23,7 @@ fi
 
 hub=zhranklin
 if [[ $BUILD_POWERFUL = "1" ]]; then
-  mvn install
+  mvn clean install -DskipTests
 
   modules="springboot-2"
 
