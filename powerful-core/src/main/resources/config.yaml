@@ -324,6 +324,23 @@ requestCases:
         powerful-cases|(200) -> b|(200) -> d|v1(null): '5:8'
         powerful-cases|(429) -> b|(429) -> null: '90:95'
       description: 'b访问d, 重复100次，每分钟全局共享限流10次，条件为header'
+  dual:
+    dual-access:
+      trace:
+        - call: dual
+        - call: dual
+      times: 1000
+      threads: 30
+      expect:
+        powerful-cases|(200) -> dual|v1(200) -> dual|v1(null): '50:200'
+        powerful-cases|(200) -> dual|v1(200) -> dual|v2(null): '50:200'
+        powerful-cases|(200) -> dual|v1(200) -> dual|v3(null): '50:200'
+        powerful-cases|(200) -> dual|v2(200) -> dual|v1(null): '50:200'
+        powerful-cases|(200) -> dual|v2(200) -> dual|v2(null): '50:200'
+        powerful-cases|(200) -> dual|v2(200) -> dual|v3(null): '50:200'
+        powerful-cases|(200) -> dual|v3(200) -> dual|v1(null): '50:200'
+        powerful-cases|(200) -> dual|v3(200) -> dual|v2(null): '50:200'
+        powerful-cases|(200) -> dual|v3(200) -> dual|v3(null): '50:200'
   yanxuan:
     x-yanxuan-app:
       trace:
