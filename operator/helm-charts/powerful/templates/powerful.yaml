@@ -95,6 +95,8 @@ spec:
           value: {{ $app.name }}
         - name: VERSION
           value: {{ if eq $deploy.version "default" }}""{{ else }}{{ $deploy.version | quote }}{{ end }}
+        - name: DEPLOY
+          value: {{ $app.name }}{{ include "deployName" $deploy}}
 {{- if $deploy.mark }}
         - name: MARK
           value: {{ $deploy.mark | quote }}
