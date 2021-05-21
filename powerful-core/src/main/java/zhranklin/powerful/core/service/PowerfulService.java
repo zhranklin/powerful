@@ -62,7 +62,7 @@ public class PowerfulService {
             result = responses.map(r -> r.renderResult).collect(Collectors.joining("\n", "", "\n"));
         } else if (collectBy.startsWith("stat_")) {
             result = responses.collect(
-                Collectors.groupingBy(r -> r.renderResult,
+                Collectors.groupingBy(r -> r.renderResult, TreeMap::new,
                     Collectors.collectingAndThen(Collectors.toList(), data -> {
                         String stat = collectBy.substring(5);
                         if (stat.equals("count")) {
