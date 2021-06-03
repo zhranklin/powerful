@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.google.common.collect.ImmutableMap;
 import zhranklin.powerful.core.cases.CaseValidator;
 import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.cases.StaticResources;
@@ -44,6 +45,14 @@ public class RequestCaseApiController {
     Map<String, Collection<String>> cases() {
         return staticResources.rawCaseSets.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().keySet(), (i, j) -> i, LinkedHashMap::new));
+    }
+
+    @RequestMapping("/caseList")
+    @ResponseBody
+    List<Object> casesForFront() {
+        return staticResources.rawCaseSets.entrySet().stream()
+            .map(entry -> ImmutableMap.of("group", entry.getKey(), "cases", entry.getValue().keySet()))
+            .collect(Collectors.toList());
     }
 
     @RequestMapping(value = {"/", ""}, produces = "text/html")

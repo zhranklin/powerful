@@ -60,14 +60,15 @@ const App = ({ store, classes }: AppProps) => {
   const [displayDataAsString, setDisplayDataAsString] = useState('');
   const [displayData, setDisplayData] = useState<any>({ trace: [{}] });
   const [consoleData, setConsoleData] = useState('');
-  const [cases, setCases] = useState(["1", "2"]);
+  const [cases, setCases] = useState([{"group": "grp1", "cases": ["a", "b"]}]);
   const [yamlStr, setYamlStr] = useState("");
   const [yamlTextFocused, setYamlTextFocused] = useState(false);
 
   if (!init) {
     $.ajax({
-      url: scopedUri('/c'),
+      url: scopedUri('/caseList'),
       success: data1 => {
+        console.log(data1)
         setCases(data1)
       }
     });
@@ -141,10 +142,17 @@ const App = ({ store, classes }: AppProps) => {
             Cases
           </Typography>
           <List dense={true}>
-            {cases.map(i => (
-              <ListItem button onClick={event => getCase(i)}>
-                <ListItemText primary={i}/>
-              </ListItem>
+            {cases.map((grp: any) => (
+              <div>
+                <ListItem className={"listItem"} button>
+                  <ListItemText primary={grp.group} />
+                </ListItem>
+                {grp.cases.map((c: string) => (
+                  <ListItem button className={"subListItem"} onClick={event => getCase(c)}>
+                    <ListItemText className={"subListItemText"} primary={c} />
+                  </ListItem>
+                ))}
+              </div>
             ))}
           </List>
         </Grid>
