@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.Base64Utils;
 
 import java.io.IOException;
@@ -251,6 +252,14 @@ public class PowerfulService {
 
     public static String decodeURLBase64(String base64) {
         return new String(Base64Utils.decodeFromUrlSafeString(base64));
+    }
+
+    public HttpHeaders renderResponseHeaders(RenderingContext context, Instruction instruction) {
+        HttpHeaders respHeaders = new HttpHeaders();
+        instruction.getResponseHeaders().forEach((k, v) ->
+            respHeaders.set(k, stringRenderer.render(v, context))
+        );
+        return respHeaders;
     }
 
 }

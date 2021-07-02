@@ -34,6 +34,8 @@ public class Instruction implements Serializable {
 
 	private Map<String, String> headers = new HashMap<>();
 
+	private Map<String, String> responseHeaders = new HashMap<>();
+
 	private Map<String, String> queries = new HashMap<>();
 
 	private Integer callTestMethod = 0;
@@ -180,5 +182,13 @@ public class Instruction implements Serializable {
 
 	public void setRr(Map<String, List<Object>> rr) {
 		this.rr = rr;
+	}
+
+	public Map<String, String> getResponseHeaders() {
+		return responseHeaders;
+	}
+
+	public void setResponseHeaders(Map<String, String> responseHeaders) {
+		this.responseHeaders = responseHeaders;
 	}
 }

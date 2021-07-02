@@ -5,6 +5,7 @@ import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -27,21 +28,24 @@ public class HttpController {
 
     @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.POST, RequestMethod.PUT})
     public Object execute(@RequestBody Instruction instruction, HttpServletRequest request, @RequestParam Map<String, String> params) {
+        RenderingContext context = new RenderingContext();
         try {
-            RenderingContext context = new RenderingContext();
             context.setMethod(request.getMethod());
             context.setRequestHeaders(transformRequestHeaders(request));
             context.setHttpParams(params);
             Object result = powerful.execute(instruction, context);
             Object res = context.getResult();
+            HttpHeaders respHeaders = powerful.renderResponseHeaders(context, instruction);
             if (res instanceof ResponseEntity) {
                 @SuppressWarnings("unchecked") ResponseEntity<String> typed = (ResponseEntity<String>) res;
-                return new ResponseEntity<>("" + result, typed.getStatusCode());
+                return new ResponseEntity<>("" + result, respHeaders, typed.getStatusCode());
+            } else {
+                return new ResponseEntity<>(result, respHeaders, HttpStatus.OK);
             }
-            return result;
         } catch (RuntimeException e) {
             e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            HttpHeaders respHeaders = powerful.renderResponseHeaders(context, instruction);
+            return new ResponseEntity<>(e.getMessage(), respHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.GET, RequestMethod.DELETE})

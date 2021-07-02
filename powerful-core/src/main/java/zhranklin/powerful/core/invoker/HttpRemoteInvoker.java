@@ -104,6 +104,9 @@ public class HttpRemoteInvoker implements RemoteInvoker {
         if (!instruction.getTo().getHeaders().isEmpty()) {
             baseInstruction.setHeaders(null);
         }
+        if (!instruction.getTo().getResponseHeaders().isEmpty()) {
+            baseInstruction.setResponseHeaders(null);
+        }
         if (!instruction.getTo().getQueries().isEmpty()) {
             baseInstruction.setQueries(null);
         }
