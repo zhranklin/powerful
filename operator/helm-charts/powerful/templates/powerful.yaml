@@ -74,6 +74,12 @@ spec:
       labels:
         release: {{ $.Release.Name }}
         deployName: {{ $app.name }}{{ include "deployName" $deploy}}
+{{- if $deploy.inject -}}
+        hasSidecar: "true"
+{{- end -}}
+{{- if .agent.enabled -}}
+        hasAgent: "true"
+{{- end -}}
 {{- if or $deploy.appLabel (kindIs "invalid" $deploy.appLabel) }}
         {{ $.Values.appLabelName }}: {{ $app.name }}
 {{- end }}
