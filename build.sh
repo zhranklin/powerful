@@ -1,11 +1,12 @@
 #!/bin/bash
+BUILD_OPERATOR=1
+COMPILE_DEMO=1
 while [ $# -ge 1 ] ; do
   case "$1" in
-    -p) BUILD_POWERFUL=1; shift 1; ;;
-    -all) BUILD_POWERFUL=1; BUILD_POWERFUL_ALL=1; BUILD_OPERATOR=1; shift 1; ;;
-    -sdk) BUILD_OPERATOR_SDK=1; shift 1; ;;
-    -o) BUILD_OPERATOR=1; shift 1; break;;
-    *)  echo unsupported option: $1 shift 1; ;;
+    -all) BUILD_POWERFUL_ALL=1; shift 1; ;;
+    -sdk) BUILD_OPERATOR_SDK=1; BUILD_OPERATOR=0; shift 1; ;;
+    -n) COMPILE_DEMO=0; shift 1; ;;
+    *)  echo unsupported option: $1; shift 1; ;;
   esac
 done
 
@@ -22,32 +23,19 @@ else
 fi
 
 hub=zhranklin
-if [[ $BUILD_POWERFUL = "1" ]]; then
+if [[ $BUILD_OPERATOR == "1" && $COMPILE_DEMO == "1" ]]; then
   mvn clean install -DskipTests
-
-  modules="springboot-2"
-
-  if [[ $BUILD_POWERFUL_ALL = "1" ]]; then
-    modules="$modules spring-mvc springboot-1"
-  fi
-
+fi
+if [[ $BUILD_POWERFUL_ALL = "1" ]]; then
+  modules="spring-mvc springboot-1"
   for module in $modules; do
     image=powerful-$(echo $module | sed 's/springboot-/sb/g; s/spring-//g'):$tag
     docker build ./powerful-$module -t $hub/$image
     docker push $hub/$image
-    if [[ $module != "springboot-2" ]]; then
-      docker rmi $hub/$image
-    fi
+    docker rmi $hub/$image
   done
-  docker tag $hub/powerful-sb2:$tag $hub/powerful:$tag
-  docker push $hub/powerful:$tag
-  docker rmi $hub/powerful-sb2:$tag
-  docker rmi $hub/powerful:$tag
-  docker rmi zhranklin/powerful-base-java
-  docker rmi zhranklin/powerful-base-tomcat
 fi
-
-cd $GOPATH/src/github.com/operator-framework/operator-sdk
+cd ./operator-sdk
 if [[ $BUILD_OPERATOR_SDK = "1" ]]; then
   if [[ $BUILD_OPERATOR = "1" ]]; then
     ./build.sh -reserve
@@ -68,11 +56,15 @@ if [[ $BUILD_OPERATOR = "1" ]]; then
   else
     SED_CMD=' '
   fi
-  OPERATOR_IMAGE="zhranklin/powerful-operator:$tag"
-  cat operator/build/Dockerfile | sed "$SED_CMD" | docker build operator -t $OPERATOR_IMAGE -f -
+  OPERATOR_IMAGE="zhranklin/powerful:$tag"
+  cp ./powerful-springboot-2/target/powerful-springboot-2.jar ./docker/app.jar
+  cat docker/build/Dockerfile | sed "$SED_CMD" | docker build docker --build-arg imageTag="$tag" -t $OPERATOR_IMAGE -f -
+  rm -f ./docker/app.jar
   docker push $OPERATOR_IMAGE
   docker rmi $OPERATOR_IMAGE
   if [[ $BUILD_OPERATOR_SDK = "1" ]]; then
     docker rmi $SDK_IMAGE
   fi
 fi
+docker rmi zhranklin/powerful-base
+docker rmi zhranklin/powerful-base-tomcat

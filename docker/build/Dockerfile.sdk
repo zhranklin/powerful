@@ -1,0 +1,8 @@
+# How to build base image:
+# docker build ./docker -f ./docker/build/Dockerfile.base -t zhranklin/powerful-base:v1.3.0
+FROM zhranklin/powerful-base:v1.3.0
+ENV OPERATOR=/usr/local/bin/helm-operator \
+    USER_UID=1001 \
+    USER_NAME=helm \
+    HOME=/opt/helm
+COPY build/_output/bin/helm-operator ${OPERATOR}

@@ -1,0 +1,193 @@
+{{- $casesDeploy := unset (set (deepCopy .Values.cases) "version" "default") "name" -}}
+{{- $_ := set .Values.cases "deploys" (list $casesDeploy) -}}
+{{- $_ := set .Values.cases "name" "powerful-cases" -}}
+{{- range $_, $app := append .Values.apps .Values.cases }}
+{{- if $app.Name }}
+{{- $_ := set $app "name" $app.Name }}
+{{- end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $app.name }}
+  namespace: {{ include "namespace" $}}
+  labels:
+    release: {{ $.Release.Name }}
+    framew-env: {{ $.Values.framewEnv }}
+    framew.zhranklin.io/project: {{ $.Values.framewProject }}
+    {{ $.Values.serviceAppLabelName }}: {{ $app.name }}
+spec:
+  type: ClusterIP
+  selector:
+    {{ $.Values.appLabelName }}: {{ $app.name }}
+  ports:
+  - name: http
+    port: {{ if $app.port }} {{ $app.port }} {{ else }} 80 {{ end }}
+    targetPort: 8080
+---
+{{- $deploys := list (dict "version" "default") -}}
+{{- if $app.deploys -}}
+  {{- $deploys = $app.deploys -}}
+{{- end -}}
+{{- range $index, $deploy := $deploys }}
+{{- $agent := (dict "enabled" false) }}
+{{- if kindIs "map" $deploy.agent }}
+  {{- $agent = merge $deploy.agent (dict "framew" (dict "application" (dict "name" $app.name))) (deepCopy $.Values.agent) -}}
+  {{- if $deploy.version -}} {{- $_ := set $deploy.agent.framew.application "version" $deploy.version -}} {{- end -}}
+  {{- if $deploy.mark -}} {{- $_ := set $deploy.agent.framew.application "mark" $deploy.mark -}} {{- end -}}
+{{- end -}}
+{{- $_ := set $deploy "agent" $agent -}}
+{{- if not (kindIs "bool" $deploy.inject) }}
+  {{- $_ := set $deploy "inject" $.Values.inject -}}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $app.name }}{{ include "deployName" $deploy}}
+  namespace: {{ include "namespace" $}}
+  labels:
+    release: {{ $.Release.Name }}
+    {{ $.Values.appLabelName }}: {{ $app.name }}
+    {{ $.Values.versionLabelName }}: {{ $deploy.version }}
+spec:
+  replicas: {{ if $deploy.replicaCount }}{{ $deploy.replicaCount }}{{ else }}1{{ end }}
+  selector:
+    matchLabels:
+      deployName: {{ $app.name }}{{ include "deployName" $deploy}}
+  template:
+    metadata:
+      annotations:
+{{- if $.Values.istioEnv }}
+        framew.zhranklin.io/istioEnv: {{ $.Values.istioEnv }}
+{{- end }}
+{{- if $.Values.revision }}
+        framew.zhranklin.io/revision: {{ $.Values.revision }}
+{{- end }}
+        sidecar.istio.io/inject: "{{ $deploy.inject }}"
+{{- range $i, $mount := $deploy.mounts }}
+{{- if $mount.configMap }}
+        checksum/volume-{{ $i }}: {{ $mount.configMap | toYaml | sha256sum }}
+{{- end }}
+{{- end }}
+{{- if $deploy.annotations }}
+{{ $deploy.annotations | toYaml | indent 8 }}
+{{- end }}
+      labels:
+        release: {{ $.Release.Name }}
+        deployName: {{ $app.name }}{{ include "deployName" $deploy}}
+{{- if $deploy.inject }}
+        hasSidecar: "true"
+{{- end }}
+{{- if $deploy.agent.enabled }}
+        hasAgent: "true"
+{{- end }}
+{{- if or $deploy.appLabel (kindIs "invalid" $deploy.appLabel) }}
+        {{ $.Values.appLabelName }}: {{ $app.name }}
+{{- end }}
+        {{ $.Values.versionLabelName }}: {{ $deploy.version }}
+{{- if $.Values.istioCluster }}
+        istio-cluster: {{ $.Values.istioCluster }}
+{{ end }}
+{{- if $deploy.mark }}
+        framew.zhranklin.io/mark: {{ $deploy.mark | quote }}
+{{- end }}
+{{- if $deploy.labels }}
+{{ $deploy.labels | toYaml | indent 8 }}
+{{- end }}
+    spec:
+      containers:
+      - args:
+        - demo
+        name: app
+        env:
+        - name: APP
+          value: {{ $app.name }}
+        - name: VERSION
+          value: {{ if eq $deploy.version "default" }}""{{ else }}{{ $deploy.version | quote }}{{ end }}
+        - name: DEPLOY
+          value: {{ $app.name }}{{ include "deployName" $deploy}}
+{{- if $deploy.mark }}
+        - name: MARK
+          value: {{ $deploy.mark | quote }}
+{{- end }}
+{{- if $deploy.agent.enabled }}
+        - name: JAVA_OPTS
+          value: "{{ if $deploy.env }}{{ if $deploy.env.JAVA_OPTS }}{{ $deploy.env.JAVA_OPTS }} {{ end }}{{ end }}-javaagent:/home/framew-agent/framew-agent.jar=conf/conf"
+        - name: PAU
+          value: {{ $deploy.agent.jar | quote }}
+{{- end }}
+{{- if $deploy.env }}
+{{- range $envName, $envValue := $deploy.env }}
+{{- if not (and (eq $envName "JAVA_OPTS") $deploy.agent.enabled) }}
+        - name: {{ $envName }}
+          value: {{ $envValue | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+        volumeMounts:
+        - name: powerful-cases
+          mountPath: /etc/powerful-cases
+{{- range $i, $mount := $deploy.mounts }}
+        - name: custom-volume-{{ $i }}
+          mountPath: {{ $mount.mountPath }}
+{{- end }}
+{{- if $deploy.agent.enabled }}
+        - name: volume-agent
+          mountPath: /home/framew-agent/conf
+{{- end }}
+{{- if $deploy.image }}
+        image: "{{ $.Values.hub }}/{{ $deploy.image }}"
+{{- else }}
+        image: "{{ $.Values.hub }}/{{ $.Values.image }}"
+{{- end }}
+        imagePullPolicy: Always
+{{- if $deploy.resources }}
+        resources:
+{{ $deploy.resources | toYaml | indent 10 }}
+{{- else }}
+        resources:
+{{- $.Values.defaultResources | toYaml | indent 10 }}
+{{ end }}
+      volumes:
+{{- if $deploy.agent.enabled }}
+      - name: volume-agent
+        configMap:
+          name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-agent
+{{- end }}
+      - name: powerful-cases
+        configMap:
+          name: powerful-cases
+{{- range $i, $mount := $deploy.mounts }}
+      - name: custom-volume-{{ $i }}
+{{- if $mount.hostPath }}
+        hostPath:
+          path: {{ $mount.hostPath }}
+{{- else if $mount.configMap }}
+        configMap:
+          name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-{{ $i }}
+{{- end }}
+{{- end }}
+      imagePullSecrets:
+{{- range $.Values.imagePullSecrets }}
+      - name: {{ . }}
+{{- end }}
+{{- if $.Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml $.Values.nodeSelector | indent 8 }}
+{{- end }}
+---
+{{- if $deploy.agent.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-agent
+  namespace: {{ include "namespace" $}}
+  labels:
+    release: {{ $.Release.Name }}
+data:
+  conf.yml: |-
+    framew:
+{{ $deploy.agent.framew | toYaml | indent 6}}
+---
+{{- end }}
+{{- end }}
+{{- end }}
