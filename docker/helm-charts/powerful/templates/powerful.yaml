@@ -49,7 +49,7 @@ metadata:
     {{ $.Values.appLabelName }}: {{ $app.name }}
     {{ $.Values.versionLabelName }}: {{ $deploy.version }}
 spec:
-  replicas: {{ if $deploy.replicaCount }}{{ $deploy.replicaCount }}{{ else }}1{{ end }}
+  replicas: {{ if kindIs "invalid" $deploy.replicaCount }}1{{ else }}{{ $deploy.replicaCount }}{{ end }}
   selector:
     matchLabels:
       deployName: {{ $app.name }}{{ include "deployName" $deploy}}
