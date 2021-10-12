@@ -49,7 +49,7 @@ if [[ $BUILD_OPERATOR = "1" ]]; then
 fi
 cd -
 if [[ $BUILD_OPERATOR = "1" ]]; then
-  if [[ $SDK_IMAGE =~ .*:dev ]]; then
+  if [[ $SDK_IMAGE =~ .*:dev\$ ]]; then
     SED_CMD='1c\
       FROM '$SDK_IMAGE
     tag=dev
