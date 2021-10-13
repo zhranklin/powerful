@@ -1,4 +1,4 @@
-{{ if .Values.k8sIngress.enabled }}
+{{ if .Values.ingressHost }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -10,7 +10,7 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   rules:
-  - host: {{ .Values.k8sIngress.domain }}
+  - host: {{ .Values.ingressHost }}
     http:
       paths:
       - backend:

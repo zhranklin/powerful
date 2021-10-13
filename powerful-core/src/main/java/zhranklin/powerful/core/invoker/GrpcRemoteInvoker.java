@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import zhranklin.powerful.grpc.service.EchoGrpc;
 import zhranklin.powerful.grpc.service.EchoNum;
 import zhranklin.powerful.model.Instruction;
+import zhranklin.powerful.model.PowerfulResponse;
 import zhranklin.powerful.model.RenderingContext;
 import zhranklin.powerful.core.service.GrpcClientInterceptor;
 import zhranklin.powerful.core.service.PowerfulService;
@@ -37,7 +38,7 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public Object invoke(Instruction instruction, RenderingContext context) {
+    public PowerfulResponse invoke(Instruction instruction, RenderingContext context) {
         String num = instruction.getQueries().get("num");
         int param = 0;
         try {
@@ -58,11 +59,11 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
         EchoNum echoNum = builder.build();
         grpcClientInterceptor.addCustomizeHeaders(instruction.getHeaders());
         if (beanName.equalsIgnoreCase("grpc-a")) {
-            return grpcAEchoBlockingStub.echo(echoNum).getMessage();
+            return new PowerfulResponse(grpcAEchoBlockingStub.echo(echoNum).getMessage(), "200", null);
         } else if (beanName.equalsIgnoreCase("grpc-b")) {
-            return grpcBEchoBlockingStub.echo(echoNum).getMessage();
+            return new PowerfulResponse(grpcBEchoBlockingStub.echo(echoNum).getMessage(), "200", null);
         }
-        return "unknow service";
+        return new PowerfulResponse("unknow service", "200", null);
     }
 
 

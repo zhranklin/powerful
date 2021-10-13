@@ -32,19 +32,13 @@ public class HttpController {
         try {
             context.setMethod(request.getMethod());
             context.setRequestHeaders(transformRequestHeaders(request));
-            context.setHttpParams(params);
-            Object result = powerful.execute(instruction, context);
-            Object res = context.getResult();
-            HttpHeaders respHeaders = powerful.renderResponseHeaders(context, instruction);
-            if (res instanceof ResponseEntity) {
-                @SuppressWarnings("unchecked") ResponseEntity<String> typed = (ResponseEntity<String>) res;
-                return new ResponseEntity<>("" + result, respHeaders, typed.getStatusCode());
-            } else {
-                return new ResponseEntity<>(result, respHeaders, HttpStatus.OK);
-            }
+            context.setParams(params);
+            powerful.execute(instruction, context);
+            return context.getResult().makeHttpResponse(instruction);
         } catch (RuntimeException e) {
             e.printStackTrace();
-            HttpHeaders respHeaders = powerful.renderResponseHeaders(context, instruction);
+            HttpHeaders respHeaders = new HttpHeaders();
+            instruction.getResponseHeaders().forEach(respHeaders::set);
             return new ResponseEntity<>(e.getMessage(), respHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

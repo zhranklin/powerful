@@ -3,9 +3,6 @@ package zhranklin.powerful.core.service;
 import zhranklin.powerful.model.RenderingContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Nullable;
@@ -53,7 +50,7 @@ public class StringRenderer implements EnvironmentAware {
             }
         });
         exprFuncs.put("p", context -> params -> System.getProperty(params.get(0)));
-        exprFuncs.put("param", context -> params -> context.getHttpParams().get(params.get(0)));
+        exprFuncs.put("param", context -> params -> context.getParams().get(params.get(0)));
         exprFuncs.put("env", context -> params -> System.getenv(params.get(0)));
         exprFuncs.put("apollo", context -> params -> environment.getProperty(params.get(0)));
         exprFuncs.put("springEnv", context -> params -> environment.getProperty(params.get(0)));
@@ -68,28 +65,26 @@ public class StringRenderer implements EnvironmentAware {
             if (!StringUtils.isEmpty(reqHeader)) {
                 result.add(reqHeader);
             }
-            if (context.getResult() instanceof ResponseEntity) {
-                List<String> values = ((ResponseEntity<?>) context.getResult()).getHeaders().get(params.get(0));
-                if (!CollectionUtils.isEmpty(values)) {
-                    result.add(String.join(",", values));
+            if (context.getResult() != null) {
+                String value = context.getResult().responseHeaders.get(params.get(0));
+                if (value != null) {
+                    result.add(value);
                 }
             }
             return String.join("|", result);
         });
         exprFuncs.put("result", context -> params -> "" + context.getResult());
         exprFuncs.put("resultBody", context -> params -> {
-            if (context.getResult() instanceof HttpEntity) {
-                return "" + ((HttpEntity<?>) context.getResult()).getBody();
-            }else{
-                return String.valueOf(context.getResult());
+            if (context.getResult() != null) {
+                return context.getResult().result;
             }
+            return null;
         });
         exprFuncs.put("statusCode", context -> params -> {
-            if (context.getResult() instanceof ResponseEntity) {
-                return "" + ((ResponseEntity<?>) context.getResult()).getStatusCodeValue();
-            } else {
-                return "null";
+            if (context.getResult() != null) {
+                return context.getResult().status;
             }
+            return null;
         });
         exprFuncs.put("invokeResult", context -> params -> "" + context.getInvokeResult());
         exprFuncs.put("delay", context -> params -> "" + context.getDelayMillis());

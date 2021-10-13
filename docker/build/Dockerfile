@@ -1,6 +1,6 @@
 FROM zhranklin/helm-operator:v1.3.0
 
-ADD ./app.jar /app.jar
+ADD ./app.jar /opt/helm/app.jar
 COPY watches.yaml ${HOME}/watches.yaml
 COPY helm-charts/ ${HOME}/helm-charts/
 

@@ -28,17 +28,42 @@ spec:
 {{- if $app.deploys -}}
   {{- $deploys = $app.deploys -}}
 {{- end -}}
+
 {{- range $index, $deploy := $deploys }}
-{{- $agent := (dict "enabled" false) }}
-{{- if kindIs "map" $deploy.agent }}
-  {{- $agent = merge $deploy.agent (dict "framew" (dict "application" (dict "name" $app.name))) (deepCopy $.Values.agent) -}}
-  {{- if $deploy.version -}} {{- $_ := set $deploy.agent.framew.application "version" $deploy.version -}} {{- end -}}
-  {{- if $deploy.mark -}} {{- $_ := set $deploy.agent.framew.application "mark" $deploy.mark -}} {{- end -}}
-{{- end -}}
-{{- $_ := set $deploy "agent" $agent -}}
+
+{{- $version := "default"}}
+{{- if $deploy.version }}
+  {{- $version = $deploy.version }}
+{{- end}}
+
+{{- $_ := set $deploy "dubbo" (dict "enabled" false) -}}
 {{- if not (kindIs "bool" $deploy.inject) }}
   {{- $_ := set $deploy "inject" $.Values.inject -}}
 {{- end }}
+
+{{- $agent := (dict "enabled" false) }}
+{{- if kindIs "map" $deploy.agent }}
+  {{- $agent = merge $deploy.agent (dict "framew" (dict "application" (dict "name" $app.name))) (deepCopy $.Values.agent) -}}
+  {{- $_ := set $deploy.agent.framew.application "version" $version -}}
+  {{- if $deploy.mark -}} {{- $_ := set $deploy.agent.framew.application "mark" $deploy.mark -}} {{- end -}}
+{{- end -}}
+{{- $_ := set $deploy "agent" $agent -}}
+
+
+{{- $javaOpts := printf "-Dpowerful.dubbo.enabled=%t" $deploy.dubbo.enabled }}
+{{- if $.Values.caseSets }}
+{{/*  {{- $javaOpts = $javaOpts + "" }}*/}}
+{{- end }}
+{{- if $deploy.env }}
+  {{- if $deploy.env.JAVA_OPTS }}
+    {{- $javaOpts = printf "%s %s" $javaOpts $deploy.env.JAVA_OPTS }}
+  {{- end }}
+  {{- $_ := unset $deploy.env "JAVA_OPTS"}}
+{{- end }}
+{{- if $deploy.agent.enabled }}
+  {{- $javaOpts = printf "%s %s" $javaOpts "-javaagent:/home/framew-agent/framew-agent.jar=conf/conf" }}
+{{- end }}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -47,7 +72,7 @@ metadata:
   labels:
     release: {{ $.Release.Name }}
     {{ $.Values.appLabelName }}: {{ $app.name }}
-    {{ $.Values.versionLabelName }}: {{ $deploy.version }}
+    {{ $.Values.versionLabelName }}: {{ $version }}
 spec:
   replicas: {{ if kindIs "invalid" $deploy.replicaCount }}1{{ else }}{{ $deploy.replicaCount }}{{ end }}
   selector:
@@ -83,7 +108,7 @@ spec:
 {{- if or $deploy.appLabel (kindIs "invalid" $deploy.appLabel) }}
         {{ $.Values.appLabelName }}: {{ $app.name }}
 {{- end }}
-        {{ $.Values.versionLabelName }}: {{ $deploy.version }}
+        {{ $.Values.versionLabelName }}: {{ $version }}
 {{- if $.Values.istioCluster }}
         istio-cluster: {{ $.Values.istioCluster }}
 {{ end }}
@@ -102,25 +127,23 @@ spec:
         - name: APP
           value: {{ $app.name }}
         - name: VERSION
-          value: {{ if eq $deploy.version "default" }}""{{ else }}{{ $deploy.version | quote }}{{ end }}
+          value: {{ if eq $version "default" }}""{{ else }}{{ $version | quote }}{{ end }}
         - name: DEPLOY
           value: {{ $app.name }}{{ include "deployName" $deploy}}
+        - name: JAVA_OPTS
+          value: {{ $javaOpts | quote }}
 {{- if $deploy.mark }}
         - name: MARK
           value: {{ $deploy.mark | quote }}
 {{- end }}
 {{- if $deploy.agent.enabled }}
-        - name: JAVA_OPTS
-          value: "{{ if $deploy.env }}{{ if $deploy.env.JAVA_OPTS }}{{ $deploy.env.JAVA_OPTS }} {{ end }}{{ end }}-javaagent:/home/framew-agent/framew-agent.jar=conf/conf"
         - name: PAU
           value: {{ $deploy.agent.jar | quote }}
 {{- end }}
 {{- if $deploy.env }}
 {{- range $envName, $envValue := $deploy.env }}
-{{- if not (and (eq $envName "JAVA_OPTS") $deploy.agent.enabled) }}
         - name: {{ $envName }}
           value: {{ $envValue | quote }}
-{{- end }}
 {{- end }}
 {{- end }}
         volumeMounts:

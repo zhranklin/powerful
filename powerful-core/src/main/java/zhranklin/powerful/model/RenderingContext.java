@@ -10,7 +10,7 @@ import java.util.Map;
 public class RenderingContext implements Serializable{
 
 	private Map<String, String> requestHeaders = new HashMap<>();
-	private Map<String, String> httpParams = new HashMap<>();
+	private Map<String, String> params = new HashMap<>();
 	private String method = "";
 	private final ThreadLocal<Result> results = new ThreadLocal<>();
 
@@ -26,12 +26,12 @@ public class RenderingContext implements Serializable{
 		this.requestHeaders = (requestHeaders);
 	}
 
-	public Object getResult() {
-		return getResults().result;
+	public PowerfulResponse getResult() {
+		return getResults().response;
 	}
 
-	public void setResult(Object result) {
-		getResults().result = result;
+	public void setResult(PowerfulResponse result) {
+		getResults().response = result;
 	}
 
 	public String getInvokeResult() {
@@ -50,12 +50,12 @@ public class RenderingContext implements Serializable{
 		getResults().delayMillis = delay;
 	}
 
-	public Map<String, String> getHttpParams() {
-		return httpParams;
+	public Map<String, String> getParams() {
+		return params;
 	}
 
-	public void setHttpParams(Map<String, String> httpParams) {
-		this.httpParams = httpParams;
+	public void setParams(Map<String, String> params) {
+		this.params = params;
 	}
 
 	private Result getResults() {
@@ -74,7 +74,7 @@ public class RenderingContext implements Serializable{
 	}
 
 	private static class Result {
-		private Object result = null;
+		private PowerfulResponse response = new PowerfulResponse();
 		private String invokeResult;
 		private double delayMillis;
 	}

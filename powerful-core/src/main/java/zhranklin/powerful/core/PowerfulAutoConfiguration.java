@@ -4,9 +4,12 @@ import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ProtocolConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
 import com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan;
+import com.alibaba.dubbo.config.spring.context.annotation.EnableDubboConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import zhranklin.powerful.assist.Gen;
+import zhranklin.powerful.assist.RPCControllerAspect;
 import zhranklin.powerful.core.cases.StaticResources;
 import zhranklin.powerful.core.invoker.DubboRemoteInvoker;
 import zhranklin.powerful.core.invoker.GrpcRemoteInvoker;
@@ -136,7 +139,7 @@ public class PowerfulAutoConfiguration {
         }
 
         @PostConstruct
-        public void init(@Autowired PowerfulService powerful, @Autowired(required = false) GrpcRemoteInvoker grpc) {
+        public void init(@Autowired PowerfulService powerful, @Autowired(required = false) GrpcRemoteInvoker grpc) throws IOException {
             powerful.setInvoker("grpc", grpc);
             if (grpc != null) {
                 grpc.setPowerful(powerful);
@@ -170,6 +173,8 @@ public class PowerfulAutoConfiguration {
     }
 
     @ConditionalOnProperty(name="powerful.dubbo.enabled", havingValue="true")
+    @Configuration
+    @EnableDubboConfig
     public static class DubboConfiguration {
 
         @Value("${framew.zk}")
@@ -208,13 +213,20 @@ public class PowerfulAutoConfiguration {
             return protocolConfig;
         }
 
-        @ConditionalOnProperty(name="powerful.dubbo.name", havingValue="dubbo-a")
-        @DubboComponentScan(basePackages = "zhranklin.powerful.rpc.dubboa")
-        public static class DubboA {}
+        @Bean
+        public DubboRemoteInvoker dubboRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer) {
+            return new DubboRemoteInvoker(stringRenderer);
+        }
 
-        @ConditionalOnProperty(name="powerful.dubbo.name", havingValue="dubbo-b")
-        @DubboComponentScan(basePackages = "zhranklin.powerful.rpc.dubbob")
-        public static class DubboB {}
+        @Bean
+        public RPCControllerAspect rpcControllerAspect() {
+            return new RPCControllerAspect();
+        }
+
+        @Configuration
+        @ComponentScan(basePackages = Gen.GEN_PACKAGE)
+        @DubboComponentScan(basePackages = Gen.GEN_PACKAGE)
+        public static class DubboGen {}
     }
 
 }

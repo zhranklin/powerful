@@ -153,7 +153,7 @@ public class RequestCaseApiController {
         Instruction instruction = staticResources.processTargetMappingForTrace(requestCase).translateTrace();
         staticResources.processTargetMapping(instruction);
         RenderingContext context = new RenderingContext();
-        context.setHttpParams(params);
+        context.setParams(params);
         Object result = powerful.execute(instruction, context);
         if (validate) {
             Map<String, Object> ret = new HashMap<>();

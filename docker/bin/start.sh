@@ -11,7 +11,9 @@ if [[ $RUN_DEMO == "1" ]]; then
 .jar
   fi
 
-  java $JAVA_OPTS -jar /app.jar "$@"
+  java $JAVA_OPTS -jar /opt/helm/app.jar stage0
+  jar -uf /opt/helm/app.jar -C /usr/local/javalib BOOT-INF/classes
+  java $JAVA_OPTS -jar /opt/helm/app.jar "$@"
 fi
 
 if [[ $RUN_OPERATOR == "1" ]]; then

@@ -1,19 +1,23 @@
 package zhranklin.powerful.core.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.flipkart.zjsonpatch.CompatibilityFlags;
+import com.flipkart.zjsonpatch.DiffFlags;
+import com.flipkart.zjsonpatch.JsonDiff;
 import com.flipkart.zjsonpatch.JsonPatch;
 import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.invoker.RemoteInvoker;
 import zhranklin.powerful.model.Instruction;
+import zhranklin.powerful.model.PowerfulResponse;
 import zhranklin.powerful.model.RenderingContext;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.util.Base64Utils;
 
 import java.io.IOException;
@@ -33,7 +37,7 @@ import java.util.stream.Stream;
  */
 public class PowerfulService {
 
-    private final ObjectMapper jsonMapper = new ObjectMapper();
+    public static final ObjectMapper jsonMapper = new ObjectMapper();
     private static final Logger logger = LoggerFactory.getLogger(PowerfulService.class);
     private static final Random rand = new Random();
     protected final StringRenderer stringRenderer;
@@ -50,9 +54,62 @@ public class PowerfulService {
         this.stringRenderer = stringRenderer;
     }
 
+    public static JsonNode getSimplifiedNode(Instruction instruction, boolean responseFmt) throws IOException {
+        Map<String, Object> blankObject = new LinkedHashMap<>();
+        Instruction curInst = new Instruction();
+        Instruction baseInstruction = curInst;
+        Map<String, Object> curNode = blankObject;
+        for (Instruction to = instruction.getTo(); to.getTo() != null; to = to.getTo()) {
+            curInst.setTo(new Instruction());
+            curInst = curInst.getTo();
+            curNode.put("to", new HashMap<>());
+            //noinspection unchecked
+            curNode = (Map<String, Object>) curNode.get("to");
+        }
+        //解决apply diff时报错
+        if (!instruction.getTo().getHeaders().isEmpty()) {
+            baseInstruction.setHeaders(null);
+        }
+        if (!instruction.getTo().getResponseHeaders().isEmpty()) {
+            baseInstruction.setResponseHeaders(null);
+        }
+        if (!instruction.getTo().getQueries().isEmpty()) {
+            baseInstruction.setQueries(null);
+        }
+        ArrayNode diff = (ArrayNode) JsonDiff.asJson(
+            jsonMapper.readTree(jsonMapper.writeValueAsString(baseInstruction)),
+            jsonMapper.readTree(jsonMapper.writeValueAsString(instruction.getTo())), DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone()
+        );
+        String pathPrefix = "/to/";
+        for (int i = 0; i < diff.size(); i++) {
+            String path = diff.get(i).get("path").textValue();
+            if (!responseFmt && path.endsWith("/responseFmt")) {
+            	diff.remove(i--);
+            	continue;
+            }
+            if (path.startsWith(pathPrefix)) {
+                diff.insertObject(i)
+                    .put("op", "replace")
+                    .put("path", pathPrefix.replaceAll("/$", ""))
+                    .putObject("value");
+                pathPrefix += "to/";
+            }
+        }
+        return JsonPatch.apply(
+            diff,
+            jsonMapper.readTree("{}"), EnumSet.of(CompatibilityFlags.ALLOW_MISSING_TARGET_OBJECT_ON_REPLACE)
+        );
+    }
+
     public Object execute(Instruction instruction, RenderingContext context) {
+        if (instruction.getCall() != null && instruction.getCall().startsWith("dubbo://")) {
+            instruction.setCall(instruction.getCall().substring("dubbo://".length()));
+            instruction.setBy("dubbo");
+        }
         if (instruction.getTimes() <= 1) {
-            return executeSingle(instruction, context, false, 0, 0, 0).renderResult;
+            String result = executeSingle(instruction, context, false, 0, 0, 0).renderResult;
+            context.getResult().result = result;
+            return result;
         }
         Stream<Result> responses = executeForTimes(instruction, context);
         Object result = null;
@@ -81,7 +138,10 @@ public class PowerfulService {
                 )
             );
         }
-        context.setResult(result);
+        context.getResult().result = result;
+        instruction.getResponseHeaders().forEach((k, v) ->
+            instruction.getResponseHeaders().put(k, stringRenderer.render(v, context))
+        );
         return result;
     }
 
@@ -128,7 +188,7 @@ public class PowerfulService {
             doExecuteSingle(processLoop(instruction, executed), context);
         } catch (Exception e) {
             if (handleException) {
-                context.setResult(e.getMessage());
+                context.setResult(new PowerfulResponse(e.getMessage(), "200", null));
             } else {
                 throw new RuntimeException(stringRenderer.render(template, context) + ": " + e.getMessage(), e);
             }
@@ -185,6 +245,13 @@ public class PowerfulService {
                 propagateHeaders.forEach(headerName -> instruction.getHeaders().put(headerName, context.getRequestHeaders().get(headerName)));
             }
         }
+        if (context.getRequestHeaders() != null) {
+            context.getRequestHeaders().forEach((k, v) -> {
+                String value = stringRenderer.render(v, context);
+                context.getRequestHeaders().put(k, value);
+            });
+        }
+        instruction.setCall(stringRenderer.render(instruction.getCall(), context));
         if (!StringUtils.isEmpty(instruction.getCall())) {
             context.setResult(invoker.invoke(instruction, context));
         }
@@ -252,14 +319,6 @@ public class PowerfulService {
 
     public static String decodeURLBase64(String base64) {
         return new String(Base64Utils.decodeFromUrlSafeString(base64));
-    }
-
-    public HttpHeaders renderResponseHeaders(RenderingContext context, Instruction instruction) {
-        HttpHeaders respHeaders = new HttpHeaders();
-        instruction.getResponseHeaders().forEach((k, v) ->
-            respHeaders.set(k, stringRenderer.render(v, context))
-        );
-        return respHeaders;
     }
 
 }

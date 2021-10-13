@@ -10,6 +10,14 @@ chmod ug+rwx "${HOME}"
 
 
 
+
+mkdir -p /usr/local/javalib
+chown "${USER_UID}:0" /usr/local/javalib
+chmod ug+rwx /usr/local/javalib
+
+chown "${USER_UID}:0" /app.jar
+chmod ug+rwx
+
 # no need for this script to remain in the image after running
 rm "$0"
 sed "s/<POWERFUL_TAG>/$POWERFUL_TAG/g" -i /opt/helm/helm-charts/powerful/values.yaml
