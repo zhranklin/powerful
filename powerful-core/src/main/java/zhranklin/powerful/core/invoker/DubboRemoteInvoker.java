@@ -1,6 +1,7 @@
 package zhranklin.powerful.core.invoker;
 
 import com.alibaba.dubbo.rpc.RpcContext;
+import com.alibaba.dubbo.rpc.RpcException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,7 +66,7 @@ public class DubboRemoteInvoker implements RemoteInvoker {
             } catch (Exception e) {
                 e.printStackTrace();
                 boolean hasInvoked = RpcContext.getContext().getAttachments().isEmpty();
-                return new PowerfulResponse(null, e.getClass().getSimpleName(), hasInvoked ? RpcContext.getServerContext().getAttachments() : null);
+                return new PowerfulResponse(null, statusCodeFromException(e), hasInvoked ? RpcContext.getServerContext().getAttachments() : null);
             }
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -74,20 +75,29 @@ public class DubboRemoteInvoker implements RemoteInvoker {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
 
-
+    private String statusCodeFromException(Throwable e) {
+        if (e instanceof InvocationTargetException && !(e.getCause() instanceof InvocationTargetException)) {
+            return statusCodeFromException(e.getCause());
+        } else if (e instanceof RpcException) {
+            String[] codeToStatus = new String[]{"UNKNOWN", "NETWORK", "TIMEOUT", "BIZ", "FORBIDDEN", "SERIALIZATION"};
+            return "DUBBO_" + codeToStatus[((RpcException) e).getCode()];
+        } else {
+            return e.getClass().getSimpleName();
+        }
     }
 
     private Object invokeDubbo(Instruction instruction) throws IOException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
-            String[] path = instruction.getCall().split("/");
-            String app = path[0];
-            String service = path[1];
-            String methodName = path[2];
+        String[] path = instruction.getCall().split("/");
+        String app = path[0];
+        String service = path[1];
+        String methodName = path[2];
 
-            String fieldName = Gen.genFieldName(app, service);
-            Class<?> clazz = fieldToClass.get(fieldName);
-            Object dubboService = DubboRemoteInvoker.class.getDeclaredField(fieldName).get(this);
-            return dynamicInvoke(clazz, dubboService, methodName, instruction, Arrays.stream(path).skip(3).collect(Collectors.joining("/")));
+        String fieldName = Gen.genFieldName(app, service);
+        Class<?> clazz = fieldToClass.get(fieldName);
+        Object dubboService = DubboRemoteInvoker.class.getDeclaredField(fieldName).get(this);
+        return dynamicInvoke(clazz, dubboService, methodName, instruction, Arrays.stream(path).skip(3).collect(Collectors.joining("/")));
     }
 
     public Object dynamicInvoke(Class<?> clazz, Object obj, String methodName, Instruction instruction, String paramsStr) throws InvocationTargetException, IllegalAccessException, IOException {
