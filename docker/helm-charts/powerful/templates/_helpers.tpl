@@ -19,3 +19,19 @@ powerful{{- if not (eq .Release.Name "default") }}-{{ .Release.Name }}{{ end -}}
   {{- end -}}
   {{- end -}}
 {{- end -}}
+
+{{- define "dubboDependsOn" -}}
+  {{- range $_, $app := append .apps .cases -}}
+    {{- $hasDubbo := false -}}
+    {{- range $_, $deploy := $app.deploys -}}
+      {{- if $deploy.dubbo -}}
+      {{- if $deploy.dubbo.enabled -}}
+        {{- $hasDubbo = true -}}
+      {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $hasDubbo -}}
+      {{- if $app.Name }}{{ $app.Name }}{{ else }}{{ $app.name }}{{ end -}},
+    {{- end -}}
+  {{- end -}}
+{{- end -}}

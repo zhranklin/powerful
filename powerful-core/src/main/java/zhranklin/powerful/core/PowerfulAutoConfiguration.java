@@ -177,17 +177,15 @@ public class PowerfulAutoConfiguration {
     @EnableDubboConfig
     public static class DubboConfiguration {
 
-        @Value("${framew.zk}")
+        @Value("${powerful.dubbo.zk}")
         public String zk;
 
-        @Value("dubbo-${powerful.dubbo.name}")
-        //@Value("${framew.app}")
-        public String app;
+        public String app = System.getenv("APP");
 
-        @Value("${framew.port}")
+        @Value("${powerful.dubbo.port}")
         public int port;
 
-        @Value("${framew.app.version:0.0.1}")
+        @Value("${powerful.dubbo.version}")
         public String version;
 
         @Bean

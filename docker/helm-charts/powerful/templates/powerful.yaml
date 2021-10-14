@@ -36,10 +36,19 @@ spec:
   {{- $version = $deploy.version }}
 {{- end}}
 
-{{- $_ := set $deploy "dubbo" (dict "enabled" false) -}}
 {{- if not (kindIs "bool" $deploy.inject) }}
   {{- $_ := set $deploy "inject" $.Values.inject -}}
 {{- end }}
+
+{{- if not $deploy.env }}
+  {{- $_ := set $deploy "env" (dict) }}
+{{- end }}
+
+{{- $dubbo := (dict "enabled" false) -}}
+{{- if kindIs "map" $deploy.dubbo }}
+  {{- $dubbo = merge $deploy.dubbo (deepCopy $.Values.dubbo) -}}
+{{- end -}}
+{{- $_ := set $deploy "dubbo" $dubbo -}}
 
 {{- $agent := (dict "enabled" false) }}
 {{- if kindIs "map" $deploy.agent }}
@@ -50,18 +59,26 @@ spec:
 {{- $_ := set $deploy "agent" $agent -}}
 
 
-{{- $javaOpts := printf "-Dpowerful.dubbo.enabled=%t" $deploy.dubbo.enabled }}
+{{- $javaOpts := "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005" }}
+{{- if $deploy.dubbo.enabled  }}
+  {{- $javaOpts = printf "%s -Dpowerful.dubbo.enabled=%t" $javaOpts $deploy.dubbo.enabled }}
+  {{- $javaOpts = printf "%s -Dpowerful.dubbo.port=%v " $javaOpts $deploy.dubbo.port }}
+  {{- $javaOpts = printf "%s -Dpowerful.dubbo.zk=%v" $javaOpts $deploy.dubbo.zk }}
+  {{- $javaOpts = printf "%s -Dpowerful.dubbo.version=%v" $javaOpts $deploy.dubbo.version }}
+  {{- if $deploy.dubbo.dependsOn }}
+  {{- $_ := set $deploy.env "DUBBO_DEPENDS_ON" $deploy.dubbo.dependsOn }}
+  {{- else }}
+  {{- $_ := set $deploy.env "DUBBO_DEPENDS_ON" (include "dubboDependsOn" $deploys) }}
+  {{- end }}
+{{- end }}
 {{- if $.Values.caseSets }}
 {{/*  {{- $javaOpts = $javaOpts + "" }}*/}}
 {{- end }}
-{{- if $deploy.env }}
-  {{- if $deploy.env.JAVA_OPTS }}
-    {{- $javaOpts = printf "%s %s" $javaOpts $deploy.env.JAVA_OPTS }}
-  {{- end }}
-  {{- $_ := unset $deploy.env "JAVA_OPTS"}}
+{{- if $deploy.env.JAVA_OPTS }}
+  {{- $javaOpts = printf "%s %s" $javaOpts $deploy.env.JAVA_OPTS }}
 {{- end }}
 {{- if $deploy.agent.enabled }}
-  {{- $javaOpts = printf "%s %s" $javaOpts "-javaagent:/home/framew-agent/framew-agent.jar=conf/conf" }}
+  {{- $javaOpts = printf "%s -javaagent:/home/framew-agent/framew-agent.jar=conf/conf" $javaOpts }}
 {{- end }}
 
 apiVersion: apps/v1
