@@ -68,7 +68,7 @@ spec:
   {{- if $deploy.dubbo.dependsOn }}
   {{- $_ := set $deploy.env "DUBBO_DEPENDS_ON" $deploy.dubbo.dependsOn }}
   {{- else }}
-  {{- $_ := set $deploy.env "DUBBO_DEPENDS_ON" (include "dubboDependsOn" $deploys) }}
+  {{- $_ := set $deploy.env "DUBBO_DEPENDS_ON" (include "dubboDependsOn" $.Values) }}
   {{- end }}
 {{- end }}
 {{- if $.Values.caseSets }}
