@@ -1,6 +1,7 @@
 package zhranklin.powerful.assist;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.dubbo.config.annotation.Service;
 import zhranklin.powerful.core.PowerfulAutoConfiguration;
 import zhranklin.powerful.core.invoker.DubboRemoteInvoker;
 import zhranklin.powerful.dubbo.tmpl.DubboService;
@@ -9,6 +10,7 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.annotation.Annotation;
 import javassist.bytecode.annotation.BooleanMemberValue;
+import javassist.bytecode.annotation.StringMemberValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -30,7 +32,7 @@ public class Gen {
     public static final String JAVASSIST_PATH = "/usr/local/javalib/BOOT-INF/classes";
     public static boolean isStage0 = false;
     private static ClassPool pool = ClassPool.getDefault();
-    private static Map<String, Class<?>> interfaces = new HashMap<>();
+    private static Map<String, InterfaceRefField> interfaces = new HashMap<>();
 
     static {
         pool.appendClassPath(new LoaderClassPath(PowerfulAutoConfiguration.class.getClassLoader()));
@@ -67,19 +69,21 @@ public class Gen {
     public static void genDubboInvoker(Set<String> dependsOn) throws NotFoundException, CannotCompileException, IOException, ClassNotFoundException {
         CtClass clazz = pool.get(DubboRemoteInvoker.class.getName());
         for (String dep : dependsOn) {
-            for (Map.Entry<String, Class<?>> entry : interfaces.entrySet()) {
-                Class<?> interfaceTmpl = entry.getValue();
-                genClass(interfaceTmpl, dep, null);
+            for (Map.Entry<String, InterfaceRefField> entry : interfaces.entrySet()) {
+                InterfaceRefField ref = entry.getValue();
+                genClass(ref.clazz, dep, null);
                 if (!isStage0) {
                     continue;
                 }
-                CtClass fieldType = pool.get(genClassName(interfaceTmpl, dep));
+                CtClass fieldType = pool.get(genClassName(ref.clazz, dep));
                 CtField field = new CtField(fieldType, genFieldName(dep, entry.getKey()), clazz);
 
                 ConstPool constPool = clazz.getClassFile().getConstPool();
                 AnnotationsAttribute annAttr = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
                 Annotation annotation = new Annotation(Reference.class.getName(), constPool);
                 annotation.addMemberValue("check", new BooleanMemberValue(false, constPool));
+                annotation.addMemberValue("group", new StringMemberValue(ref.group, constPool));
+                annotation.addMemberValue("version", new StringMemberValue(ref.version, constPool));
                 annAttr.setAnnotation(annotation);
 
                 field.getFieldInfo().addAttribute(annAttr);
@@ -92,8 +96,8 @@ public class Gen {
 
     public static void genDubboRefFields(Map<String, Class<?>> fieldToClass) throws ClassNotFoundException {
         for (String dep : getDependsOn()) {
-            for (Map.Entry<String, Class<?>> entry : interfaces.entrySet()) {
-                fieldToClass.put(genFieldName(dep, entry.getKey()), Class.forName(genClassName(entry.getValue(), dep)));
+            for (Map.Entry<String, InterfaceRefField> entry : interfaces.entrySet()) {
+                fieldToClass.put(genFieldName(dep, entry.getKey()), Class.forName(genClassName(entry.getValue().clazz, dep)));
             }
         }
     }
@@ -114,6 +118,9 @@ public class Gen {
         String cPkg = impl.getPackage().getName();
         CtClass ctClass = copyClassFromTmpl(impl, suffix);
         CtClass[] interfaces = ctClass.getInterfaces();
+        Service sa = (Service) ctClass.getAnnotation(Service.class);
+        String group = sa == null ? "" : sa.group();
+        String version = sa == null ? "" : sa.version();
         int iClassCount = 0;
         for (int i = 0; i < interfaces.length; i++) {
             Class<?> iClass = Class.forName(interfaces[i].getName());
@@ -123,7 +130,7 @@ public class Gen {
                 if (iClassCount > 0) {
                     serviceName += iClassCount;
                 }
-                Gen.interfaces.put(serviceName, iClass);
+                Gen.interfaces.put(serviceName, new InterfaceRefField(iClass, group, version));
                 CtClass interfaceClass = copyClassFromTmpl(iClass, suffix);
                 writeClass(interfaceClass);
                 interfaces[i] = interfaceClass;
@@ -156,6 +163,18 @@ public class Gen {
     public static void main(String[] args) {
         System.out.println();
         gen("a");
+    }
+
+    public static class InterfaceRefField {
+        public final Class<?> clazz;
+        public final String group;
+        public final String version;
+
+        public InterfaceRefField(Class<?> clazz, String group, String version) {
+            this.clazz = clazz;
+            this.group = group;
+            this.version = version;
+        }
     }
 
 }

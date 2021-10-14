@@ -185,14 +185,11 @@ public class PowerfulAutoConfiguration {
         @Value("${powerful.dubbo.port}")
         public int port;
 
-        @Value("${powerful.dubbo.version}")
-        public String version;
-
         @Bean
         public ApplicationConfig applicationConfig() {
             ApplicationConfig application = new ApplicationConfig();
             application.setName(app);
-            application.setVersion(version);
+            application.setVersion(System.getenv("VERSION"));
             return application;
         }
 

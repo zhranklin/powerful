@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-@Service
+@Service(group = "g", version = "0.0.1")
 @Component
 @PowerfulRPCTemplate("test")
 public class DubboServiceTestImpl implements DubboServiceTest {

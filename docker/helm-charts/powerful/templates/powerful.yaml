@@ -64,7 +64,6 @@ spec:
   {{- $javaOpts = printf "%s -Dpowerful.dubbo.enabled=%t" $javaOpts $deploy.dubbo.enabled }}
   {{- $javaOpts = printf "%s -Dpowerful.dubbo.port=%v " $javaOpts $deploy.dubbo.port }}
   {{- $javaOpts = printf "%s -Dpowerful.dubbo.zk=%v" $javaOpts $deploy.dubbo.zk }}
-  {{- $javaOpts = printf "%s -Dpowerful.dubbo.version=%v" $javaOpts $deploy.dubbo.version }}
   {{- if $deploy.dubbo.dependsOn }}
   {{- $_ := set $deploy.env "DUBBO_DEPENDS_ON" $deploy.dubbo.dependsOn }}
   {{- else }}
