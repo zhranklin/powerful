@@ -17,6 +17,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,7 +41,7 @@ public class Gen {
         }
     }
 
-    public static void gen(String appName, String dependsOn) {
+    public static void gen(String appName) {
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(new DefaultResourceLoader(Thread.currentThread().getContextClassLoader()));
 //            Resource[] resources = resolver.getResources("classpath*:" + GEN_PACKAGE.replaceAll("\\.", "/") + "/**/*.class");
@@ -57,15 +58,15 @@ public class Gen {
                     genClass(clazz, appName, service);
                 }
             }
-            genDubboInvoker(dependsOn);
+            genDubboInvoker(getDependsOn());
         } catch (CannotCompileException | IOException | NotFoundException | ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    public static void genDubboInvoker(String dependsOn) throws NotFoundException, CannotCompileException, IOException, ClassNotFoundException {
+    public static void genDubboInvoker(Set<String> dependsOn) throws NotFoundException, CannotCompileException, IOException, ClassNotFoundException {
         CtClass clazz = pool.get(DubboRemoteInvoker.class.getName());
-        for (String dep : dependsOn.split(",")) {
+        for (String dep : dependsOn) {
             for (Map.Entry<String, Class<?>> entry : interfaces.entrySet()) {
                 Class<?> interfaceTmpl = entry.getValue();
                 genClass(interfaceTmpl, dep, null);
@@ -90,11 +91,23 @@ public class Gen {
     }
 
     public static void genDubboRefFields(Map<String, Class<?>> fieldToClass) throws ClassNotFoundException {
-        for (String dep : System.getenv("DUBBO_DEPENDS_ON").split(",")) {
+        for (String dep : getDependsOn()) {
             for (Map.Entry<String, Class<?>> entry : interfaces.entrySet()) {
                 fieldToClass.put(genFieldName(dep, entry.getKey()), Class.forName(genClassName(entry.getValue(), dep)));
             }
         }
+    }
+
+    public static Set<String> getDependsOn() {
+        String app = System.getenv("APP");
+        HashSet<String> result = new HashSet<>();
+        for (String d : System.getenv("DUBBO_DEPENDS_ON").split(",")) {
+            if (d.isEmpty() || d.equals(app)) {
+                continue;
+            }
+            result.add(d);
+        }
+        return result;
     }
 
     public static void genClass(Class<?> impl, String suffix, String service) throws CannotCompileException, IOException, NotFoundException, ClassNotFoundException {
@@ -142,7 +155,7 @@ public class Gen {
 
     public static void main(String[] args) {
         System.out.println();
-        gen("a", "b,c");
+        gen("a");
     }
 
 }
