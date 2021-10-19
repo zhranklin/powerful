@@ -23,6 +23,10 @@ spec:
   - name: http
     port: {{ if $app.port }} {{ $app.port }} {{ else }} 80 {{ end }}
     targetPort: 8080
+{{- if $.Values.enableDebug }}
+  - name: debug
+    port: 5005
+{{- end }}
 ---
 {{- $deploys := list (dict "version" "default") -}}
 {{- if $app.deploys -}}
@@ -59,7 +63,10 @@ spec:
 {{- $_ := set $deploy "agent" $agent -}}
 
 
-{{- $javaOpts := "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005" }}
+{{- $javaOpts := "" }}
+{{- if $.Values.enableDebug }}
+  {{- $javaOpts = printf "%s -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005" $javaOpts }}
+{{- end }}
 {{- if $deploy.dubbo.enabled  }}
   {{- $javaOpts = printf "%s -Dpowerful.dubbo.enabled=%t" $javaOpts $deploy.dubbo.enabled }}
   {{- $javaOpts = printf "%s -Dpowerful.dubbo.port=%v " $javaOpts $deploy.dubbo.port }}
