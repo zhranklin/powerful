@@ -85,7 +85,7 @@ public class Gen {
                 annotation.addMemberValue("check", new BooleanMemberValue(false, constPool));
                 annotation.addMemberValue("group", new StringMemberValue(ref.group, constPool));
                 annotation.addMemberValue("version", new StringMemberValue(ref.version, constPool));
-                annotation.addMemberValue("retries", new IntegerMemberValue(0, constPool));
+                annotation.addMemberValue("retries", new IntegerMemberValue(constPool, 0));
                 annAttr.setAnnotation(annotation);
 
                 field.getFieldInfo().addAttribute(annAttr);
