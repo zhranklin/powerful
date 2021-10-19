@@ -10,6 +10,7 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.annotation.Annotation;
 import javassist.bytecode.annotation.BooleanMemberValue;
+import javassist.bytecode.annotation.IntegerMemberValue;
 import javassist.bytecode.annotation.StringMemberValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -84,6 +85,7 @@ public class Gen {
                 annotation.addMemberValue("check", new BooleanMemberValue(false, constPool));
                 annotation.addMemberValue("group", new StringMemberValue(ref.group, constPool));
                 annotation.addMemberValue("version", new StringMemberValue(ref.version, constPool));
+                annotation.addMemberValue("retries", new IntegerMemberValue(0, constPool));
                 annAttr.setAnnotation(annotation);
 
                 field.getFieldInfo().addAttribute(annAttr);
