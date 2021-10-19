@@ -59,9 +59,6 @@ public class RPCControllerAspect {
 			PowerfulResponse res = context.getResult();
 			//todo 根据statusCode抛异常等
 			return result;
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			return null;
 		} finally {
 			RPCInvokeContext.renderingContext.set(null);
 			RpcContext serverContext = RpcContext.getServerContext();
