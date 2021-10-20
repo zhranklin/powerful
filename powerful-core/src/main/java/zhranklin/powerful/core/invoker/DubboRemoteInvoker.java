@@ -66,7 +66,8 @@ public class DubboRemoteInvoker implements RemoteInvoker {
             } catch (Exception e) {
                 e.printStackTrace();
                 boolean hasInvoked = RpcContext.getContext().getAttachments().isEmpty();
-                return new PowerfulResponse(null, statusCodeFromException(e), hasInvoked ? RpcContext.getServerContext().getAttachments() : null);
+                Map<String, String> responseHeaders = hasInvoked ? RpcContext.getServerContext().getAttachments() : null;
+                return getPowerfulResponse(e, responseHeaders);
             }
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -77,14 +78,14 @@ public class DubboRemoteInvoker implements RemoteInvoker {
         }
     }
 
-    private String statusCodeFromException(Throwable e) {
+    private PowerfulResponse getPowerfulResponse(Throwable e, Map<String, String> responseHeaders) {
         if (e instanceof InvocationTargetException && !(e.getCause() instanceof InvocationTargetException)) {
-            return statusCodeFromException(e.getCause());
+            return getPowerfulResponse(e.getCause(), responseHeaders);
         } else if (e instanceof RpcException) {
             String[] codeToStatus = new String[]{"UNKNOWN", "NETWORK", "TIMEOUT", "BIZ", "FORBIDDEN", "SERIALIZATION"};
-            return "DUBBO_" + codeToStatus[((RpcException) e).getCode()];
+            return new PowerfulResponse(e.getMessage(), "DUBBO_" + codeToStatus[((RpcException) e).getCode()], responseHeaders);
         } else {
-            return e.getClass().getSimpleName();
+            return new PowerfulResponse(e.getMessage(), e.getClass().getSimpleName(), responseHeaders);
         }
     }
 
