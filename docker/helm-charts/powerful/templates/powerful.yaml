@@ -14,6 +14,11 @@ metadata:
     release: {{ $.Release.Name }}
     framew-env: {{ $.Values.framewEnv }}
     framew.zhranklin.io/project: {{ $.Values.framewProject }}
+    {{- if $app.protocols }}
+    {{- range $i, $p := (splitList "," $app.protocols) }}
+    framew.zhranklin.io/protocol-{{ $p }}: "true"
+    {{- end }}
+    {{- end }}
     {{ $.Values.serviceAppLabelName }}: {{ $app.name }}
 spec:
   type: ClusterIP
