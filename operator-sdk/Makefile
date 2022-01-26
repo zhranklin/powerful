@@ -19,7 +19,7 @@ TEST_PKGS = $(shell go list ./... | grep -v -E 'github.com/operator-framework/op
 SOURCES = $(shell find . -name '*.go' -not -path "*/vendor/*")
 
 ANSIBLE_BASE_IMAGE = quay.io/operator-framework/ansible-operator
-HELM_BASE_IMAGE = quay.io/operator-framework/helm-operator
+HELM_BASE_IMAGE ?= quay.io/operator-framework/helm-operator
 SCORECARD_PROXY_BASE_IMAGE = quay.io/operator-framework/scorecard-proxy
 SCORECARD_TEST_BASE_IMAGE = quay.io/operator-framework/scorecard-test
 
@@ -124,8 +124,8 @@ release_builds := \
 
 release: clean $(release_builds) $(release_builds:=.asc) ## Release the Operator SDK
 
-build/operator-sdk-%-aarch64-linux-gnu: GOARGS = GOOS=linux GOARCH=arm64
-build/operator-sdk-%-x86_64-linux-gnu: GOARGS = GOOS=linux GOARCH=amd64
+build/operator-sdk-%-arm64-linux-gnu: GOARGS = GOOS=linux GOARCH=arm64
+build/operator-sdk-%-amd64-linux-gnu: GOARGS = GOOS=linux GOARCH=amd64
 build/operator-sdk-%-x86_64-apple-darwin: GOARGS = GOOS=darwin GOARCH=amd64
 build/operator-sdk-%-ppc64le-linux-gnu: GOARGS = GOOS=linux GOARCH=ppc64le
 build/operator-sdk-%-s390x-linux-gnu: GOARGS = GOOS=linux GOARCH=s390x
@@ -170,8 +170,14 @@ image-build: image-build-ansible image-build-helm image-build-scorecard-proxy ##
 image-build-ansible: build/operator-sdk-dev-linux-gnu
 	./hack/image/build-ansible-image.sh $(ANSIBLE_BASE_IMAGE):dev
 
-image-build-helm: build/operator-sdk-dev-linux-gnu
+image-build-helm: build/operator-sdk-dev-x86_64-linux-gnu build/operator-sdk-dev-aarch64-linux-gnu
 	./hack/image/build-helm-image.sh $(HELM_BASE_IMAGE):dev
+
+image-build-helm-amd64: build/operator-sdk-dev-amd64-linux-gnu
+	./hack/image/build-helm-image.sh $(HELM_BASE_IMAGE):$(HELM_BASE_IMAGE_TAG)_linux_amd64 amd64
+
+image-build-helm-arm64: build/operator-sdk-dev-arm64-linux-gnu
+	./hack/image/build-helm-image.sh $(HELM_BASE_IMAGE):$(HELM_BASE_IMAGE_TAG)_linux_arm64 arm64
 
 image-build-scorecard-proxy:
 	./hack/image/build-scorecard-proxy-image.sh $(SCORECARD_PROXY_BASE_IMAGE):dev

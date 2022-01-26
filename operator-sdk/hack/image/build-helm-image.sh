@@ -15,11 +15,12 @@ echo $BASEIMAGEDIR
 # build operator binary and base image
 pushd "$BASEIMAGEDIR"
 
+arch=$2
 mkdir -p build/_output/bin/
-cp $ROOTDIR/build/operator-sdk-dev-linux-gnu build/_output/bin/helm-operator
+cp $ROOTDIR/build/operator-sdk-dev-$arch-linux-gnu build/_output/bin/helm-operator
 cp $ROOTDIR/../docker/build/Dockerfile.sdk build/Dockerfile
 
-operator-sdk build $1
+docker buildx build --platform "linux/$arch" --load . -f build/Dockerfile -t ${1}
 # If using a kind cluster, load the image into all nodes.
 load_image_if_kind "$1"
 popd

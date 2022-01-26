@@ -24,12 +24,20 @@ if [[ $NO_INSTALL == "1" ]]; then
   exit
 fi
 
-make image-build-helm
+make image-build-helm-amd64
+make image-build-helm-arm64
 
 QUEY=quay.io/operator-framework/helm-operator:dev
-docker tag $QUEY $IMAGE:$TAG
-docker push $IMAGE:$TAG
-docker rmi $QUEY
+mfargs="$IMAGE:$TAG"
+for _arch in _linux_amd64 _linux_arm64; do
+  docker tag $QUEY$_arch $IMAGE:$TAG$_arch
+  docker push $IMAGE:$TAG$_arch
+  docker rmi $QUEY$_arch
+  mfargs="$mfargs $IMAGE:$TAG$_arch"
+done
+docker manifest create --amend $mfargs
+docker manifest push $IMAGE:$TAG
+docker manifest rm $IMAGE:$TAG
 if [[ $RESERVE_IMAGE != "1" ]]; then
-  docker rmi $IMAGE:$TAG
+  docker rmi $mfargs
 fi
