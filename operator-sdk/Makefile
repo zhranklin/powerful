@@ -129,7 +129,7 @@ build/operator-sdk-%-amd64-linux-gnu: GOARGS = GOOS=linux GOARCH=amd64
 build/operator-sdk-%-x86_64-apple-darwin: GOARGS = GOOS=darwin GOARCH=amd64
 build/operator-sdk-%-ppc64le-linux-gnu: GOARGS = GOOS=linux GOARCH=ppc64le
 build/operator-sdk-%-s390x-linux-gnu: GOARGS = GOOS=linux GOARCH=s390x
-build/operator-sdk-%-linux-gnu: GOARGS = GOOS=linux
+#build/operator-sdk-%-linux-gnu: GOARGS = GOOS=linux
 
 build/%: $(SOURCES)
 	$(Q)$(GOARGS) go build \
