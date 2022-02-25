@@ -118,7 +118,7 @@ spec:
         sidecar.istio.io/inject: "{{ $deploy.inject }}"
 {{- range $i, $mount := $deploy.mounts }}
 {{- if $mount.configMap }}
-        checksum/volume-{{ $i }}: {{ $mount.configMap | toYaml | sha256sum }}
+        checksum/volume-{{ $i }}: {{ $mount.configMap | sha256sum }}
 {{- end }}
 {{- end }}
 {{- if $deploy.annotations }}
@@ -180,6 +180,9 @@ spec:
 {{- range $i, $mount := $deploy.mounts }}
         - name: custom-volume-{{ $i }}
           mountPath: {{ $mount.mountPath }}
+{{- if $mount.configMap }}
+          subPath: {{ splitList "/" $mount.mountPath | last | quote }}
+{{- end }}
 {{- end }}
 {{- if $deploy.agent.enabled }}
         - name: volume-agent
@@ -239,6 +242,20 @@ data:
     framew:
 {{ $deploy.agent.framew | toYaml | indent 6}}
 ---
+{{- end }}
+{{- range $i, $mount := $deploy.mounts }}
+{{- if $mount.configMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-{{ $app.name }}{{ include "deployName" $deploy}}-{{ $i }}
+  namespace: {{ include "namespace" $}}
+  labels:
+    release: {{ $.Release.Name }}
+data:
+  {{ splitList "/" $mount.mountPath | last | quote }}: {{ $mount.configMap | quote }}
+---
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
