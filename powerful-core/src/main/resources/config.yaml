@@ -11,8 +11,8 @@ requestCases:
         - call: a
         - call: b
       expect:
-        powerful-cases|(200) -> a|v1(200) -> b|(null): 4800:5200
-        powerful-cases|(200) -> a|v2(200) -> b|(null): 4800:5200
+        powerful-cases|(200) -> a|v1(200) -> b|(): 4800:5200
+        powerful-cases|(200) -> a|v2(200) -> b|(): 4800:5200
       description: a访问b, 重复10000次
     a-delay-1s:
       trace:
@@ -40,8 +40,8 @@ requestCases:
         - call: a
       description: 正常访问b
       expect:
-        powerful-cases|(200) -> a|v2(null): 4990:5010
-        powerful-cases|(200) -> a|v1(null): 4990:5010
+        powerful-cases|(200) -> a|v2(): 4990:5010
+        powerful-cases|(200) -> a|v1(): 4990:5010
     normal-all-v1:
       times: 1000
       threads: 30
@@ -49,7 +49,7 @@ requestCases:
         - call: a/normalTest
       description: 将所有流量流向v1版本
       expect:
-        powerful-cases|(200) -> a|v1(null): 1000
+        powerful-cases|(200) -> a|v1(): 1000
     prefix-url-hit:
       threads: 30
       times: 10000
@@ -57,8 +57,8 @@ requestCases:
         - call: a/matchTest/uri/preEcho
       description: 前缀uri，命中按9:1分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 8700:9200
-        powerful-cases|(200) -> a|v2(null): 800:1300
+        powerful-cases|(200) -> a|v1(): 8700:9200
+        powerful-cases|(200) -> a|v2(): 800:1300
     prefix-url-miss:
       threads: 30
       times: 10000
@@ -66,8 +66,8 @@ requestCases:
         - call: a/matchTest/uri/mypreEcho
       description: 前缀uri，未命中按5:5分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 4990:5010
-        powerful-cases|(200) -> a|v2(null): 4990:5010
+        powerful-cases|(200) -> a|v1(): 4990:5010
+        powerful-cases|(200) -> a|v2(): 4990:5010
     exact-url-hit:
       threads: 30
       times: 10000
@@ -75,8 +75,8 @@ requestCases:
         - call: a/matchTest/uri/exEcho
       description: 精准uri，命中按9:1分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 8800:9200
-        powerful-cases|(200) -> a|v2(null): 800:1200
+        powerful-cases|(200) -> a|v1(): 8800:9200
+        powerful-cases|(200) -> a|v2(): 800:1200
     regex-url-hit:
       threads: 30
       times: 10000
@@ -84,8 +84,8 @@ requestCases:
         - call: a/matchTest/uri/regXcho
       description: 正则uri，命中按9:1分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 8800:9200
-        powerful-cases|(200) -> a|v2(null): 800:1200
+        powerful-cases|(200) -> a|v1(): 8800:9200
+        powerful-cases|(200) -> a|v2(): 800:1200
     prefix-header-hit:
       threads: 30
       times: 10000
@@ -95,8 +95,8 @@ requestCases:
             source: yanxuan-test
       description: 前缀header(需要source是yanxuan-test开头)，命中按9:1分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 8800:9200
-        powerful-cases|(200) -> a|v2(null): 800:1200
+        powerful-cases|(200) -> a|v1(): 8800:9200
+        powerful-cases|(200) -> a|v2(): 800:1200
     exact-header-hit:
       threads: 30
       times: 10000
@@ -106,8 +106,8 @@ requestCases:
             source: test
       description: 精准header(需要source=test)，命中按9:1分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 8800:9200
-        powerful-cases|(200) -> a|v2(null): 800:1200
+        powerful-cases|(200) -> a|v1(): 8800:9200
+        powerful-cases|(200) -> a|v2(): 800:1200
     regex-header-hit:
       threads: 30
       times: 10000
@@ -117,8 +117,8 @@ requestCases:
             source: yanxuan-test
       description: 前缀header(需要source是yanxuan-test开头)，命中按9:1分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 8700:9300
-        powerful-cases|(200) -> a|v2(null): 700:1300
+        powerful-cases|(200) -> a|v1(): 8700:9300
+        powerful-cases|(200) -> a|v2(): 700:1300
     exact-queryparams-hit:
       threads: 30
       times: 10000
@@ -128,8 +128,8 @@ requestCases:
             key: yanxuan-test
       description: 精准queryparams(需要key=yanxuan-test)，命中按9:1分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 8800:9200
-        powerful-cases|(200) -> a|v2(null): 800:1200
+        powerful-cases|(200) -> a|v1(): 8800:9200
+        powerful-cases|(200) -> a|v2(): 800:1200
     regex-queryparams-hit:
       threads: 30
       times: 10000
@@ -139,8 +139,8 @@ requestCases:
             key: '42615'
       description: 正则queryparams(需要key是5位数字)，命中按9:1分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 8700:9200
-        powerful-cases|(200) -> a|v2(null): 800:1300
+        powerful-cases|(200) -> a|v1(): 8700:9200
+        powerful-cases|(200) -> a|v2(): 800:1300
     logic-and-hit:
       times: 10000
       threads: 30
@@ -150,13 +150,13 @@ requestCases:
             mysource: test
       description: 测试与逻辑（精准url和精准header），命中按9:1分流
       expect:
-        powerful-cases|(200) -> a|v1(null): 8700:9200
-        powerful-cases|(200) -> a|v2(null): 800:1300
+        powerful-cases|(200) -> a|v1(): 8700:9200
+        powerful-cases|(200) -> a|v2(): 800:1300
     delay-all-10s:
       trace:
         - call: a/delayTest
       description: 100%流量延迟10s
-      expect: powerful-cases|(200) -> a|v1(null)
+      expect: powerful-cases|(200) -> a|v1()
     abort-all-500:
       times: 1000
       threads: 30
@@ -181,7 +181,7 @@ requestCases:
       trace:
         - call: a/rewriteURL
       description: URL重写到/normalTest
-      expect: powerful-cases|(200) -> a|v1(null)
+      expect: powerful-cases|(200) -> a|v1()
     rewrite-authority:
       traceNodeTmpl: "{{env(APP)}}|{{env(VERSION)}}({{statusCode()}}|{{header(location)}})"
       trace:
@@ -254,7 +254,7 @@ requestCases:
       trace:
         - call: a/mirrorTest
       description: 将流量复制给a
-      expect: powerful-cases|(200) -> a|v1(null)
+      expect: powerful-cases|(200) -> a|v1()
   rl:
     ratelimit-local-header-minute:
       times: 100
@@ -264,8 +264,8 @@ requestCases:
           headers:
             id: b_local_header_minute
       expect:
-        powerful-cases|(200) -> b|(200) -> d|v2(null): '2:5'
-        powerful-cases|(200) -> b|(200) -> d|v1(null): '2:5'
+        powerful-cases|(200) -> b|(200) -> d|v2(): '2:5'
+        powerful-cases|(200) -> b|(200) -> d|v1(): '2:5'
         powerful-cases|(429) -> b|(429) -> null: '90:95'
       description: 'b访问d, 重复100次，每分钟单机限流5次，条件为header'
     ratelimit-local-multi-headers-hour:
@@ -277,8 +277,8 @@ requestCases:
           headers:
             id: b_local_header_hour
       expect:
-        powerful-cases|(200) -> b|(200) -> d|v2(null): '7:10'
-        powerful-cases|(200) -> b|(200) -> d|v1(null): '7:10'
+        powerful-cases|(200) -> b|(200) -> d|v2(): '7:10'
+        powerful-cases|(200) -> b|(200) -> d|v1(): '7:10'
         powerful-cases|(429) -> b|(429) -> null: '80:90'
       description: 'b访问d, 重复100次，每小时单机限流10次，条件为header'
     ratelimit-local-consumer-match-minute:
@@ -287,8 +287,8 @@ requestCases:
         - call: c
         - call: d
       expect:
-        powerful-cases|(200) -> c|(200) -> d|v2(null): '2:5'
-        powerful-cases|(200) -> c|(200) -> d|v1(null): '2:5'
+        powerful-cases|(200) -> c|(200) -> d|v2(): '2:5'
+        powerful-cases|(200) -> c|(200) -> d|v1(): '2:5'
         powerful-cases|(429) -> c|(429) -> null: '90:95'
       description: 'c访问d, 重复100次，每分钟单机限流5次，条件为消费服务'
     ratelimit-local-consumer-not-match:
@@ -297,8 +297,8 @@ requestCases:
         - call: b
         - call: d
       expect:
-        powerful-cases|(200) -> b|(200) -> d|v2(null): '48:52'
-        powerful-cases|(200) -> b|(200) -> d|v1(null): '48:51'
+        powerful-cases|(200) -> b|(200) -> d|v2(): '48:52'
+        powerful-cases|(200) -> b|(200) -> d|v1(): '48:51'
       description: 'b访问d, 重复100次，未匹配到消费服务，不限流'
     ratelimit-global-header-minute:
       times: 100
@@ -308,8 +308,8 @@ requestCases:
           headers:
             id: b_global_header_minute
       expect:
-        powerful-cases|(200) -> b|(200) -> d|v2(null): '2:3'
-        powerful-cases|(200) -> b|(200) -> d|v1(null): '2:3'
+        powerful-cases|(200) -> b|(200) -> d|v2(): '2:3'
+        powerful-cases|(200) -> b|(200) -> d|v1(): '2:3'
         powerful-cases|(429) -> b|(429) -> null: '92:95'
       description: 'b访问d, 重复100次，每分钟全局均分限流5次，条件为header'
     ratelimit-global-share-minute:
@@ -320,8 +320,8 @@ requestCases:
           headers:
             id: b_global_share_header_minute
       expect:
-        powerful-cases|(200) -> b|(200) -> d|v2(null): '5:8'
-        powerful-cases|(200) -> b|(200) -> d|v1(null): '5:8'
+        powerful-cases|(200) -> b|(200) -> d|v2(): '5:8'
+        powerful-cases|(200) -> b|(200) -> d|v1(): '5:8'
         powerful-cases|(429) -> b|(429) -> null: '90:95'
       description: 'b访问d, 重复100次，每分钟全局共享限流10次，条件为header'
   dual:
@@ -332,15 +332,15 @@ requestCases:
       times: 1000
       threads: 30
       expect:
-        powerful-cases|(200) -> dual|v1(200) -> dual|v1(null): '50:200'
-        powerful-cases|(200) -> dual|v1(200) -> dual|v2(null): '50:200'
-        powerful-cases|(200) -> dual|v1(200) -> dual|v3(null): '50:200'
-        powerful-cases|(200) -> dual|v2(200) -> dual|v1(null): '50:200'
-        powerful-cases|(200) -> dual|v2(200) -> dual|v2(null): '50:200'
-        powerful-cases|(200) -> dual|v2(200) -> dual|v3(null): '50:200'
-        powerful-cases|(200) -> dual|v3(200) -> dual|v1(null): '50:200'
-        powerful-cases|(200) -> dual|v3(200) -> dual|v2(null): '50:200'
-        powerful-cases|(200) -> dual|v3(200) -> dual|v3(null): '50:200'
+        powerful-cases|(200) -> dual|v1(200) -> dual|v1(): '50:200'
+        powerful-cases|(200) -> dual|v1(200) -> dual|v2(): '50:200'
+        powerful-cases|(200) -> dual|v1(200) -> dual|v3(): '50:200'
+        powerful-cases|(200) -> dual|v2(200) -> dual|v1(): '50:200'
+        powerful-cases|(200) -> dual|v2(200) -> dual|v2(): '50:200'
+        powerful-cases|(200) -> dual|v2(200) -> dual|v3(): '50:200'
+        powerful-cases|(200) -> dual|v3(200) -> dual|v1(): '50:200'
+        powerful-cases|(200) -> dual|v3(200) -> dual|v2(): '50:200'
+        powerful-cases|(200) -> dual|v3(200) -> dual|v3(): '50:200'
   yanxuan:
     x-yanxuan-app:
       trace:
