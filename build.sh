@@ -36,7 +36,7 @@ USE_NEWEST_SDK=${USE_NEWEST_SDK:-0}
 cd `dirname $0`
 git status
 
-hub=zhranklin
+hub=${hub:-zhranklin}
 sdkImage=$hub/helm-operator
 tag=$(getTag)
 
@@ -70,7 +70,7 @@ if [[ $BUILD_OPERATOR = "1" ]]; then
   else
     SED_CMD=' '
   fi
-  OPERATOR_IMAGE="zhranklin/powerful:$tag"
+  OPERATOR_IMAGE="$hub/powerful:$tag"
   cp ./powerful-springboot-2/target/powerful-springboot-2.jar ./docker/app.jar
   mf_args="$OPERATOR_IMAGE"
   for arch in amd64 arm64; do

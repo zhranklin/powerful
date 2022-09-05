@@ -1,0 +1,50 @@
+defaults:
+  version: default
+  debug: false
+  dubbo:
+    enabled: false
+    port: 20880
+    zk: ""
+    group: ""
+    version: 0.0.1
+    dependsOn: ""
+
+  replicaCount: 1
+  image: powerful:<POWERFUL_TAG>
+  hub: zhranklin
+  labels: {}
+  deployLabels: {}
+  serviceLabels: {}
+  annotations: {}
+  deployAnnotations: {}
+  serviceAnnotations: {}
+  nodeSelector: {}
+  imagePullSecrets: []
+  resources: {}
+  env:
+    DUBBO_DEPENDS_ON: |-
+      {{- if .dubbo.enabled -}}
+        {{- range $_, $app := append .Values.apps .Values.cases -}}
+          {{- $hasDubbo := false -}}
+          {{- range $_, $deploy := $app.deploys -}}
+            {{- $deploy = merge (deepCopy $deploy) $app $.Values.defaults }}
+            {{- if $deploy.dubbo -}}
+              {{- if $deploy.dubbo.enabled -}}
+                {{- $hasDubbo = true -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+          {{- if $hasDubbo -}}
+            {{- if $app.Name }}{{ $app.Name }}{{ else }}{{ $app.name }}{{ end -}},
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+  javaOpts:
+    dubbo: |-
+      {{ if .dubbo.enabled }}
+      -Dpowerful.dubbo.enabled={{ .dubbo.enabled }} -Dpowerful.dubbo.port={{ .dubbo.port }} -Dpowerful.dubbo.zk={{ .dubbo.zk }}
+      {{ end }}
+    debug: '{{ if .debug }}-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005{{ end }}'
+ingressHost: ""
+cases:
+  replicaCount: 1
