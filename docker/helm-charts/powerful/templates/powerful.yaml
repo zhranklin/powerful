@@ -159,8 +159,8 @@ spec:
 {{- end }}
 {{- end }}
       imagePullSecrets:
-{{- range $deploy.imagePullSecrets }}
-      - name: {{ . }}
+{{- range $name, $_ := $deploy.imagePullSecrets }}
+      - name: {{ $name }}
 {{- end }}
       nodeSelector:
 {{ toYaml $deploy.nodeSelector | indent 8 }}
