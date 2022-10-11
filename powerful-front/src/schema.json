@@ -33,11 +33,6 @@
             "minimum": 0,
             "default": 0
           },
-          "okByRoundRobin": {
-            "type": "integer",
-            "minimum": 1,
-            "default": 1
-          },
           "errorByPercent": {
             "type": "integer",
             "minimum": 0,

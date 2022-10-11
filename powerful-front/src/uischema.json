@@ -49,10 +49,6 @@
                   "type": "Control",
                   "scope": "#/properties/errorByPercent",
                   "label": "error"
-                }, {
-                  "type": "Control",
-                  "scope": "#/properties/okByRoundRobin",
-                  "label": "ok round robin"
                 }]
               }]
             }, {
