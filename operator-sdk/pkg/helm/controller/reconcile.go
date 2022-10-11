@@ -152,7 +152,6 @@ func (r HelmOperatorReconciler) Reconcile(request reconcile.Request) (reconcile.
 			return reconcile.Result{}, err
 		}
 
-		r.deleteCRs(request)
 		return reconcile.Result{}, nil
 	}
 

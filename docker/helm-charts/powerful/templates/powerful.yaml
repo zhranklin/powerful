@@ -11,7 +11,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ $app.name }}
-  namespace: {{ include "namespace" $}}
+  namespace: {{ $.Release.Name }}
   annotations:
     {{- range $k, $v := $appContext.serviceAnnotations }}
     {{- $value := (tpl $v $appContext) }}
@@ -53,7 +53,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $deploy.deployName }}
-  namespace: {{ include "namespace" $}}
+  namespace: {{ $.Release.Name }}
   annotations:
     {{- range $k, $v := $deploy.deployAnnotations }}
     {{- $value := (tpl $v $deployContext) }}
@@ -171,7 +171,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cm-{{ $deploy.deployName }}-{{ $i }}
-  namespace: {{ include "namespace" $}}
+  namespace: {{ $.Release.Name }}
   labels:
     release: {{ $.Release.Name }}
 data:

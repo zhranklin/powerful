@@ -72,7 +72,7 @@ func Run(flags *hoflags.HelmOperatorFlags) error {
 		scope := req.URL.Query().Get("scope")
 		ns := "powerful"
 		if scope != "" {
-			ns = fmt.Sprintf("powerful-%s", scope)
+			ns = scope
 		}
 		req.URL.Host = fmt.Sprintf("powerful-cases.%s.svc.cluster.local", ns)
 		req.URL.Scheme = "http"

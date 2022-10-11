@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: powerful-cases
-  namespace: {{ include "namespace" .}}
+  namespace: {{ .Release.Name }}
   labels:
     release: {{ .Release.Name }}
 data:

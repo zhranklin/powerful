@@ -2,12 +2,12 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  labels:
-    release: {{ .Release.Name }}
   name: powerful
-  namespace: {{ include "namespace" .}}
+  namespace: {{ .Release.Name }}
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
+  labels:
+    release: {{ .Release.Name }}
 spec:
   rules:
   - host: {{ .Values.ingressHost }}
