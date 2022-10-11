@@ -1,5 +1,5 @@
 {{- $baseContext := (dict "Values" $.Values "Template" $.Template)}}
-{{- $casesApp := dict "name" "powerful-cases" "deploys" (list (set .Values.cases "version" "default")) -}}
+{{- $casesApp := dict "name" "powerful-cases" "deploys" (list .Values.cases) -}}
 
 {{- range $_, $app := append .Values.apps $casesApp }}
 {{- if $app.Name }}
@@ -40,7 +40,7 @@ spec:
     port: 5005
 {{- end }}
 ---
-{{- $deploys := list (dict "version" "default") -}}
+{{- $deploys := list (dict) -}}
 {{- if $app.deploys -}}
   {{- $deploys = $app.deploys -}}
 {{- end -}}

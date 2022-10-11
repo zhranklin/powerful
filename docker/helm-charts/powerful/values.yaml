@@ -1,5 +1,4 @@
 defaults:
-  version: default
   debug: false
   dubbo:
     enabled: false
@@ -19,7 +18,7 @@ defaults:
   deployAnnotations: {}
   serviceAnnotations: {}
   nodeSelector: {}
-  imagePullSecrets: []
+  imagePullSecrets: {}
   resources: {}
   env:
     DUBBO_DEPENDS_ON: |-
@@ -46,5 +45,4 @@ defaults:
       {{ end }}
     debug: '{{ if .debug }}-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005{{ end }}'
 ingressHost: ""
-cases:
-  replicaCount: 1
+cases: {}
