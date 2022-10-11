@@ -1,4 +1,4 @@
-FROM zhranklin/helm-operator:v1.4.3
+FROM zhranklin/helm-operator:v1.4.4
 
 ADD ./app.jar /opt/helm/app.jar
 COPY watches.yaml ${HOME}/watches.yaml
