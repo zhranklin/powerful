@@ -90,19 +90,22 @@ if [[ $BUILD_OPERATOR = "1" ]]; then
   fi
 fi
 if [[ $BUILD_ALL_DEMO = "1" ]]; then
-  modules="spring-mvc springboot-1"
+  modules="springboot-1 springboot-2"
   for module in $modules; do
-    image=powerful-$(echo $module | sed 's/springboot-/sb/g; s/spring-//g'):$tag
-    mf_args="$hub/$image"
-    for arch in amd64 arm64; do
-      _arch=_$arch
-      docker buildx build --platform "linux/$arch" --load ./powerful-$module -t $hub/$image$_arch
-      docker push $hub/$image$_arch
-      docker rmi $hub/$image$_arch
-      mf_args="$mf_args $hub/$image$_arch"
+    # 不带java后缀的是java17
+    for df in `ls ./powerful-$module/Dockerfile*`; do
+      image=powerful$(echo "$df"|sed 's/.*Dockerfile//g')-$(echo $module | sed 's/springboot-/sb/g; s/spring-//g'):$tag
+      mf_args="$hub/$image"
+      for arch in amd64 arm64; do
+        _arch=_$arch
+        docker buildx build --platform "linux/$arch" --load ./powerful-$module -t $hub/$image$_arch
+        docker push $hub/$image$_arch
+        docker rmi $hub/$image$_arch
+        mf_args="$mf_args $hub/$image$_arch"
+      done
+      docker manifest create --amend $mf_args
+      docker manifest push $hub/$image
     done
-    docker manifest create --amend $mf_args
-    docker manifest push $hub/$image
   done
 fi
 docker rmi \
