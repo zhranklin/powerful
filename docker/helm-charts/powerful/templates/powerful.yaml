@@ -7,6 +7,7 @@
 {{- end }}
 {{ $app := merge (deepCopy $app) $.Values.defaults }}
 {{- $appContext := merge $app $baseContext }}
+{{- if $app.genService }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -38,6 +39,7 @@ spec:
 {{- if $app.debug }}
   - name: debug
     port: 5005
+{{- end }}
 {{- end }}
 ---
 {{- $deploys := list (dict) -}}

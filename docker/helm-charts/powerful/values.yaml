@@ -1,4 +1,5 @@
 defaults:
+  genService: true
   debug: false
   dubbo:
     enabled: false
