@@ -138,7 +138,11 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
+        {{- if contains ":" $deploy.image }}
         image: "{{ $deploy.hub }}/{{ $deploy.image }}"
+        {{- else }}
+        image: "{{ $deploy.hub }}/{{ $deploy.image }}:{{ $deploy.tag }}"
+        {{- end }}
         imagePullPolicy: Always
         resources:
 {{ $deploy.resources | toYaml | indent 10 }}

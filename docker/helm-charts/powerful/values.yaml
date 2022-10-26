@@ -9,7 +9,8 @@ defaults:
     dependsOn: ""
 
   replicaCount: 1
-  image: powerful:<POWERFUL_TAG>
+  image: powerful
+  tag: <POWERFUL_TAG>
   hub: zhranklin
   labels: {}
   deployLabels: {}
