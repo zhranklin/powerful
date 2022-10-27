@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: WEBFLUX-PROVIDER
+server:
+  port: 5201

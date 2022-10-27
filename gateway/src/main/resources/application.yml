@@ -1,0 +1,86 @@
+server:
+  port: 8888
+
+spring:
+  cloud:
+#    nacos:
+#      # 注册中心
+#      discovery:
+#        server-addr: http://192.102.20.62:30248
+#      # 配置中心
+#      config:
+#        server-addr: http://192.102.20.62:30248
+#        group: c9ff0075-8795-4f62-95e7-d99fd891420f
+    gateway:
+#      discovery:
+#        locator:
+#          enabled: true # 启用服务发现
+#          lower-case-service-id: true
+      routes:
+#        - id: system-auth
+#          uri: lb://system-auth
+#          predicates:
+#            - Path=/system-auth/**
+#          filters:
+#            - StripPrefix=1
+#        - id: gongyi-auth
+#          uri: lb://gongyi-auth
+#          predicates:
+#            - Path=/gongyi-auth/**
+#          filters:
+#            - StripPrefix=1
+#        - id: system-admin
+#          uri: lb://system-admin
+#          predicates:
+#            - Path=/system-auth/**
+#          filters:
+#            - StripPrefix=1
+#        - id: gongyi-system
+#          uri: lb://gongyi-system
+#          predicates:
+#            - Path=/system-auth/**
+#          filters:
+#            - StripPrefix=1
+#        - id: system-customer
+#          uri: lb://system-customer
+#          predicates:
+#            - Path=/system-customer/**
+#          filters:
+#            - StripPrefix=1
+        - id: powerful-springboot-1
+          uri: http://localhost:8080
+          predicates:
+            - Path=/test/string/**
+
+#  redis:
+#    timeout: PT30S
+#    database: 0
+#    host: 127.0.0.1
+#    port: 6379
+#    password: ENC(sq8Fy8GXuTzp2K6711Jw5A==)
+#    lettuce:
+#      pool:
+#        # 连接池最小空闲连接数
+#        min-idle: 1
+# 白名单(忽略鉴权)配置
+security:
+  ignoreUrls:
+    # 登录接口
+    - /system-auth/oauth/token/**
+    - /gongyi-auth/oauth/token/**
+    - /system-auth/sms-code
+    - /gongyi-auth/sms-code
+    - /captcha
+    - /system-admin/api/v1/users/me
+    - /gongyi-system/api/v1/users/me
+    - /system-customer/demo/**
+    - /gongyi-system/api/v1/depts
+
+# Feign 配置
+feign:
+  httpclient:
+    enabled: true
+  okhttp:
+    enabled: false
+  sentinel:  # 开启feign对sentinel的支持
+    enabled: false
