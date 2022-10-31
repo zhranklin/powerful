@@ -24,6 +24,9 @@ public class StockServiceImpl implements IStockService {
     @Value("${stock_advisor_url}")
     String stockAdvisorUrl;
 
+    @Autowired
+    WebClient.Builder builder;
+
 
     
     @Override
@@ -34,7 +37,7 @@ public class StockServiceImpl implements IStockService {
     	while(times --> 0) {
             String result;
             try{
-                result = WebClient.create().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
+                result = builder.build().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
             }catch (Exception e){
                 result = e.getMessage() + "\r\n";
             }
@@ -52,7 +55,7 @@ public class StockServiceImpl implements IStockService {
     	while(times --> 0) {
     	    String result;
     	    try{
-    	        result = WebClient.create().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
+    	        result = builder.build().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
             }catch (Exception e){
                 result = e.getMessage() + "\r\n";
             }
@@ -70,7 +73,7 @@ public class StockServiceImpl implements IStockService {
         while (times-- > 0) {
             String result;
             try{
-                result = WebClient.create().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
+                result = builder.build().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
             }catch (Exception e){
                 result = e.getMessage() + "\r\n";
             }

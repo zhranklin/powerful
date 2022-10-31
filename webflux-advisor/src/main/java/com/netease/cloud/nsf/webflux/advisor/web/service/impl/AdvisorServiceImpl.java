@@ -33,6 +33,9 @@ public class AdvisorServiceImpl implements IAdvisorService {
 		return new RestTemplate();
 	}
 
+	@Autowired
+	WebClient.Builder builder;
+
 
 	@Value("${hot_stock_ids}")
 	String hotStockIds;
@@ -65,7 +68,7 @@ public class AdvisorServiceImpl implements IAdvisorService {
 		for(int i = 0; i < 20; i++) {
 			String result;
 			try{
-				result = WebClient.create().get().uri(stockProviderUrl + "/hi?p=" + i).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
+				result = builder.build().get().uri(stockProviderUrl + "/hi?p=" + i).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
 			}catch (Exception e){
 				result = e.getMessage() + "\r\n";
 			}
@@ -80,7 +83,7 @@ public class AdvisorServiceImpl implements IAdvisorService {
 		if(times --> 0) {
 			String result;
 			try{
-				result = WebClient.create().get().uri(stockViewerrUrl + "/deepInvoke?times=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
+				result = builder.build().get().uri(stockViewerrUrl + "/deepInvoke?times=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
 			}catch (Exception e){
 				result = e.getMessage() + "\r\n";
 			}
@@ -96,7 +99,7 @@ public class AdvisorServiceImpl implements IAdvisorService {
 		String url = stockProviderUrl + "/echobyecho";
 		String result;
 		try{
-			result = WebClient.create().get().uri(url).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
+			result = builder.build().get().uri(url).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
 		}catch (Exception e){
 			result = e.getMessage() + "\r\n";
 		}
@@ -125,7 +128,7 @@ public class AdvisorServiceImpl implements IAdvisorService {
 		};
 		String result = "异步调用失败了，得看看代码";
 		try{
-			result = WebClient.create().get().uri(stockProviderUrl + "/hi?"+request.getURI().getQuery()).headers(headersConsumer).retrieve().bodyToMono(String.class).toFuture().get(2000, TimeUnit.MILLISECONDS);
+			result = builder.build().get().uri(stockProviderUrl + "/hi?"+request.getURI().getQuery()).headers(headersConsumer).retrieve().bodyToMono(String.class).toFuture().get(2000, TimeUnit.MILLISECONDS);
 		}catch (Exception e){
 
 		}
