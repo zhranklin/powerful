@@ -55,31 +55,45 @@ public class PanelController {
     	return Mono.just(new HttpResponse("clear logs success"));
     }
     
+//    @GetMapping("/echo/advisor")
+//    @ResponseBody
+//    public Mono<HttpResponse> echoAdvisor(ServerHttpRequest request,
+//                                    @RequestParam(name = "time", defaultValue = "10", required = false) int time) {
+//    	String result = stockService.echoAdvisor(time);
+//    	LogManager.put(UUID.randomUUID().toString(), result);
+//    	return Mono.just(new HttpResponse(result));
+//    }
+
     @GetMapping("/echo/advisor")
     @ResponseBody
-    public Mono<HttpResponse> echoAdvisor(ServerHttpRequest request,
-                                    @RequestParam(name = "time", defaultValue = "10", required = false) int time) {
-    	String result = stockService.echoAdvisor(time);
-    	LogManager.put(UUID.randomUUID().toString(), result);
-    	return Mono.just(new HttpResponse(result));
+    public Mono<String> echoAdvisor(ServerHttpRequest request,
+                                          @RequestParam(name = "time", defaultValue = "10", required = false) int time) {
+        return stockService.echoAdvisor(time);
     }
     
     @GetMapping("/echo/provider")
     @ResponseBody
-    public Mono<HttpResponse> echoProvider(ServerHttpRequest request,
-    		@RequestParam(name = "time", defaultValue = "10", required = false) int time) {
-    	String result = stockService.echoProvider(time);
-    	LogManager.put(UUID.randomUUID().toString(), result);
-    	return Mono.just(new HttpResponse(result));
+    public Mono<String> echoProvider(ServerHttpRequest request,
+                                           @RequestParam(name = "time", defaultValue = "10", required = false) int time) {
+    	return stockService.echoProvider(time);
+//    	LogManager.put(UUID.randomUUID().toString(), result);
+//    	return Mono.just(new HttpResponse(result));
     }
+
+//    @GetMapping("/echobyecho")
+//    @ResponseBody
+//    public Mono<HttpResponse> echobyecho(ServerHttpRequest request,
+//                                   @RequestParam(name = "time", defaultValue = "10", required = false) int time) {
+//        String result = stockService.echobyecho(time);
+//        LogManager.put(UUID.randomUUID().toString(), result);
+//        return Mono.just(new HttpResponse(result));
+//    }
 
     @GetMapping("/echobyecho")
     @ResponseBody
-    public Mono<HttpResponse> echobyecho(ServerHttpRequest request,
-                                   @RequestParam(name = "time", defaultValue = "10", required = false) int time) {
-        String result = stockService.echobyecho(time);
-        LogManager.put(UUID.randomUUID().toString(), result);
-        return Mono.just(new HttpResponse(result));
+    public Mono<String> echobyecho(ServerHttpRequest request,
+                                         @RequestParam(name = "time", defaultValue = "10", required = false) int time) {
+       return stockService.echobyecho(time);
     }
 
     

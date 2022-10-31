@@ -27,60 +27,91 @@ public class StockServiceImpl implements IStockService {
     @Autowired
     WebClient.Builder builder;
 
+    private WebClient webClient = null;
 
-    
-    @Override
-    public String echoAdvisor(int times) {
-    	
-    	StringBuilder sBuilder = new StringBuilder();
-    	String url = stockAdvisorUrl + "/echo";
-    	while(times --> 0) {
-            String result;
-            try{
-                result = builder.build().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
-            }catch (Exception e){
-                result = e.getMessage() + "\r\n";
-            }
-
-            sBuilder.append(result);
-    	}
-    	return sBuilder.toString();
-    }
-    
-    @Override
-    public String echoProvider(int times) {
-
-    	StringBuilder sBuilder = new StringBuilder();
-    	String url = stockProviderUrl + "/echo";
-    	while(times --> 0) {
-    	    String result;
-    	    try{
-    	        result = builder.build().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
-            }catch (Exception e){
-                result = e.getMessage() + "\r\n";
-            }
-
-    		sBuilder.append(result);
-    	}
-    	return sBuilder.toString();
-    }
-
-
-    @Override
-    public String echobyecho(int times) {
-        StringBuilder sBuilder = new StringBuilder();
-        String url = stockAdvisorUrl + "/echobyecho";
-        while (times-- > 0) {
-            String result;
-            try{
-                result = builder.build().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
-            }catch (Exception e){
-                result = e.getMessage() + "\r\n";
-            }
-
-            sBuilder.append(result);
+    private WebClient getWebClient(){
+        if(webClient == null){
+            webClient = builder.build();
         }
-        return sBuilder.toString();
+        return webClient;
+    }
+//    @Override
+//    public String echoAdvisor(int times) {
+//
+//    	StringBuilder sBuilder = new StringBuilder();
+//    	String url = stockAdvisorUrl + "/echo";
+//    	while(times --> 0) {
+//            String result;
+//            try{
+//                result = getWebClient().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
+//            }catch (Exception e){
+//                result = e.getMessage() + "\r\n";
+//            }
+//
+//            sBuilder.append(result);
+//    	}
+//    	return sBuilder.toString();
+//    }
+
+    @Override
+    public Mono<String> echoAdvisor(int times) {
+
+        String url = stockAdvisorUrl + "/echo";
+            Mono<String> result;
+            try{
+                result = getWebClient().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class);
+            }catch (Exception e){
+                result = Mono.just(e.getMessage() + "\r\n");
+            }
+            return result;
+    }
+    
+    @Override
+    public Mono<String> echoProvider(int times) {
+
+    	//StringBuilder sBuilder = new StringBuilder();
+    	String url = stockProviderUrl + "/echo";
+    	//while(times --> 0) {
+    	    Mono<String> result;
+    	    try{
+    	        result = getWebClient().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class);
+            }catch (Exception e){
+                result = Mono.just(e.getMessage() + "\r\n");
+            }
+
+    		//sBuilder.append(result);
+    	//}
+    	return result;
+    }
+
+
+//    @Override
+//    public String echobyecho(int times) {
+//        StringBuilder sBuilder = new StringBuilder();
+//        String url = stockAdvisorUrl + "/echobyecho";
+//        while (times-- > 0) {
+//            String result;
+//            try{
+//                result = getWebClient().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class).toFuture().get(1000, TimeUnit.MILLISECONDS);
+//            }catch (Exception e){
+//                result = e.getMessage() + "\r\n";
+//            }
+//
+//            sBuilder.append(result);
+//        }
+//        return sBuilder.toString();
+//    }
+
+    @Override
+    public Mono<String> echobyecho(int times) {
+        String url = stockAdvisorUrl + "/echobyecho";
+            Mono<String> result;
+            try{
+                result = getWebClient().get().uri(url + "?p=" + times).retrieve().bodyToMono(String.class);
+            }catch (Exception e){
+                result = Mono.just(e.getMessage() + "\r\n");
+            }
+        return  result;
     }
 
 }

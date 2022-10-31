@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Iterator;
@@ -25,8 +26,8 @@ public class AdvisorController {
 
 	
 	@GetMapping("/hi")
-	public Mono<List<String> > greeting() {
-		return Mono.just(advisorService.batchHi());
+	public Mono<String > greeting() {
+		return advisorService.batchHi();
 	}
 	
 	@Value("${spring.application.name}")
@@ -43,7 +44,7 @@ public class AdvisorController {
 
 
 	@GetMapping("/echobyecho")
-	public Mono<String> echobyecho(ServerHttpRequest request) {
+	public Flux<String> echobyecho(ServerHttpRequest request) {
 		String host = request.getLocalAddress().getHostString();
 		int port = request.getLocalAddress().getPort();
 		String color = request.getHeaders().getFirst("X-NSF-COLOR");
@@ -56,8 +57,8 @@ public class AdvisorController {
 			}
 		}
 		sb.append("]");
-		String res = advisorService.echobyecho();
-		return Mono.just("echo from " + name + "[" + host + ":" + port + "] color:" + color + sb.toString() + " | " + res + System.lineSeparator());
+		Mono<String> res = advisorService.echobyecho();
+		return Flux.merge(Mono.just("echo from " + name + "[" + host + ":" + port + "] color:" + color + sb.toString() + " | ") , res );
 	}
 
 
@@ -70,7 +71,7 @@ public class AdvisorController {
 	@RequestMapping("/deepInvoke")
 	@ResponseBody
 	public Mono<String> deepInvoke(@RequestParam int times) {
-		return Mono.just(advisorService.deepInvoke(times));
+		return advisorService.deepInvoke(times);
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
@@ -98,7 +99,7 @@ public class AdvisorController {
 	@GetMapping("/divide")
 	public Mono<String> divide(ServerHttpRequest request) {
 		
-		return Mono.just(advisorService.divide(request));
+		return advisorService.divide(request);
 
 		
 	}
