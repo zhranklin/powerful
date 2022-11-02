@@ -11,7 +11,7 @@ defaults:
 
   replicaCount: 1
   image: powerful
-  tag: <POWERFUL_TAG>
+  tag: "<POWERFUL_TAG>"
   hub: zhranklin
   labels: {}
   deployLabels: {}
