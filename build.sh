@@ -98,7 +98,7 @@ if [[ $BUILD_ALL_DEMO = "1" ]]; then
       mf_args="$hub/$image"
       for arch in amd64 arm64; do
         _arch=_$arch
-        docker buildx build --platform "linux/$arch" --load ./powerful-$module -t $hub/$image$_arch
+        docker buildx build --platform "linux/$arch" --load ./powerful-$module -t $hub/$image$_arch -f $df
         docker push $hub/$image$_arch
         docker rmi $hub/$image$_arch
         mf_args="$mf_args $hub/$image$_arch"

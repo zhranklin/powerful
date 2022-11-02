@@ -1,6 +1,6 @@
 # How to build base image:
 # ./build-base-img.sh
-FROM zhranklin/toolbox:v0.1.0
+FROM zhranklin/toolbox:v0.1.2
 ENV OPERATOR=/usr/local/bin/helm-operator \
     USER_UID=1001 \
     USER_NAME=helm \
