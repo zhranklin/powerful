@@ -43,6 +43,10 @@
                   "label": "by"
                 }, {
                   "type": "Control",
+                  "scope": "#/properties/method",
+                  "label": "method"
+                }, {
+                  "type": "Control",
                   "scope": "#/properties/delay",
                   "label": "delay"
                 }, {

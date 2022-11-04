@@ -18,6 +18,15 @@
               "thrift"
             ]
           },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "DELETE",
+              "PUT"
+            ]
+          },
           "times": {
             "type": "integer",
             "minimum": 1,
