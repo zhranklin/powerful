@@ -10,6 +10,7 @@ import java.util.Map;
 public class RenderingContext implements Serializable{
 
 	private Map<String, String> requestHeaders = new HashMap<>();
+	private String path = "";
 	private Map<String, String> params = new HashMap<>();
 	private String method = "";
 	private final ThreadLocal<Result> results = new ThreadLocal<>();
@@ -71,6 +72,14 @@ public class RenderingContext implements Serializable{
 
 	public void setMethod(String method) {
 		this.method = method;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 	private static class Result {

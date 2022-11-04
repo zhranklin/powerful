@@ -32,6 +32,7 @@ public class HttpController {
         try {
             context.setMethod(request.getMethod());
             context.setRequestHeaders(transformRequestHeaders(request));
+            context.setPath(request.getServletPath());
             context.setParams(params);
             powerful.execute(instruction, context);
             return context.getResult().makeHttpResponse(instruction);

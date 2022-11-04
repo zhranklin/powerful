@@ -54,6 +54,7 @@ public class StringRenderer implements EnvironmentAware {
         exprFuncs.put("env", context -> params -> System.getenv(params.get(0)));
         exprFuncs.put("apollo", context -> params -> environment.getProperty(params.get(0)));
         exprFuncs.put("springEnv", context -> params -> environment.getProperty(params.get(0)));
+        exprFuncs.put("path", context -> params -> context.getPath());
         exprFuncs.put("timestamp", context -> params -> {
             Date now = new Date();
             String pattern = params.isEmpty() ? "yyyy-MM-dd hh:mm:ss" : params.get(0);
