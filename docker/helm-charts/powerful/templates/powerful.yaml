@@ -1,5 +1,5 @@
 {{- $baseContext := (dict "Values" $.Values "Template" $.Template)}}
-{{- $casesApp := dict "name" "powerful-cases" "deploys" (list .Values.cases) -}}
+{{- $casesApp := (set .Values.cases "name" "powerful-cases") -}}
 
 {{- range $_, $app := append .Values.apps $casesApp }}
 {{- if $app.Name }}
