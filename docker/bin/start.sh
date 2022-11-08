@@ -6,7 +6,7 @@ case "$1" in
 esac
 
 if [[ $RUN_DEMO == "1" ]]; then
-  java $JAVA_OPTS -jar /opt/helm/app.jar stage0
+  java $(echo "$JAVA_OPTS" | sed 's/-javaagent.*nsf[^ ]*\( \|$\)/ /g') -jar /opt/helm/app.jar stage0
   jar -uf /opt/helm/app.jar -C /usr/local/javalib BOOT-INF/classes
   java $JAVA_OPTS -jar /opt/helm/app.jar "$@"
 fi

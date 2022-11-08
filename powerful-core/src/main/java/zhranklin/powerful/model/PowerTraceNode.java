@@ -1,9 +1,10 @@
 package zhranklin.powerful.model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PowerTraceNode {
+public class PowerTraceNode implements Serializable {
 	private String call = "";
 
 	private String by = "http";

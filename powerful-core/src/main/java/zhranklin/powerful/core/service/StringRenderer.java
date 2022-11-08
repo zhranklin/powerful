@@ -115,7 +115,7 @@ public class StringRenderer implements EnvironmentAware {
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             String expr = matcher.group(1);
-            matcher.appendReplacement(sb, calc(expr, requestContext));
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(calc(expr, requestContext)));
         }
         matcher.appendTail(sb);
         return sb.toString();

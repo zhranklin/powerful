@@ -1,0 +1,12 @@
+#!/bin/bash
+case "$1" in
+  demo) RUN_DEMO=1; shift 1; ;;
+  operator) RUN_OPERATOR=1; shift 1; ;;
+  *) echo unsupported option: $1; shift 1; ;;
+esac
+
+if [[ $RUN_DEMO == "1" ]]; then
+  java $(echo "$JAVA_OPTS" | sed 's/-javaagent.*nsf[^ ]*\( \|$\)/ /g') -jar /app.jar stage0
+  jar -uf /app.jar -C /usr/local/javalib BOOT-INF/classes
+  java $JAVA_OPTS -jar /app.jar "$@"
+fi

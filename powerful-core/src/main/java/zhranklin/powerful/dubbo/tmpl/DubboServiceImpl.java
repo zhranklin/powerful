@@ -1,17 +1,16 @@
 package zhranklin.powerful.dubbo.tmpl;
 
 import com.alibaba.dubbo.config.annotation.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import zhranklin.powerful.assist.PowerfulRPCTemplate;
 import zhranklin.powerful.core.invoker.RPCInvokeContext;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.dubbo.pojo.DubboPojo1;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.RenderingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
@@ -20,8 +19,6 @@ import javax.annotation.PostConstruct;
 @PowerfulRPCTemplate("")
 public class DubboServiceImpl implements DubboService {
     private static final Logger logger = LoggerFactory.getLogger(DubboServiceImpl.class);
-
-    private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     PowerfulService powerful;

@@ -58,7 +58,7 @@ public class Gen {
                 if (rpcTemplate != null) {
                     rpcTemplate.subPackage();
                     String service = rpcTemplate.value();
-                    genClass(clazz, appName, service);
+                    genClass(clazz, appNameToClassName(appName), service);
                 }
             }
             genDubboInvoker(getDependsOn());
@@ -70,6 +70,7 @@ public class Gen {
     public static void genDubboInvoker(Set<String> dependsOn) throws NotFoundException, CannotCompileException, IOException, ClassNotFoundException {
         CtClass clazz = pool.get(DubboRemoteInvoker.class.getName());
         for (String dep : dependsOn) {
+            dep = appNameToClassName(dep);
             for (Map.Entry<String, InterfaceRefField> entry : interfaces.entrySet()) {
                 InterfaceRefField ref = entry.getValue();
                 genClass(ref.clazz, dep, null);
@@ -155,11 +156,11 @@ public class Gen {
     }
 
     public static String genClassName(Class<?> tmpl, String suffix) {
-        return GEN_PACKAGE + "." + tmpl.getSimpleName() + "_" + suffix;
+        return GEN_PACKAGE + "." + tmpl.getSimpleName() + "_" + Gen.appNameToClassName(suffix);
     }
 
     public static String genFieldName(String app, String service) {
-        return String.format("gen_dubbo%s_%s", service, app);
+        return String.format("gen_dubbo%s_%s", service, appNameToClassName(app));
     }
 
     public static void main(String[] args) {
@@ -177,6 +178,10 @@ public class Gen {
             this.group = group;
             this.version = version;
         }
+    }
+
+    public static String appNameToClassName(String appName) {
+        return appName.replaceAll("-", "_");
     }
 
 }

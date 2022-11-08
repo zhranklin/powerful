@@ -27,12 +27,18 @@ defaults:
       {{- if .dubbo.enabled -}}
         {{- range $_, $app := append .Values.apps .Values.cases -}}
           {{- $hasDubbo := false -}}
+          {{- $app = merge (deepCopy $app) $.Values.defaults }}
           {{- range $_, $deploy := $app.deploys -}}
-            {{- $deploy = merge (deepCopy $deploy) $app $.Values.defaults }}
+            {{- $deploy = merge (deepCopy $deploy) $app }}
             {{- if $deploy.dubbo -}}
               {{- if $deploy.dubbo.enabled -}}
                 {{- $hasDubbo = true -}}
               {{- end -}}
+            {{- end -}}
+          {{- end -}}
+          {{- if and (not $app.deploys) $app.dubbo -}}
+            {{- if $app.dubbo.enabled -}}
+              {{- $hasDubbo = true -}}
             {{- end -}}
           {{- end -}}
           {{- if $hasDubbo -}}

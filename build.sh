@@ -90,7 +90,7 @@ if [[ $BUILD_OPERATOR = "1" ]]; then
   fi
 fi
 if [[ $BUILD_ALL_DEMO = "1" ]]; then
-  modules="springboot-1 springboot-2"
+  modules="springboot-2 springboot-1"
   for module in $modules; do
     # 不带java后缀的是java17
     for df in `ls ./powerful-$module/Dockerfile*`; do

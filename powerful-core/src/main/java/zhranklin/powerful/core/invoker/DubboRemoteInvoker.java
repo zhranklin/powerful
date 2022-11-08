@@ -91,7 +91,7 @@ public class DubboRemoteInvoker implements RemoteInvoker {
 
     private Object invokeDubbo(Instruction instruction) throws IOException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
         String[] path = instruction.currentNode().getCall().split("/");
-        String app = path[0];
+        String app = Gen.appNameToClassName(path[0]);
         String service = path[1];
         String methodName = path[2];
 
@@ -121,7 +121,7 @@ public class DubboRemoteInvoker implements RemoteInvoker {
         for (int i = 0; i < arguments.length; i++) {
             Class<?> type = method.getParameterTypes()[i];
             if (type == Instruction.class) {
-                arguments[i] = instruction.getNext();
+                arguments[i] = instruction;
             } else {
                 arguments[i] = unmarshalParam(params.get(paramIndex++), type);
             }
