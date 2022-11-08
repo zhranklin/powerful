@@ -123,7 +123,7 @@ public class Instruction implements Serializable, Cloneable {
 			next.setTrace(nextTrace);
 			next.times = 1;
 			next.threads = 1;
-			next.qps = 1;
+			next.qps = 0;
 			return next;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
