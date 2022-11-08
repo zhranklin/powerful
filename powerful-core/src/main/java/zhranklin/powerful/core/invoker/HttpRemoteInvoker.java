@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.core.service.StringRenderer;
 import zhranklin.powerful.model.Instruction;
+import zhranklin.powerful.model.PowerTraceNode;
 import zhranklin.powerful.model.PowerfulResponse;
 import zhranklin.powerful.model.RenderingContext;
 import org.apache.commons.lang3.StringUtils;
@@ -36,23 +37,24 @@ public class HttpRemoteInvoker implements RemoteInvoker {
     }
 
     public PowerfulResponse invoke(Instruction instruction, RenderingContext context) {
+        PowerTraceNode node = instruction.currentNode();
         HttpHeaders headers = new HttpHeaders();
-        instruction.getHeaders().forEach(headers::set);
+        node.getHeaders().forEach(headers::set);
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        String url = instruction.getCall() + "/execute";
+        String url = node.getCall() + "/execute";
         List<String> params = new ArrayList<>();
-        instruction.getQueries().forEach((k, v) -> params.add(k + "=" + stringRenderer.render(v, context)));
+        node.getQueries().forEach((k, v) -> params.add(k + "=" + stringRenderer.render(v, context)));
         if (!url.startsWith("http:")) {
             url = "http://" + url;
         }
         try {
-            String method = instruction.getMethod();
+            String method = node.getMethod();
             Instruction body;
             if (METHODS_WITH_BODY.contains(method)) {
-                body = instruction.getTo();
+                body = instruction;
             } else if (METHODS_WITHOUT_BODY.contains(method)) {
                 body = null;
-                params.add("_body=" + PowerfulService.encodeURLBase64(PowerfulService.jsonMapper.writeValueAsString(PowerfulService.getSimplifiedNode(instruction, true))));
+                params.add("_body=" + PowerfulService.encodeURLBase64(PowerfulService.jsonMapper.writeValueAsString(PowerfulService.getSimplifiedNode(instruction))));
             } else {
                 throw new IllegalArgumentException(String.format("The method '%s' is not supported.", method));
             }
@@ -60,7 +62,7 @@ public class HttpRemoteInvoker implements RemoteInvoker {
                 url = url + "?" + StringUtils.join(params, "&");
             }
             if (instruction.isLog()) {
-                String yamlBody = new ObjectMapper(new YAMLFactory()).writeValueAsString(PowerfulService.getSimplifiedNode(instruction, false));
+                String yamlBody = new ObjectMapper(new YAMLFactory()).writeValueAsString(PowerfulService.getSimplifiedNode(instruction));
                 logger.info("{}:\n{}\nREQUEST:\n{}", method, url, yamlBody);
             }
             return PowerfulResponse.fromHttp(restTemplate.exchange(new RequestEntity<>(body, headers, HttpMethod.valueOf(method), URI.create(url)), String.class));

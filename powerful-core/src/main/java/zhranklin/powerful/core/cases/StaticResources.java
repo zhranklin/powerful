@@ -94,13 +94,7 @@ public class StaticResources {
         return requestCase;
     }
     public void processTargetMapping(Instruction instruction) {
-        instruction.setCall(replaceTargets(instruction.getCall(), false));
-        try {
-            String to = replaceTargets(objectMapper.writeValueAsString(instruction.getTo()), false);
-            instruction.setTo(objectMapper.readValue(to, Instruction.class));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        instruction.getTrace().forEach(t -> t.setCall(replaceTargets(t.getCall(), false)));
     }
 
     private String replaceTargets(String src, boolean trace) {

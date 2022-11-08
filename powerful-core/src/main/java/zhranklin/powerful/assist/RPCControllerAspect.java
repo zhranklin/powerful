@@ -63,7 +63,7 @@ public class RPCControllerAspect {
 			RPCInvokeContext.renderingContext.set(null);
 			RpcContext serverContext = RpcContext.getServerContext();
 			if (instruction != null) {
-				instruction.getResponseHeaders().forEach(serverContext::setAttachment);
+				instruction.currentNode().getResponseHeaders().forEach(serverContext::setAttachment);
 			}
 		}
 	}

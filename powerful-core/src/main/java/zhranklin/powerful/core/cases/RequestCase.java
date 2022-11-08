@@ -2,20 +2,12 @@ package zhranklin.powerful.core.cases;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import zhranklin.powerful.model.Instruction;
-import org.springframework.util.CollectionUtils;
-
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by 张武 at 2019/9/20
  */
 public class RequestCase extends Instruction {
 
-	private List<Instruction> trace;
-
-	private String traceNodeTmpl = defaultTraceNodeTmpl;
-	public static final String defaultTraceNodeTmpl = System.getProperty("defaultTraceNodeTmpl", "{{env(APP)}}|{{env(VERSION)}}({{statusCode()}})");
 
 	@JsonProperty
 	private String name;
@@ -38,46 +30,6 @@ public class RequestCase extends Instruction {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public List<Instruction> getTrace() {
-		return trace;
-	}
-
-	public void setTrace(List<Instruction> trace) {
-		this.trace = trace;
-	}
-
-	public String getTraceNodeTmpl() {
-		return traceNodeTmpl;
-	}
-
-	public void setTraceNodeTmpl(String traceNodeTmpl) {
-		this.traceNodeTmpl = traceNodeTmpl;
-	}
-
-	public Instruction translateTrace() {
-		if (CollectionUtils.isEmpty(trace)) {
-			return this;
-		}
-		Instruction prev = this;
-		for (Instruction current : trace) {
-			prev.setCall(current.getCall());
-			prev.setBy(current.getBy());
-			prev.setHeaders(current.getHeaders());
-			prev.setQueries(current.getQueries());
-			prev.setMethod(current.getMethod());
-			prev.setTo(current);
-			prev.setResponseFmt(String.format("%s -> {{resultBody()}}", traceNodeTmpl));
-			current.setPropagateHeaders(getPropagateHeaders());
-			current.setLog(isLog());
-			prev = current;
-		}
-		prev.setCall("");
-		prev.setHeaders(new HashMap<>());
-		prev.setQueries(new HashMap<>());
-		prev.setResponseFmt(traceNodeTmpl);
-		return this;
 	}
 
 	public Object getExpect() {

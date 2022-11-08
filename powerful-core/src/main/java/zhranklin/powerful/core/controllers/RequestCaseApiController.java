@@ -10,6 +10,7 @@ import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.cases.StaticResources;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.model.Instruction;
+import zhranklin.powerful.model.PowerTraceNode;
 import zhranklin.powerful.model.RenderingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -150,10 +151,12 @@ public class RequestCaseApiController {
     }
 
     private Object execute(RequestCase requestCase, Map<String, String> params, boolean validate) {
-        Instruction instruction = staticResources.processTargetMappingForTrace(requestCase).translateTrace();
+        Instruction instruction = staticResources.processTargetMappingForTrace(requestCase);
         staticResources.processTargetMapping(instruction);
         RenderingContext context = new RenderingContext();
         context.setParams(params);
+        //execute方法的逻辑中, trace中的第一个node代表自身的执行节点
+        instruction.getTrace().add(0, new PowerTraceNode());
         Object result = powerful.execute(instruction, context);
         if (validate) {
             Map<String, Object> ret = new HashMap<>();

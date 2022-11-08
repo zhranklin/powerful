@@ -3,6 +3,7 @@ package zhranklin.powerful.core.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.model.Instruction;
+import zhranklin.powerful.model.PowerfulStatusCodeException;
 import zhranklin.powerful.model.RenderingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -39,8 +40,12 @@ public class HttpController {
         } catch (RuntimeException e) {
             e.printStackTrace();
             HttpHeaders respHeaders = new HttpHeaders();
-            instruction.getResponseHeaders().forEach(respHeaders::set);
-            return new ResponseEntity<>(e.getMessage(), respHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+            instruction.currentNode().getResponseHeaders().forEach(respHeaders::set);
+            HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+            if (e.getCause() instanceof PowerfulStatusCodeException) {
+                status = ((PowerfulStatusCodeException) e.getCause()).status;
+            }
+            return new ResponseEntity<>(e.getMessage(), respHeaders, status);
         }
     }
     @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.GET, RequestMethod.DELETE})

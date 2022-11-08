@@ -1,5 +1,6 @@
 package zhranklin.powerful.core.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -9,25 +10,33 @@ import com.flipkart.zjsonpatch.CompatibilityFlags;
 import com.flipkart.zjsonpatch.DiffFlags;
 import com.flipkart.zjsonpatch.JsonDiff;
 import com.flipkart.zjsonpatch.JsonPatch;
-import zhranklin.powerful.core.cases.RequestCase;
-import zhranklin.powerful.core.invoker.RemoteInvoker;
-import zhranklin.powerful.model.Instruction;
-import zhranklin.powerful.model.PowerfulResponse;
-import zhranklin.powerful.model.RenderingContext;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
+import zhranklin.powerful.core.cases.RequestCase;
+import zhranklin.powerful.core.invoker.RemoteInvoker;
+import zhranklin.powerful.model.Instruction;
+import zhranklin.powerful.model.PowerTraceNode;
+import zhranklin.powerful.model.PowerfulResponse;
+import zhranklin.powerful.model.PowerfulStatusCodeException;
+import zhranklin.powerful.model.RenderingContext;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -37,13 +46,11 @@ import java.util.stream.Stream;
  */
 public class PowerfulService {
 
-    public static final ObjectMapper jsonMapper = new ObjectMapper();
+    public static final ObjectMapper jsonMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private static final Logger logger = LoggerFactory.getLogger(PowerfulService.class);
     private static final Random rand = new Random();
     protected final StringRenderer stringRenderer;
     private final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(20, 200, 3, TimeUnit.MINUTES, new SynchronousQueue<>());
-
-    private final AtomicInteger executeCount = new AtomicInteger(0);
 
     @Autowired
     private TestingMethodService testingMethodService;
@@ -54,47 +61,39 @@ public class PowerfulService {
         this.stringRenderer = stringRenderer;
     }
 
-    public static JsonNode getSimplifiedNode(Instruction instruction, boolean responseFmt) throws IOException {
-        Map<String, Object> blankObject = new LinkedHashMap<>();
-        Instruction curInst = new Instruction();
-        Instruction baseInstruction = curInst;
-        Map<String, Object> curNode = blankObject;
-        for (Instruction to = instruction.getTo(); to.getTo() != null; to = to.getTo()) {
-            curInst.setTo(new Instruction());
-            curInst = curInst.getTo();
-            curNode.put("to", new HashMap<>());
-            //noinspection unchecked
-            curNode = (Map<String, Object>) curNode.get("to");
+    public static JsonNode getSimplifiedNode(Instruction instruction) throws IOException {
+        if (instruction instanceof RequestCase) {
+            instruction = jsonMapper.readValue(jsonMapper.writeValueAsString(instruction), Instruction.class);
         }
-        //解决apply diff时报错
-        if (!instruction.getTo().getHeaders().isEmpty()) {
-            baseInstruction.setHeaders(null);
+        ArrayNode trace = new ArrayNode(JsonNodeFactory.instance);
+        for (PowerTraceNode t : instruction.getTrace()) {
+            PowerTraceNode n = new PowerTraceNode();
+            if (!t.getQueries().isEmpty()) {
+                n.setQueries(null);
+            }
+            if (!t.getHeaders().isEmpty()) {
+                n.setHeaders(null);
+            }
+            if (!t.getResponseHeaders().isEmpty()) {
+                n.setResponseHeaders(null);
+            }
+            trace.add(simplify(n, t));
         }
-        if (!instruction.getTo().getResponseHeaders().isEmpty()) {
-            baseInstruction.setResponseHeaders(null);
-        }
-        if (!instruction.getTo().getQueries().isEmpty()) {
-            baseInstruction.setQueries(null);
-        }
+        Instruction base = new Instruction();
+        base.setTrace(null);
+        List<PowerTraceNode> backup = instruction.getTrace();
+        instruction.setTrace(null);
+        JsonNode result = simplify(base, instruction);
+        instruction.setTrace(backup);
+        ((ObjectNode) result).put("trace", trace);
+        return result;
+    }
+
+    private static JsonNode simplify(Object base, Object target) throws IOException {
         ArrayNode diff = (ArrayNode) JsonDiff.asJson(
-            jsonMapper.readTree(jsonMapper.writeValueAsString(baseInstruction)),
-            jsonMapper.readTree(jsonMapper.writeValueAsString(instruction.getTo())), DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone()
+            jsonMapper.readTree(jsonMapper.writeValueAsString(base)),
+            jsonMapper.readTree(jsonMapper.writeValueAsString(target)), DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone()
         );
-        String pathPrefix = "/to/";
-        for (int i = 0; i < diff.size(); i++) {
-            String path = diff.get(i).get("path").textValue();
-            if (!responseFmt && path.endsWith("/responseFmt")) {
-            	diff.remove(i--);
-            	continue;
-            }
-            if (path.startsWith(pathPrefix)) {
-                diff.insertObject(i)
-                    .put("op", "replace")
-                    .put("path", pathPrefix.replaceAll("/$", ""))
-                    .putObject("value");
-                pathPrefix += "to/";
-            }
-        }
         return JsonPatch.apply(
             diff,
             jsonMapper.readTree("{}"), EnumSet.of(CompatibilityFlags.ALLOW_MISSING_TARGET_OBJECT_ON_REPLACE)
@@ -102,10 +101,6 @@ public class PowerfulService {
     }
 
     public Object execute(Instruction instruction, RenderingContext context) {
-        if (instruction.getCall() != null && instruction.getCall().startsWith("dubbo://")) {
-            instruction.setCall(instruction.getCall().substring("dubbo://".length()));
-            instruction.setBy("dubbo");
-        }
         if (instruction.getTimes() <= 1) {
             String result = executeSingle(instruction, context, false, 0, 0, 0).renderResult;
             context.getResult().result = result;
@@ -139,8 +134,8 @@ public class PowerfulService {
             );
         }
         context.getResult().result = result;
-        instruction.getResponseHeaders().forEach((k, v) ->
-            instruction.getResponseHeaders().put(k, stringRenderer.render(v, context))
+        instruction.currentNode().getResponseHeaders().forEach((k, v) ->
+            instruction.currentNode().getResponseHeaders().put(k, stringRenderer.render(v, context))
         );
         return result;
     }
@@ -178,7 +173,7 @@ public class PowerfulService {
 
     private Result executeSingle(Instruction instruction, RenderingContext context, boolean handleException, double qps, long startTime, int executed) {
         long waitTimeMillis = qps == 0 ? 0 : (long) (executed / qps * 1000) - (System.nanoTime() - startTime) / 1000000;
-        String template = !StringUtils.isEmpty(instruction.getResponseFmt()) ? instruction.getResponseFmt() : "{{resultBody()}}";
+        String template = instruction.getTrace().size() < 2 ? instruction.getTraceNodeTmpl() : instruction.getTraceNodeTmpl() + " -> {{resultBody()}}";
         long requestStarts = 0;
         try {
             if (waitTimeMillis >= 5) {
@@ -208,12 +203,6 @@ public class PowerfulService {
             for (Map.Entry<String, List<Object>> entry : instruction.getRr().entrySet()) {
                 List<Object> values = entry.getValue();
                 String path = "/" + entry.getKey().replaceAll("\\.", "/");
-                String indexStr = path.replaceAll("^(/trace\\[(\\d+)])?.*", "$2");
-                if (!indexStr.isEmpty()) {
-                    int index = Integer.parseInt(indexStr);
-                    path = Stream.generate(() -> "/to").limit(index).collect(Collectors.joining())
-                        + path.replaceAll("^/trace\\[(\\d+)]", "");
-                }
                 ObjectNode patch = patches.addObject();
                 patch.put("op", "replace");
                 patch.put("path", path);
@@ -227,47 +216,68 @@ public class PowerfulService {
     }
 
     private void doExecuteSingle(Instruction instruction, RenderingContext context) {
-        executeCount.incrementAndGet();
-        RemoteInvoker invoker = invokers.get(instruction.getBy());
-        if (invoker == null) {
-            throw new IllegalStateException(String.format("Protocol not supported in this instance: '%s'", instruction.getBy()));
-        }
-        if (context.getRequestHeaders() != null && !StringUtils.isEmpty(instruction.getPropagateHeaders())) {
-            HashSet<String> propagateHeaders = new HashSet<>(Arrays.asList(instruction.getPropagateHeaders().split(",")));
-            propagateHeaders.retainAll(context.getRequestHeaders().keySet());
-            if (instruction.getHeaders() != null) {
-                propagateHeaders.removeAll(instruction.getHeaders().keySet());
-            }
-            if (!propagateHeaders.isEmpty()) {
-                if (instruction.getHeaders() == null) {
-                    instruction.setHeaders(new HashMap<>());
-                }
-                propagateHeaders.forEach(headerName -> instruction.getHeaders().put(headerName, context.getRequestHeaders().get(headerName)));
-            }
-        }
+        PowerTraceNode node = instruction.currentNode();
+        propagateHeaders(instruction, context, node);
+        renderHeaders(context);
+        invokeTestMethod(context, node);
+        delay(node);
+        errorByPercent(node);
+        code(node);
+        call(instruction.getNext(), context);
+    }
+
+    private void renderHeaders(RenderingContext context) {
         if (context.getRequestHeaders() != null) {
             context.getRequestHeaders().forEach((k, v) -> {
                 String value = stringRenderer.render(v, context);
                 context.getRequestHeaders().put(k, value);
             });
         }
-        instruction.setCall(stringRenderer.render(instruction.getCall(), context));
-        if (!StringUtils.isEmpty(instruction.getCall())) {
-            context.setResult(invoker.invoke(instruction, context));
-        }
-        Integer tm = instruction.getCallTestMethod();
-        if (tm != null) {
-            context.setInvokeResult(invokeTestMethod(tm));
-        }
-        int delay = (int) (instruction.getDelay() * 1000);
-        if (delay > 0) {
-            try {
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    }
+
+    private void propagateHeaders(Instruction instruction, RenderingContext context, PowerTraceNode node) {
+        if (context.getRequestHeaders() != null && !StringUtils.isEmpty(instruction.getPropagateHeaders())) {
+            HashSet<String> propagateHeaders = new HashSet<>(Arrays.asList(instruction.getPropagateHeaders().split(",")));
+            propagateHeaders.retainAll(context.getRequestHeaders().keySet());
+            if (node.getHeaders() != null) {
+                propagateHeaders.removeAll(node.getHeaders().keySet());
+            }
+            if (!propagateHeaders.isEmpty()) {
+                if (node.getHeaders() == null) {
+                    node.setHeaders(new HashMap<>());
+                }
+                propagateHeaders.forEach(headerName -> node.getHeaders().put(headerName, context.getRequestHeaders().get(headerName)));
             }
         }
-        Integer errorPercent = instruction.getErrorByPercent();
+    }
+
+    private void call(Instruction instruction, RenderingContext context) {
+        if (instruction == null || instruction.currentNode() == null) {
+            return;
+        }
+        PowerTraceNode node = instruction.currentNode();
+        if (node.getCall() != null && node.getCall().startsWith("dubbo://")) {
+            node.setCall(node.getCall().substring("dubbo://".length()));
+            node.setBy("dubbo");
+        }
+        RemoteInvoker invoker = invokers.get(node.getBy());
+        if (invoker == null) {
+            throw new IllegalStateException(String.format("Protocol not supported in this instance: '%s'", node.getBy()));
+        }
+        node.setCall(stringRenderer.render(node.getCall(), context));
+        if (!StringUtils.isEmpty(node.getCall())) {
+            context.setResult(invoker.invoke(instruction, context));
+        }
+    }
+
+    private void code(PowerTraceNode node) {
+        if (node.getCode() != 200) {
+            throw new PowerfulStatusCodeException(node.getCode());
+        }
+    }
+
+    private void errorByPercent(PowerTraceNode node) {
+        Integer errorPercent = node.getErrorByPercent();
         if (errorPercent > 0) {
             if (rand.nextInt(100) < errorPercent) {
                 logger.info("throw Random error");
@@ -276,9 +286,21 @@ public class PowerfulService {
         }
     }
 
-    public String invokeTestMethod(int n) {
-        if (n == 0) {
-            return null;
+    private void delay(PowerTraceNode node) {
+        int delay = (int) (node.getDelay() * 1000);
+        if (delay > 0) {
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void invokeTestMethod(RenderingContext context, PowerTraceNode node) {
+        Integer n = node.getCallTestMethod();
+        if (n == null || n == 0) {
+            return;
         }
         if (n > 100 || n < 0) {
             throw new IllegalArgumentException(String.format("invokeTestMethod: illegal n: %s", n));
@@ -286,7 +308,7 @@ public class PowerfulService {
         try {
             int i = rand.nextInt(n);
             Method method = TestingMethodService.class.getMethod(String.format("method%02d", i));
-            return (String) method.invoke(testingMethodService);
+            context.setInvokeResult((String) method.invoke(testingMethodService));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

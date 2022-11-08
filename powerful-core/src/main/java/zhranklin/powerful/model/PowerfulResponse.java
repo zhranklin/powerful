@@ -32,7 +32,7 @@ public class PowerfulResponse {
 
 	public ResponseEntity<String> makeHttpResponse(Instruction instruction) {
 		HttpHeaders respHeaders = new HttpHeaders();
-		instruction.getResponseHeaders().forEach(respHeaders::set);
+		instruction.currentNode().getResponseHeaders().forEach(respHeaders::set);
 		//todo 翻译status
 		return new ResponseEntity<>("" + result, respHeaders, HttpStatus.OK);
 	}

@@ -53,9 +53,9 @@ public class DubboRemoteInvoker implements RemoteInvoker {
     @Override
     public PowerfulResponse invoke(Instruction instruction, RenderingContext context) {
         try {
-            instruction.getHeaders().forEach(RpcContext.getContext()::setAttachment);
+            instruction.currentNode().getHeaders().forEach(RpcContext.getContext()::setAttachment);
             if (instruction.isLog()) {
-                String yamlBody = new ObjectMapper(new YAMLFactory()).writeValueAsString(PowerfulService.getSimplifiedNode(instruction, false));
+                String yamlBody = new ObjectMapper(new YAMLFactory()).writeValueAsString(PowerfulService.getSimplifiedNode(instruction));
                 logger.info("DUBBO:\nREQUEST:\n{}", yamlBody);
             }
             RPCInvokeContext.renderingContext.set(context);
@@ -90,7 +90,7 @@ public class DubboRemoteInvoker implements RemoteInvoker {
     }
 
     private Object invokeDubbo(Instruction instruction) throws IOException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
-        String[] path = instruction.getCall().split("/");
+        String[] path = instruction.currentNode().getCall().split("/");
         String app = path[0];
         String service = path[1];
         String methodName = path[2];
@@ -121,7 +121,7 @@ public class DubboRemoteInvoker implements RemoteInvoker {
         for (int i = 0; i < arguments.length; i++) {
             Class<?> type = method.getParameterTypes()[i];
             if (type == Instruction.class) {
-                arguments[i] = instruction.getTo();
+                arguments[i] = instruction.getNext();
             } else {
                 arguments[i] = unmarshalParam(params.get(paramIndex++), type);
             }

@@ -1,6 +1,9 @@
 package zhranklin.powerful.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,20 +11,9 @@ import java.util.Map;
 /**
  * Created by 张武 at 2019/9/6
  */
-public class Instruction implements Serializable {
+public class Instruction implements Serializable, Cloneable {
 
-	private String call = "";
-
-	private String by = "http";
-
-	private static final String defaultCollectBy = System.getProperty("defaultCollectBy", "stat_count");
-	private String collectBy = defaultCollectBy;
-
-	private String method = "POST";
-
-	private boolean log = true;
-
-	private Map<String, List<Object>> rr = new HashMap<>();
+	private List<PowerTraceNode> trace = new ArrayList<>();
 
 	private int times = 1;
 
@@ -29,55 +21,22 @@ public class Instruction implements Serializable {
 
 	private int qps = 0;
 
-	//@JsonProperty(defaultValue = "{}")
-	private Instruction to;
-
-	private Map<String, String> headers = new HashMap<>();
-
-	private Map<String, String> responseHeaders = new HashMap<>();
-
-	private Map<String, String> queries = new HashMap<>();
-
-	private Integer callTestMethod = 0;
-
-	private double delay = 0;
-
-	private Integer errorByPercent = 0;
-
-	private String responseFmt = "";
-
 	private String propagateHeaders = "";
 
-	public String getCall() {
-		return call;
-	}
+	private static final String defaultCollectBy = System.getProperty("defaultCollectBy", "stat_count");
+	private String collectBy = defaultCollectBy;
 
-	public void setCall(String call) {
-		this.call = call;
-	}
+	private String traceNodeTmpl = defaultTraceNodeTmpl;
+	public static final String defaultTraceNodeTmpl = System.getProperty("defaultTraceNodeTmpl", "{{env(APP)}}|{{env(VERSION)}}({{statusCode()}})");
+	private boolean log = true;
 
-	public Instruction getTo() {
-		return to;
-	}
+	private Map<String, List<Object>> rr = new HashMap<>();
 
-	public void setTo(Instruction to) {
-		this.to = to;
-	}
-
-	public Map<String, String> getHeaders() {
-		return headers;
-	}
-
-	public void setHeaders(Map<String, String> headers) {
-		this.headers = headers;
-	}
-
-	public String getResponseFmt() {
-		return responseFmt;
-	}
-
-	public void setResponseFmt(String responseFmt) {
-		this.responseFmt = responseFmt;
+	public PowerTraceNode currentNode() {
+		if (trace == null || trace.isEmpty()) {
+			return null;
+		}
+		return trace.get(0);
 	}
 
 	public int getTimes() {
@@ -94,46 +53,6 @@ public class Instruction implements Serializable {
 
 	public void setCollectBy(String collectBy) {
 		this.collectBy = collectBy;
-	}
-
-	public String getBy() {
-		return by;
-	}
-
-	public void setBy(String by) {
-		this.by = by;
-	}
-
-	public double getDelay() {
-		return delay;
-	}
-
-	public void setDelay(double delay) {
-		this.delay = delay;
-	}
-
-	public Integer getErrorByPercent() {
-		return errorByPercent;
-	}
-
-	public void setErrorByPercent(Integer errorByPercent) {
-		this.errorByPercent = errorByPercent;
-	}
-
-	public Map<String, String> getQueries() {
-		return queries;
-	}
-
-	public void setQueries(Map<String, String> queries) {
-		this.queries = queries;
-	}
-
-	public Integer getCallTestMethod() {
-		return callTestMethod;
-	}
-
-	public void setCallTestMethod(Integer callTestMethod) {
-		this.callTestMethod = callTestMethod;
 	}
 
 	public int getThreads() {
@@ -160,14 +79,6 @@ public class Instruction implements Serializable {
 		this.qps = qps;
 	}
 
-	public String getMethod() {
-		return method;
-	}
-
-	public void setMethod(String method) {
-		this.method = method;
-	}
-
 	public boolean isLog() {
 		return log;
 	}
@@ -184,11 +95,39 @@ public class Instruction implements Serializable {
 		this.rr = rr;
 	}
 
-	public Map<String, String> getResponseHeaders() {
-		return responseHeaders;
+	public List<PowerTraceNode> getTrace() {
+		return trace;
 	}
 
-	public void setResponseHeaders(Map<String, String> responseHeaders) {
-		this.responseHeaders = responseHeaders;
+	public void setTrace(List<PowerTraceNode> trace) {
+		this.trace = trace;
 	}
+
+	public String getTraceNodeTmpl() {
+		return traceNodeTmpl;
+	}
+
+	public void setTraceNodeTmpl(String traceNodeTmpl) {
+		this.traceNodeTmpl = traceNodeTmpl;
+	}
+
+	@JsonIgnore
+	public Instruction getNext() {
+		try {
+			if (trace == null || trace.isEmpty()) {
+				return null;
+			}
+			Instruction next = ((Instruction) this.clone());
+			ArrayList<PowerTraceNode> nextTrace = new ArrayList<>(trace);
+			nextTrace.remove(0);
+			next.setTrace(nextTrace);
+			next.times = 1;
+			next.threads = 1;
+			next.qps = 1;
+			return next;
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 }

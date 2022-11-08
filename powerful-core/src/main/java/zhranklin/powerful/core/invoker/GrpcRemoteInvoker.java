@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import zhranklin.powerful.grpc.service.EchoGrpc;
 import zhranklin.powerful.grpc.service.EchoNum;
 import zhranklin.powerful.model.Instruction;
+import zhranklin.powerful.model.PowerTraceNode;
 import zhranklin.powerful.model.PowerfulResponse;
 import zhranklin.powerful.model.RenderingContext;
 import zhranklin.powerful.core.service.GrpcClientInterceptor;
@@ -39,17 +40,18 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public PowerfulResponse invoke(Instruction instruction, RenderingContext context) {
-        String num = instruction.getQueries().get("num");
+        PowerTraceNode node = instruction.currentNode();
+        String num = node.getQueries().get("num");
         int param = 0;
         try {
             param = Integer.parseInt(num);
         } catch (Exception e) {
             logger.warn("query param num is illegal");
         }
-        String beanName = instruction.getCall();
+        String beanName = node.getCall();
         EchoNum.Builder builder = EchoNum.newBuilder();
         try {
-            String instructionStr = objectMapper.writeValueAsString(instruction.getTo());
+            String instructionStr = objectMapper.writeValueAsString(instruction);
             String contextStr = objectMapper.writeValueAsString(context);
             builder.setInstruction(instructionStr).setContext(contextStr);
         } catch (Exception e) {
@@ -57,7 +59,7 @@ public class GrpcRemoteInvoker extends EchoGrpc.EchoImplBase implements RemoteIn
         }
         builder.setNum(param);
         EchoNum echoNum = builder.build();
-        grpcClientInterceptor.addCustomizeHeaders(instruction.getHeaders());
+        grpcClientInterceptor.addCustomizeHeaders(node.getHeaders());
         if (beanName.equalsIgnoreCase("grpc-a")) {
             return new PowerfulResponse(grpcAEchoBlockingStub.echo(echoNum).getMessage(), "200", null);
         } else if (beanName.equalsIgnoreCase("grpc-b")) {
