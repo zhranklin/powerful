@@ -1,4 +1,5 @@
-{{ if .Values.ingressHost }}
+{{- $ingressHost := tpl .Values.ingressHost $ }}
+{{ if $ingressHost }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -10,7 +11,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   rules:
-  - host: {{ .Values.ingressHost }}
+  - host: {{ $ingressHost }}
     http:
       paths:
       - backend:
