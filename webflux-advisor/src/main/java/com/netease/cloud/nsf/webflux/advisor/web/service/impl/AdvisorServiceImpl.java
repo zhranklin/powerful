@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -202,6 +203,16 @@ public class AdvisorServiceImpl implements IAdvisorService {
 		}
 
 
+		return result;
+	}
+
+	@Override
+	public Mono<String> sendProvider(String content, int delay, String providerName) {
+		if (StringUtils.isEmpty(providerName)) {
+			providerName = stockProviderUrl;
+		}
+		String url = String.format("%s/content?content=%s&delay=%d", providerName, content, delay);
+		Mono<String> result = builder.build().get().uri(url).retrieve().bodyToMono(String.class);
 		return result;
 	}
 	

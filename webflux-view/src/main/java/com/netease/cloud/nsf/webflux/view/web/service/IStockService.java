@@ -17,4 +17,6 @@ public interface IStockService {
 //	public String echobyecho(int times);
 	public Mono<String> echobyecho(int times);
 
+	public Mono<String> sendProvider(String content, int delay, String advisorName, String providerName);
+
 }

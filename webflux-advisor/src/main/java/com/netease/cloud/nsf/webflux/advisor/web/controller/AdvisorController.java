@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -97,10 +99,42 @@ public class AdvisorController {
 	}
 	
 	@GetMapping("/divide")
-	public Mono<String> divide(ServerHttpRequest request) {
-		
-		return advisorService.divide(request);
+	public Flux<String> divide(ServerHttpRequest request) {
+
+		String host = address.getHostAddress();
+		return Flux.merge(Mono.just("greeting from " + name + "[" + host + ":" + port + "(" + mode + ")]  |  ") , advisorService.divide(request));
 
 		
+	}
+
+	InetAddress address;
+
+	{
+		try {
+			address = InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
+
+	int count = 0;
+	@Value("${server.port}")
+	int port;
+	private String mode = System.getProperty("mode", "unknow");
+	private String color = System.getProperty("color", "");
+	@GetMapping("/content")
+	public Flux<String> content(String content, int delay, String providerName) {
+		log.info("advisor content executed");
+		if ("advisorerror".equals(content)) {
+			throw new RuntimeException(content);
+		}
+		if ("advisorrand".equals(content)) {
+			if (count++ % 3 == 0) {
+				throw new RuntimeException(content);
+			}
+		}
+		String host = address.getHostAddress();
+		return Flux.merge(Mono.just(content + " from " + name + "[" + host + ":" + port + "(" + mode + ",color:" + color + ")] | " ), advisorService.sendProvider(content, delay, providerName));
+
 	}
 }

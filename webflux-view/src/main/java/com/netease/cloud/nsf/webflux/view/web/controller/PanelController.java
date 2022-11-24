@@ -113,4 +113,16 @@ public class PanelController {
         return Mono.just(new HttpResponse(nsfException.getType().getDesc()));
     }
 
+    @GetMapping("/send/provider")
+    @ResponseBody
+    public Mono<String> sendProvider(ServerHttpRequest request,
+                                     @RequestParam(name = "content", defaultValue = "test", required = false) String content,
+                                     @RequestParam(name = "delay", defaultValue = "0", required = false) int delay,
+                                     @RequestParam(name = "advisorName", required = false) String advisorName,
+                                     @RequestParam(name = "providerName", required = false) String providerName
+    ) {
+        Mono<String> result = stockService.sendProvider(content, delay, advisorName, providerName);
+        return result;
+    }
+
 }

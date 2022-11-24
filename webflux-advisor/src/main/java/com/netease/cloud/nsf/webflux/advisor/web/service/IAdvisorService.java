@@ -24,4 +24,6 @@ public interface IAdvisorService {
 
 	public Mono<String> divide(ServerHttpRequest request);
 
+	public Mono<String> sendProvider(String content, int delay, String providerName);
+
 }
