@@ -1,9 +1,13 @@
 package zhranklin.powerful.model;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +32,14 @@ public class PowerfulResponse {
 
 	public static PowerfulResponse fromHttp(ResponseEntity<String> entity) {
 		return new PowerfulResponse(entity.getBody(), ""+entity.getStatusCodeValue(), entity.getHeaders().toSingleValueMap());
+	}
+
+	public static PowerfulResponse fromHttp(CloseableHttpResponse clientHttpResponse) throws IOException {
+		Map<String, String> responseHeader = new HashMap<>();
+		Arrays.asList(clientHttpResponse.getAllHeaders()).forEach(header -> responseHeader.put(header.getName(), header.getValue()));
+		return new PowerfulResponse(EntityUtils.toString(clientHttpResponse.getEntity()),
+				String.valueOf(clientHttpResponse.getStatusLine().getStatusCode()),
+				responseHeader);
 	}
 
 	public ResponseEntity<String> makeHttpResponse(Instruction instruction) {

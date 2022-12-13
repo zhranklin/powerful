@@ -3,64 +3,65 @@ package zhranklin.powerful.core.invoker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.core.service.StringRenderer;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.PowerTraceNode;
 import zhranklin.powerful.model.PowerfulResponse;
 import zhranklin.powerful.model.RenderingContext;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.util.*;
 
-/**
- * Created by twogoods on 2019/10/29.
- */
-@Deprecated
-// 该HttpRemoteInvoker类中客户端调用Http请求的方式固定为restTemplate。
-// 现为支持Powerful多场景切换，通过新的HttpRestTemplateRemoteInvoker类实现客户端通过restTemplate发起Http调用。
-public class HttpRemoteInvoker implements RemoteInvoker {
+public abstract class HttpRemoteAbstractInvoker implements RemoteInvoker {
 
     private static final Logger logger = LoggerFactory.getLogger(PowerfulService.class);
+
     private final StringRenderer stringRenderer;
-    private final RestTemplate restTemplate;
+
+    protected HttpRemoteAbstractInvoker(StringRenderer stringRenderer) {
+        this.stringRenderer = stringRenderer;
+    }
+
     private static final Set<String> METHODS_WITHOUT_BODY = Sets.newHashSet("GET", "DELETE");
     private static final Set<String> METHODS_WITH_BODY = Sets.newHashSet("POST", "PUT");
 
-    public HttpRemoteInvoker(StringRenderer stringRenderer, RestTemplate restTemplate) {
-        this.stringRenderer = stringRenderer;
-        this.restTemplate = restTemplate;
-    }
-
+    @Override
     public PowerfulResponse invoke(Instruction instruction, RenderingContext context) {
         PowerTraceNode node = instruction.currentNode();
-        HttpHeaders headers = new HttpHeaders();
-        node.getHeaders().forEach(headers::set);
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+
+        // get headers
+        final Map<String, String> headers = new HashMap<>(node.getHeaders());
+        headers.put("Content-Type", "application/json;charset=UTF-8");
+
+        // get url
         String url = node.getCall() + "/execute";
         List<String> params = new ArrayList<>();
         node.getQueries().forEach((k, v) -> params.add(k + "=" + stringRenderer.render(v, context)));
         if (!url.startsWith("http:")) {
             url = "http://" + url;
         }
+
+        // get method
+        String method = node.getMethod();
+
         try {
-            String method = node.getMethod();
+            // get body
             Instruction body;
             if (METHODS_WITH_BODY.contains(method)) {
                 body = instruction;
             } else if (METHODS_WITHOUT_BODY.contains(method)) {
                 body = null;
+                // 将 instruction 作为请求参数
                 params.add("_body=" + PowerfulService.encodeURLBase64(PowerfulService.jsonMapper.writeValueAsString(PowerfulService.getSimplifiedNode(instruction))));
             } else {
                 throw new IllegalArgumentException(String.format("The method '%s' is not supported.", method));
             }
+            // get params
             if (params.size() != 0) {
                 url = url + "?" + StringUtils.join(params, "&");
             }
@@ -68,16 +69,17 @@ public class HttpRemoteInvoker implements RemoteInvoker {
                 String yamlBody = new ObjectMapper(new YAMLFactory()).writeValueAsString(PowerfulService.getSimplifiedNode(instruction));
                 logger.info("{}:\n{}\nREQUEST:\n{}", method, url, yamlBody);
             }
-            return PowerfulResponse.fromHttp(restTemplate.exchange(new RequestEntity<>(body, headers, HttpMethod.valueOf(method), URI.create(url)), String.class));
+            return doInvoke(headers, url, method, body);
         } catch (HttpServerErrorException | HttpClientErrorException e) {
-            return new PowerfulResponse(e.getResponseBodyAsString(), ""+e.getRawStatusCode(), null);
+            return new PowerfulResponse(e.getResponseBodyAsString(), "" + e.getRawStatusCode(), null);
         } catch (RuntimeException e) {
             e.printStackTrace();
             throw e;
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
+    public abstract PowerfulResponse doInvoke(Map<String, String> headers, String url, String method, Instruction body);
 }

@@ -6,6 +6,7 @@ import com.alibaba.dubbo.config.RegistryConfig;
 import com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan;
 import com.alibaba.dubbo.config.spring.context.annotation.EnableDubboConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import net.devh.boot.grpc.client.interceptor.GlobalClientInterceptorConfigurer;
 import net.devh.boot.grpc.server.serverfactory.GrpcServerLifecycle;
@@ -27,9 +28,7 @@ import org.springframework.web.client.RestTemplate;
 import zhranklin.powerful.assist.Gen;
 import zhranklin.powerful.assist.RPCControllerAspect;
 import zhranklin.powerful.core.cases.StaticResources;
-import zhranklin.powerful.core.invoker.DubboRemoteInvoker;
-import zhranklin.powerful.core.invoker.GrpcRemoteInvoker;
-import zhranklin.powerful.core.invoker.HttpRemoteInvoker;
+import zhranklin.powerful.core.invoker.*;
 import zhranklin.powerful.core.service.GrpcClientInterceptor;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.core.service.StringRenderer;
@@ -80,14 +79,27 @@ public class PowerfulAutoConfiguration {
     }
 
     @Bean
-    PowerfulService powerfulService(HttpRemoteInvoker http, @Autowired(required = false) DubboRemoteInvoker dubbo) {
+    PowerfulService powerfulService(@Autowired(required = false) DubboRemoteInvoker dubbo,
+                                    HttpClientRemoteInvoker httpClientRemoteInvoker, HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker) {
         PowerfulService powerful = new PowerfulService(stringRenderer());
-        powerful.setInvoker("http", http);
+        powerful.setInvoker("http", httpRestTemplateRemoteInvoker);
         powerful.setInvoker("dubbo", dubbo);
+        powerful.setInvoker("http(restTemplate)", httpRestTemplateRemoteInvoker);
+        powerful.setInvoker("http(httpClient)", httpClientRemoteInvoker);
         if (dubbo != null) {
             dubbo.setPowerful(powerful);
         }
         return powerful;
+    }
+
+    @Bean
+    HttpClientRemoteInvoker httpClientRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, ObjectMapper objectMapper) {
+        return new HttpClientRemoteInvoker(stringRenderer, objectMapper);
+    }
+
+    @Bean
+    HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, RestTemplate restTemplate) {
+        return new HttpRestTemplateRemoteInvoker(stringRenderer, restTemplate);
     }
 
     @Bean
@@ -115,11 +127,6 @@ public class PowerfulAutoConfiguration {
                 }
             });
         }};
-    }
-
-    @Bean
-    HttpRemoteInvoker httpRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, RestTemplate restTemplate) {
-        return new HttpRemoteInvoker(stringRenderer, restTemplate);
     }
 
     @Bean
