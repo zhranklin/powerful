@@ -55,6 +55,10 @@ public class PowerfulAutoConfiguration {
     @Value("${configPath:/etc/powerful-cases/config.yaml}")
 	String configPath;
 
+    // 目前HTTP客户端支持两种：RestTemplate 和 HttpClient
+    @Value("${defaultHttpClient:RestTemplate}")
+    String defaultHttpClient;
+
     @Bean
     public FilterRegistrationBean<Filter> filterRegist() {
         FilterRegistrationBean<Filter> frBean = new FilterRegistrationBean<>();
@@ -82,7 +86,13 @@ public class PowerfulAutoConfiguration {
     PowerfulService powerfulService(@Autowired(required = false) DubboRemoteInvoker dubbo,
                                     HttpClientRemoteInvoker httpClientRemoteInvoker, HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker) {
         PowerfulService powerful = new PowerfulService(stringRenderer());
-        powerful.setInvoker("http", httpRestTemplateRemoteInvoker);
+        if ("restTemplate".equalsIgnoreCase(defaultHttpClient)) {
+            powerful.setInvoker("http", httpRestTemplateRemoteInvoker);
+        } else if ("httpClient".equalsIgnoreCase(defaultHttpClient)) {
+            powerful.setInvoker("http", httpClientRemoteInvoker);
+        } else {
+            throw new IllegalStateException(String.format("Default HTTP Client not supported: '%s'", defaultHttpClient));
+        }
         powerful.setInvoker("dubbo", dubbo);
         powerful.setInvoker("http(restTemplate)", httpRestTemplateRemoteInvoker);
         powerful.setInvoker("http(httpClient)", httpClientRemoteInvoker);
