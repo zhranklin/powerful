@@ -20,4 +20,4 @@ chmod ug+rwx
 
 # no need for this script to remain in the image after running
 rm "$0"
-sed "s/<POWERFUL_TAG>/$POWERFUL_TAG/g" -i /opt/helm/helm-charts/powerful/values.yaml
+sed "s/<POWERFUL_TAG>/$POWERFUL_TAG/g; s/<POWERFUL_BUNDLE>/$POWERFUL_BUNDLE/g" -i /opt/helm/helm-charts/powerful/values.yaml

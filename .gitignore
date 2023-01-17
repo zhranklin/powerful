@@ -28,6 +28,7 @@ target/
 /.nb-gradle/
 build/
 !/docker/**
+docker/jars/*.jar
 
 ### VS Code ###
 .vscode/

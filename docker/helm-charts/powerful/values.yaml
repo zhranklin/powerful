@@ -10,7 +10,9 @@ defaults:
     dependsOn: ""
 
   replicaCount: 1
-  image: powerful
+  image: powerful<POWERFUL_BUNDLE>
+  args:
+  - demo
   tag: "<POWERFUL_TAG>"
   hub: zhranklin
   labels: {}

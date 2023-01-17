@@ -106,9 +106,14 @@ spec:
         {{- end }}
     spec:
       containers:
-      - args:
-        - demo
-        name: app
+      - name: app
+        {{- if $deploy.command }}
+        command:
+{{ $deploy.command | toYaml | indent 8 }}
+        {{- else if $deploy.args }}
+        args:
+{{ $deploy.args | toYaml | indent 8 }}
+        {{- end }}
         env:
         {{- $javaOpts := "" }}
         {{- range $_, $opts := $deploy.javaOpts }}
