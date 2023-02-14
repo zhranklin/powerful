@@ -89,6 +89,10 @@
       "type": "integer",
       "minimum": 1
     },
+    "qps": {
+      "type": "integer",
+      "minimum": 1
+    },
     "threads": {
       "type": "integer",
       "minimum": 1

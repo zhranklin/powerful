@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +29,7 @@ public class Instruction implements Serializable, Cloneable {
 	public static final String defaultTraceNodeTmpl = System.getProperty("defaultTraceNodeTmpl", "{{env(APP)}}|{{env(VERSION)}}({{statusCode()}})");
 	private boolean log = true;
 
-	private Map<String, List<Object>> rr = new HashMap<>();
+	private Map<String, List<Object>> rr;
 
 	public PowerTraceNode currentNode() {
 		if (trace == null || trace.isEmpty()) {

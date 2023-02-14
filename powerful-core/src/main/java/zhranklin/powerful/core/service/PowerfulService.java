@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.CollectionUtils;
 import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.invoker.RemoteInvoker;
 import zhranklin.powerful.model.Instruction;
@@ -37,6 +38,8 @@ import java.util.TreeMap;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -195,24 +198,37 @@ public class PowerfulService {
     }
 
     private Instruction processLoop(Instruction instruction, int i) {
-    	if (instruction.getRr().isEmpty()) {
+    	if (CollectionUtils.isEmpty(instruction.getRr())) {
     	    return instruction;
         }
         try {
             ArrayNode patches = JsonNodeFactory.instance.arrayNode();
             for (Map.Entry<String, List<Object>> entry : instruction.getRr().entrySet()) {
                 List<Object> values = entry.getValue();
-                String path = "/" + entry.getKey().replaceAll("\\.", "/");
+                String path = processRrPath(entry.getKey());
                 ObjectNode patch = patches.addObject();
                 patch.put("op", "replace");
                 patch.put("path", path);
                 Object value = values.get(i % values.size());
                 patch.replace("value", jsonMapper.readTree(jsonMapper.writeValueAsString(value)));
             }
-            return jsonMapper.readValue(jsonMapper.writeValueAsString(JsonPatch.apply(patches, jsonMapper.readTree(jsonMapper.writeValueAsString(instruction)))), RequestCase.class);
+            RequestCase result = jsonMapper.readValue(jsonMapper.writeValueAsString(JsonPatch.apply(patches, jsonMapper.readTree(jsonMapper.writeValueAsString(instruction)))), RequestCase.class);
+            result.setRr(new HashMap<>());
+            return result;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Pattern pattern = Pattern.compile("^/trace/(\\d+)/.*");
+    private static String processRrPath(String key) {
+        String path = "/" + key.replaceAll("\\.", "/")
+            .replaceAll("\\[(\\d+)\\]", "/$1");
+        if (path.matches("^/trace/\\d+.*")) {
+            Matcher m = pattern.matcher(path);
+            path = "/trace/" + (Integer.parseInt(m.group(1)) + 1) + path.replaceAll("^/trace/(\\d+)", "");
+        }
+        return path;
     }
 
     private void doExecuteSingle(Instruction instruction, RenderingContext context) {
