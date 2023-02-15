@@ -12,7 +12,7 @@
       "label": "threads"
     }, {
       "type": "Control",
-      "scope": "#/properties/threads",
+      "scope": "#/properties/qps",
       "label": "QPS"
     }, {
       "type": "Control",
