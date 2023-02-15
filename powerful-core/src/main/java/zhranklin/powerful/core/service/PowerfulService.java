@@ -224,8 +224,8 @@ public class PowerfulService {
     private static String processRrPath(String key) {
         String path = "/" + key.replaceAll("\\.", "/")
             .replaceAll("\\[(\\d+)\\]", "/$1");
-        if (path.matches("^/trace/\\d+.*")) {
-            Matcher m = pattern.matcher(path);
+        Matcher m = pattern.matcher(path);
+        if (m.matches()) {
             path = "/trace/" + (Integer.parseInt(m.group(1)) + 1) + path.replaceAll("^/trace/(\\d+)", "");
         }
         return path;
