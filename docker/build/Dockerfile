@@ -10,5 +10,6 @@ ENV POWERFUL_TAG=$imageTag
 ENV POWERFUL_BUNDLE=$bundleSuffix
 COPY bin /usr/local/bin
 RUN /usr/local/bin/setup.sh
+RUN chmod 777 /root
 USER root
 ENTRYPOINT ["/usr/local/bin/start.sh"]
