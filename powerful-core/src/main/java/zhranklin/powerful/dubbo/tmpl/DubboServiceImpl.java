@@ -16,7 +16,7 @@ import javax.annotation.PostConstruct;
 
 @Service(group = "g", version = "0.0.1")
 @Component
-@PowerfulRPCTemplate("")
+@PowerfulRPCTemplate("DubboService")
 public class DubboServiceImpl implements DubboService {
     private static final Logger logger = LoggerFactory.getLogger(DubboServiceImpl.class);
 
