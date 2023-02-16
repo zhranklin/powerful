@@ -1,14 +1,6 @@
 defaults:
   genService: true
   debug: false
-  dubbo:
-    enabled: false
-    port: 20880
-    zk: ""
-    group: ""
-    version: 0.0.1
-    dependsOn: ""
-
   replicaCount: 1
   image: powerful<POWERFUL_BUNDLE>
   args:
@@ -16,6 +8,7 @@ defaults:
   tag: "<POWERFUL_TAG>"
   hub: zhranklin
   labels: {}
+  deployName: '{{- .name }}{{ if .version }}-{{ .version }}{{ end }}'
   deployLabels: {}
   serviceLabels: {}
   annotations: {}
@@ -26,33 +19,14 @@ defaults:
   resources: {}
   env:
     DUBBO_DEPENDS_ON: |-
-      {{- if .dubbo.enabled -}}
+      {{- if eq .protocol "dubbo" -}}
         {{- range $_, $app := append .Values.apps .Values.cases -}}
-          {{- $hasDubbo := false -}}
-          {{- $app = merge (deepCopy $app) $.Values.defaults }}
-          {{- range $_, $deploy := $app.deploys -}}
-            {{- $deploy = merge (deepCopy $deploy) $app }}
-            {{- if $deploy.dubbo -}}
-              {{- if $deploy.dubbo.enabled -}}
-                {{- $hasDubbo = true -}}
-              {{- end -}}
-            {{- end -}}
-          {{- end -}}
-          {{- if and (not $app.deploys) $app.dubbo -}}
-            {{- if $app.dubbo.enabled -}}
-              {{- $hasDubbo = true -}}
-            {{- end -}}
-          {{- end -}}
-          {{- if $hasDubbo -}}
-            {{- if $app.Name }}{{ $app.Name }}{{ else }}{{ $app.name }}{{ end -}},
+          {{- if eq ($app.protocol | default $.Values.defaults.protocol) "dubbo" -}}
+            {{- $app.Name | default $app.name -}},
           {{- end -}}
         {{- end -}}
       {{- end -}}
-  javaOpts:
-    dubbo: |-
-      {{ if .dubbo.enabled }}
-      -Dpowerful.dubbo.enabled={{ .dubbo.enabled }} -Dpowerful.dubbo.port={{ .dubbo.port }} -Dpowerful.dubbo.zk={{ .dubbo.zk }}
-      {{ end }}
-    debug: '{{ if .debug }}-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005{{ end }}'
 ingressHost: ""
 cases: {}
+apps:
+- Name: a
