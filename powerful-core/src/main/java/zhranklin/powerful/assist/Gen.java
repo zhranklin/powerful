@@ -108,7 +108,7 @@ public class Gen {
     public static Set<String> getDependsOn() {
         String app = System.getenv("APP");
         HashSet<String> result = new HashSet<>();
-        for (String d : System.getenv("DUBBO_DEPENDS_ON").split(",")) {
+        for (String d : System.getProperty("dubboDependsOn", "").split(",")) {
             if (d.isEmpty() || d.equals(app)) {
                 continue;
             }

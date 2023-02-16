@@ -17,9 +17,10 @@ defaults:
   nodeSelector: {}
   imagePullSecrets: {}
   resources: {}
-  env:
-    DUBBO_DEPENDS_ON: |-
+  javaOpts:
+    dubboDependsOn: |-
       {{- if eq .protocol "dubbo" -}}
+        -DdubboDependsOn=
         {{- range $_, $app := append .Values.apps .Values.cases -}}
           {{- if eq ($app.protocol | default $.Values.defaults.protocol) "dubbo" -}}
             {{- $app.Name | default $app.name -}},
@@ -28,5 +29,4 @@ defaults:
       {{- end -}}
 ingressHost: ""
 cases: {}
-apps:
-- Name: a
+apps: []
