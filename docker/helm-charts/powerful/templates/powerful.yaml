@@ -7,7 +7,7 @@
 {{- end }}
 {{ $app := merge (deepCopy $app) $.Values.defaults }}
 {{- $appContext := merge $app $baseContext }}
-{{- if $app.genService }}
+{{- if eq $app.genService "enabled" }}
 apiVersion: v1
 kind: Service
 metadata:

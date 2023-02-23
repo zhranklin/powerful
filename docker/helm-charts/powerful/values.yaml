@@ -1,5 +1,5 @@
 defaults:
-  genService: true
+  genService: enabled
   debug: false
   replicaCount: 1
   image: powerful<POWERFUL_BUNDLE>
