@@ -1,7 +1,0 @@
-grpc:
-  client:
-    webflux-provider-grpc:
-      enableKeepAlive: false
-      keepAliveWithoutCalls: false
-      negotiationType: plaintext
-      defaultLoadBalancingPolicy: round_robin
