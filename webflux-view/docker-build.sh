@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t harbor.cloud.netease.com/qztest/webflux:viewer-26 --platform=linux/amd64 . --push
+docker buildx build -t harbor.cloud.netease.com/qztest/webflux:viewer-26 --platform=linux/arm64,linux/amd64 . --push

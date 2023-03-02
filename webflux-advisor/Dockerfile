@@ -1,3 +1,6 @@
-FROM hub.c.163.com/qingzhou/amm-toolbox:v0.1.0-java8_linux_amd64
+FROM harbor.cloud.netease.com/qztest/tomcat-8.5-jdk8-openjdk-skiff:v1.6-220801-multi-arch-nsf-20230228
 ADD target/webflux-advisor-2.6.14.jar /app.jar
-ENTRYPOINT java $JAVA_OPTS -jar /app.jar
+
+ADD start.sh /start.sh
+
+CMD ["sh","/start.sh"]
