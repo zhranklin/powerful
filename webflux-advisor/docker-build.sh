@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t hub.c.163.com/qztest/webflux:advisor-27 --platform=linux/amd64 . --push
+docker buildx build -t harbor.cloud.netease.com/qztest/webflux:advisor-27 --platform=linux/arm64,linux/amd64 . --push

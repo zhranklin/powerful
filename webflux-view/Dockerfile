@@ -1,3 +1,6 @@
-FROM hub.c.163.com/qingzhou/amm-toolbox:v0.1.0-java8_linux_amd64
-ADD target/webflux-view-2.7.5.jar /app.jar
-ENTRYPOINT java $JAVA_OPTS -jar /app.jar
+FROM harbor.cloud.netease.com/qzprod/tomcat-8.5-jdk8-openjdk-skiff:v1.6-220801-multi-arch
+ADD target/webflux-viewer-2.7.5.jar /app.jar
+
+ADD start.sh /start.sh
+
+CMD ["sh","/start.sh"]
