@@ -27,14 +27,7 @@ import zhranklin.powerful.model.RenderingContext;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -233,7 +226,7 @@ public class PowerfulService {
 
     private void doExecuteSingle(Instruction instruction, RenderingContext context) {
         PowerTraceNode node = instruction.currentNode();
-        propagateHeaders(instruction, context, node);
+        propagateHeaders(instruction, context);
         renderHeaders(context);
         invokeTestMethod(context, node);
         delay(node);
@@ -251,7 +244,11 @@ public class PowerfulService {
         }
     }
 
-    private void propagateHeaders(Instruction instruction, RenderingContext context, PowerTraceNode node) {
+    private void propagateHeaders(Instruction instruction, RenderingContext context) {
+        if (Optional.ofNullable(instruction.getTrace()).stream().noneMatch(c -> c.size() > 1)) {
+            return;
+        }
+        PowerTraceNode node = instruction.getTrace().get(1);
         if (context.getRequestHeaders() != null && !StringUtils.isEmpty(instruction.getPropagateHeaders())) {
             HashSet<String> propagateHeaders = new HashSet<>(Arrays.asList(instruction.getPropagateHeaders().split(",")));
             propagateHeaders.retainAll(context.getRequestHeaders().keySet());
