@@ -15,6 +15,10 @@ mkdir -p /usr/local/javalib
 chown "${USER_UID}:0" /usr/local/javalib
 chmod ug+rwx /usr/local/javalib
 
+mkdir -p /BOOT-INF/lib
+chown "${USER_UID}:0" /BOOT-INF/lib
+chmod ug+rwx /BOOT-INF/lib
+
 chown "${USER_UID}:0" /app.jar
 chmod ug+rwx
 

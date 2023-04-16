@@ -3,6 +3,8 @@ FROM zhranklin/helm-operator:v1.5.0-jdk-all
 ADD ./jars/*.jar /opt/helm/
 COPY watches.yaml ${HOME}/watches.yaml
 COPY helm-charts/ ${HOME}/helm-charts/
+COPY dubbo-jars/dubbo26x /usr/local/dubbo26x
+COPY dubbo-jars/dubbo27x /usr/local/dubbo27x
 
 ARG imageTag="UNKNOWN"
 ARG bundleSuffix=""

@@ -92,6 +92,10 @@ fi
 
 # Step 3: 构建镜像, 镜像包含: operator-sdk(在基础镜像中)、powerful自动渲染的chart、powerful demo的jar包
 if [[ $BUILD_IMAGE = "1" ]]; then
+  # 下载dubbo2.6.11和2.7.22的相关依赖
+  mvn -f powerful-core/dubbo27pom.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/dubbo-jars/dubbo27x
+  mvn -f powerful-core/dubbo26pom.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/dubbo-jars/dubbo26x
+
   if [[ $USE_NEWEST_SDK = "1" ]]; then
     SED_CMD='1c\
       FROM '$sdkImage
@@ -127,4 +131,5 @@ if [[ $BUILD_IMAGE = "1" ]]; then
   if [[ $BUILD_SDK = "1" ]]; then
     docker rmi $sdkImage
   fi
+  rm -rf ./docker/dubbo-jars
 fi

@@ -11,6 +11,7 @@ import org.apache.dubbo.config.spring.context.annotation.EnableDubboConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -144,7 +145,8 @@ public class PowerfulAutoConfiguration {
     @ConditionalOnProperty(name="powerful.dubbo.enabled", havingValue="true")
     @Configuration
     @EnableDubboConfig
-    public static class DubboConfiguration {
+    @ConditionalOnClass(org.apache.dubbo.config.spring.context.annotation.DubboComponentScan.class)
+    public static class DubboConfiguration27x {
 
         @Value("${powerful.dubbo.zk}")
         public String zk;
@@ -191,6 +193,60 @@ public class PowerfulAutoConfiguration {
         @ComponentScan(basePackages = Gen.GEN_PACKAGE)
         @DubboComponentScan(basePackages = Gen.GEN_PACKAGE)
         public static class DubboGen {}
+    }
+
+    @ConditionalOnProperty(name = "powerful.dubbo.enabled", havingValue = "true")
+    @Configuration
+    @com.alibaba.dubbo.config.spring.context.annotation.EnableDubboConfig
+    @ConditionalOnClass(com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan.class)
+    public static class DubboConfiguration26X {
+
+        @Value("${powerful.dubbo.zk}")
+        public String zk;
+
+        public String app = System.getenv("APP");
+
+        @Value("${powerful.dubbo.port}")
+        public int port;
+
+        @Bean
+        public ApplicationConfig applicationConfig() {
+            ApplicationConfig application = new ApplicationConfig();
+            application.setName(app);
+            application.setVersion(System.getenv("VERSION"));
+            return application;
+        }
+
+        @Bean
+        public RegistryConfig registryConfig() {
+            RegistryConfig registryConfig = new RegistryConfig();
+            registryConfig.setAddress(zk);
+            return registryConfig;
+        }
+
+        @Bean
+        public ProtocolConfig protocolConfig() {
+            ProtocolConfig protocolConfig = new ProtocolConfig();
+            protocolConfig.setName("dubbo");
+            protocolConfig.setPort(port);
+            return protocolConfig;
+        }
+
+        @Bean
+        public DubboRemoteInvoker dubboRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer) {
+            return new DubboRemoteInvoker(stringRenderer);
+        }
+
+        @Bean
+        public RPCControllerAspect rpcControllerAspect() {
+            return new RPCControllerAspect();
+        }
+
+        @Configuration
+        @ComponentScan(basePackages = Gen.GEN_PACKAGE)
+        @com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan(basePackages = Gen.GEN_PACKAGE)
+        public static class DubboGen {
+        }
     }
 
 }

@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class PowerfulApplication {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         Gen.isStage0 = args.length > 0 && args[0].equals("stage0");
         if ("true".equals(System.getProperty("powerful.dubbo.enabled"))) {
             Gen.gen(System.getenv("APP"));
