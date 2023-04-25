@@ -1,6 +1,7 @@
 package zhranklin.powerful.core.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.PowerfulStatusCodeException;
@@ -44,6 +45,10 @@ public class HttpController {
             HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
             if (e.getCause() instanceof PowerfulStatusCodeException) {
                 status = ((PowerfulStatusCodeException) e.getCause()).status;
+            }
+            if (e.getCause() instanceof FeignException) {
+                int intStatus=((FeignException) e.getCause()).status();
+                status = HttpStatus.valueOf(intStatus);
             }
             return new ResponseEntity<>(e.getMessage(), respHeaders, status);
         }

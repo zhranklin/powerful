@@ -10,6 +10,7 @@ import com.flipkart.zjsonpatch.CompatibilityFlags;
 import com.flipkart.zjsonpatch.DiffFlags;
 import com.flipkart.zjsonpatch.JsonDiff;
 import com.flipkart.zjsonpatch.JsonPatch;
+import feign.FeignException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,6 +182,10 @@ public class PowerfulService {
             if (handleException) {
                 context.setResult(new PowerfulResponse(e.getMessage(), "200", null));
             } else {
+                if(e instanceof FeignException){
+                    String message=new String(((FeignException) e).responseBody().get().array());
+                    throw new RuntimeException(stringRenderer.render(template, context) + ": " + message, e);
+                }
                 throw new RuntimeException(stringRenderer.render(template, context) + ": " + e.getMessage(), e);
             }
         } finally {

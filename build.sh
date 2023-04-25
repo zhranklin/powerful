@@ -82,7 +82,60 @@ if [[ $COMPILE_DEMO = 1 ]]; then
     versions=$(eval "echo \$boots_java$jdk")
     for version in $versions; do
       echo "version: $version, jdk: $jdk, JavaVersion: $JavaVersion"
-      (cd powerful-springboot; mvn clean install "-DJavaVersion=${JavaVersion}" -Dspringboot.version=$version)
+      case $version in
+          "1.5.22.RELEASE")
+              springWebfluxVersion="5.0.13.RELEASE"
+              reactorNettyGroupId="io.projectreactor.ipc"
+              reactorNettyVersion="0.7.15.RELEASE"
+              springCloudStarterOpenfeignVersion="2.0.4.RELEASE"
+              springCloudStarterLoadbalancerVersion="2.0.4.RELEASE"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
+              ;;
+          "2.0.9.RELEASE")
+              springWebfluxVersion="5.0.13.RELEASE"
+              reactorNettyGroupId="io.projectreactor.ipc"
+              reactorNettyVersion="0.7.15.RELEASE"
+              springCloudStarterOpenfeignVersion="2.0.4.RELEASE"
+              springCloudStarterLoadbalancerVersion="2.0.4.RELEASE"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
+              ;;
+          "2.1.18.RELEASE")
+              springWebfluxVersion="5.1.19.RELEASE"
+              reactorNettyGroupId="io.projectreactor.netty"
+              reactorNettyVersion="0.8.22.RELEASE"
+              springCloudStarterOpenfeignVersion="2.1.5.RELEASE"
+              springCloudStarterLoadbalancerVersion="2.1.5.RELEASE"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
+              ;;
+          "2.2.13.RELEASE")
+              springWebfluxVersion="5.2.12.RELEASE"
+              reactorNettyGroupId="io.projectreactor.netty"
+              reactorNettyVersion="0.9.16.RELEASE"
+              springCloudStarterOpenfeignVersion="2.2.9.RELEASE"
+              springCloudStarterLoadbalancerVersion="2.2.9.RELEASE"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
+              ;;
+          "2.6.14")
+              springWebfluxVersion="5.3.27"
+              reactorNettyGroupId="io.projectreactor.netty"
+              reactorNettyVersion="1.0.32"
+              springCloudStarterOpenfeignVersion="3.1.8"
+              springCloudStarterLoadbalancerVersion="3.1.7"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
+              ;;
+          "2.7.7")
+              springWebfluxVersion="5.3.31"
+              reactorNettyGroupId="io.projectreactor.netty"
+              reactorNettyVersion="1.0.39"
+              springCloudStarterOpenfeignVersion="3.1.8"
+              springCloudStarterLoadbalancerVersion="3.1.7"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
+              ;;
+          *)
+              echo "unknown version: $version"
+              ;;
+      esac
+      (cd powerful-springboot; mvn clean install "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}" "-Dspring-webflux.version=${springWebfluxVersion}" "-Dreactor-netty.groupId=${reactorNettyGroupId}" "-Dreactor-netty.version=${reactorNettyVersion}" "-Dspring-cloud-starter-openfeign.version=${springCloudStarterOpenfeignVersion}" "-Dspring-cloud-starter-loadbalancer.version=${springCloudStarterLoadbalancerVersion}" "-Dspring-cloud-starter-loadbalancer.artifactId=${springCloudStarterLoadbalancerArtifactId}")
       cp powerful-springboot/target/powerful-boot-$version-java$JavaVersion.jar docker/jars
     done
   done
