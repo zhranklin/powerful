@@ -245,7 +245,7 @@ public class PowerfulService {
     }
 
     private void propagateHeaders(Instruction instruction, RenderingContext context) {
-        if (Optional.ofNullable(instruction.getTrace()).stream().noneMatch(c -> c.size() > 1)) {
+        if (instruction.getTrace() == null || instruction.getTrace().size() <= 1) {
             return;
         }
         PowerTraceNode node = instruction.getTrace().get(1);

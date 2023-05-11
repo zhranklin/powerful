@@ -71,11 +71,9 @@ if [[ $COMPILE_DEMO = 1 ]]; then
   # 如果指定了bundle版本, 则会编译所有的jar包, 否则只编译2.7 on java17
   if [[ $BUNDLE == "1" ]]; then
     export boots_java8="1.5.22.RELEASE 2.1.18.RELEASE 2.5.14 2.6.14 2.7.7"
-    export boots_java9="2.1.18.RELEASE 2.5.14 2.6.14 2.7.7"
     export boots_java11="2.1.18.RELEASE 2.5.14 2.6.14 2.7.7"
-    export boots_java14="2.5.14 2.6.14 2.7.7"
     export boots_java17="2.5.14 2.6.14 2.7.7"
-    export jdks="8 9 11 14 17"
+    export jdks="8 11 17"
   fi
   rm -rf docker/jars/*.jar
   for jdk in $jdks; do
