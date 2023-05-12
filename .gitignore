@@ -34,3 +34,4 @@ docker/jars/*.jar
 .vscode/
 /test
 .DS_Store
+/docker/dubbo-jars

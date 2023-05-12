@@ -22,7 +22,9 @@ if [[ $RUN_DEMO == "1" ]]; then
   fi
   jar -uf0 $JAR /BOOT-INF/lib
 
-  java $(echo "$JAVA_OPTS" | sed 's/-javaagent.*nsf[^ ]*\( \|$\)/ /g') -jar $JAR stage0
+  OPTS_FOR_GEN="$(echo "$JAVA_OPTS" | sed 's/-javaagent[^ ]*nsf[^ ]*\( \|$\)/ /g')"
+  echo "OPTS_FOR_GEN: $OPTS_FOR_GEN"
+  java $OPTS_FOR_GEN -jar $JAR stage0
   jar -uf $JAR -C /usr/local/javalib BOOT-INF/classes
   java $JAVA_OPTS -jar $JAR "$@"
 fi
