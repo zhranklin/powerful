@@ -70,7 +70,7 @@ if [[ $COMPILE_DEMO = 1 ]]; then
   export jdks="17"
   # 如果指定了bundle版本, 则会编译所有的jar包, 否则只编译2.7 on java17
   if [[ $BUNDLE == "1" ]]; then
-    export boots_java8="1.5.22.RELEASE 2.1.18.RELEASE 2.5.14 2.6.14 2.7.7"
+    export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.5.14 2.6.14 2.7.7"
     export boots_java11="2.1.18.RELEASE 2.5.14 2.6.14 2.7.7"
     export boots_java17="2.5.14 2.6.14 2.7.7"
     export jdks="8 11 17"
@@ -123,11 +123,11 @@ if [[ $BUILD_IMAGE = "1" ]]; then
   done
   docker manifest create --amend $mf_args
   docker manifest push $OPERATOR_IMAGE
+  rm -rf ./docker/dubbo-jars
   rm -f ./docker/app.jar
   docker push $OPERATOR_IMAGE
   docker rmi $OPERATOR_IMAGE
   if [[ $BUILD_SDK = "1" ]]; then
     docker rmi $sdkImage
   fi
-  rm -rf ./docker/dubbo-jars
 fi

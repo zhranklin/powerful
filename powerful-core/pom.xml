@@ -11,7 +11,6 @@
   <properties>
     <JavaVersion>17</JavaVersion>
     <java.version>${JavaVersion}</java.version>
-    <dubbo.version>2.7.22</dubbo.version>
   </properties>
 
   <dependencies>
@@ -82,7 +81,7 @@
     <dependency>
       <groupId>org.apache.dubbo</groupId>
       <artifactId>dubbo</artifactId>
-      <version>${dubbo.version}</version>
+      <version>2.7.22</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
