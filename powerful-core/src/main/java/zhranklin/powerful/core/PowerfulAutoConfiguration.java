@@ -58,8 +58,8 @@ public class PowerfulAutoConfiguration {
     String defaultHttpClient;
 
     @Bean
-    public FilterRegistrationBean<Filter> filterRegist() {
-        FilterRegistrationBean<Filter> frBean = new FilterRegistrationBean<>();
+    public FilterRegistrationBean filterRegist() {
+        FilterRegistrationBean frBean = new FilterRegistrationBean();
         frBean.setFilter(new Filter() {
             @Override
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {

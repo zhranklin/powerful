@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.google.common.collect.ImmutableMap;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import zhranklin.powerful.core.cases.CaseValidator;
 import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.cases.StaticResources;
@@ -13,11 +15,9 @@ import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.PowerTraceNode;
 import zhranklin.powerful.model.RenderingContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -78,7 +78,7 @@ public class RequestCaseApiController {
     Object rCase(@PathVariable String name, @RequestParam(required = false, defaultValue = "false") boolean validate, @RequestParam Map<String, String> params) {
         RequestCase requestCase = staticResources.getCase(name);
         if (requestCase == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Instruction of name '%s' not found.", name));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format("Instruction of name '%s' not found.", name));
         }
         return execute(requestCase, params, validate);
     }

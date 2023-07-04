@@ -11,7 +11,7 @@ public class PowerfulStatusCodeException extends RuntimeException {
 	}
 
 	public PowerfulStatusCodeException(int code) {
-		this(HttpStatus.resolve(code));
+		this(HttpStatus.valueOf(code));
 		if (status == null) {
 			throw new IllegalArgumentException("Status unsupported: " + code);
 		}
