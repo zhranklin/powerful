@@ -72,7 +72,7 @@ if [[ $COMPILE_DEMO = 1 ]]; then
   if [[ $BUNDLE == "1" ]]; then
     export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.7"
     export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.7"
-    export boots_java17="2.7.7"
+    export boots_java17="2.6.14 2.7.7"
     export jdks="8 11 17"
   fi
   rm -rf docker/jars/*.jar
