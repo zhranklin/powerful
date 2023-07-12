@@ -26,7 +26,7 @@ if [[ $RUN_DEMO == "1" ]]; then
   echo "OPTS_FOR_GEN: $OPTS_FOR_GEN"
   java $OPTS_FOR_GEN -jar $JAR stage0
   jar -uf $JAR -C /usr/local/javalib BOOT-INF/classes
-  java $JAVA_OPTS -jar $JAR "$@"
+  exec java $JAVA_OPTS -jar $JAR "$@"
 fi
 
 if [[ $RUN_OPERATOR == "1" ]]; then
