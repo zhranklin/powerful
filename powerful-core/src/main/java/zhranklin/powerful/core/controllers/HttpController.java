@@ -27,7 +27,7 @@ public class HttpController {
     @Autowired
     private PowerfulService powerful;
 
-    @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.POST, RequestMethod.PUT})
+    @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH})
     public Object execute(@RequestBody Instruction instruction, HttpServletRequest request, @RequestParam Map<String, String> params) {
         RenderingContext context = new RenderingContext();
         try {

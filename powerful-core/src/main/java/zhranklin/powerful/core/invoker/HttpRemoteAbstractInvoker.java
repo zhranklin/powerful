@@ -28,7 +28,7 @@ public abstract class HttpRemoteAbstractInvoker implements RemoteInvoker {
     }
 
     private static final Set<String> METHODS_WITHOUT_BODY = Sets.newHashSet("GET", "DELETE");
-    private static final Set<String> METHODS_WITH_BODY = Sets.newHashSet("POST", "PUT");
+    private static final Set<String> METHODS_WITH_BODY = Sets.newHashSet("POST", "PUT", "PATCH");
 
     @Override
     public PowerfulResponse invoke(Instruction instruction, RenderingContext context) {

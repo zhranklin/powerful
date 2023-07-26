@@ -32,7 +32,7 @@ public class HttpRemoteInvoker implements RemoteInvoker {
     private final StringRenderer stringRenderer;
     private final RestTemplate restTemplate;
     private static final Set<String> METHODS_WITHOUT_BODY = Sets.newHashSet("GET", "DELETE");
-    private static final Set<String> METHODS_WITH_BODY = Sets.newHashSet("POST", "PUT");
+    private static final Set<String> METHODS_WITH_BODY = Sets.newHashSet("POST", "PUT", "PATCH");
 
     public HttpRemoteInvoker(StringRenderer stringRenderer, RestTemplate restTemplate) {
         this.stringRenderer = stringRenderer;

@@ -1,10 +1,7 @@
 package zhranklin.powerful.core.invoker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -40,6 +37,8 @@ public class HttpClientRemoteInvoker extends HttpRemoteAbstractInvoker {
                     return execDeleteRequest(httpclient, headers, url);
                 case "PUT":
                     return execPutRequest(httpclient, headers, url, objectMapper.writeValueAsString(body));
+                case "PATCH":
+                    return execPatchRequest(httpclient, headers, url, objectMapper.writeValueAsString(body));
                 default:
                     logger.warn("Unsupported http request method!");
                     return null;
@@ -80,5 +79,13 @@ public class HttpClientRemoteInvoker extends HttpRemoteAbstractInvoker {
         headers.forEach(httpPut::setHeader);
         httpPut.setEntity(new StringEntity(body));
         return PowerfulResponse.fromHttp(httpclient.execute(httpPut));
+    }
+
+    private PowerfulResponse execPatchRequest(CloseableHttpClient httpclient, Map<String, String> headers, String url, String body)
+            throws IOException {
+        HttpPatch httpPatch = new HttpPatch(url);
+        headers.forEach(httpPatch::setHeader);
+        httpPatch.setEntity(new StringEntity(body));
+        return PowerfulResponse.fromHttp(httpclient.execute(httpPatch));
     }
 }
