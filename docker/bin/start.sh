@@ -12,13 +12,20 @@ if [[ $RUN_DEMO == "1" ]]; then
   SB_VERSION=${SB_VERSION:-2.7.7}
   JAR=/opt/helm/powerful-boot-$SB_VERSION-java$JDK.jar
 
-  # copy dubbo.jar into powerful.jar
   jar -xvf $JAR BOOT-INF/lib
+  # copy dubbo.jar into powerful.jar
   DUBBO_VERSION=${DUBBO_VERSION:-2.6.11}
   if [ $DUBBO_VERSION == "2.6.11" ]; then
     cp -r /usr/local/dubbo26x/* /BOOT-INF/lib/
   elif [ $DUBBO_VERSION == "2.7.22" ]; then
     cp -r /usr/local/dubbo27x/* /BOOT-INF/lib/
+  fi
+  # copy container.jar(like bes or tomcat) into powerful.jar
+  SERVER_CONTAINER_TYPE=${SERVER_CONTAINER_TYPE:-tomcat}
+  if [ $SERVER_CONTAINER_TYPE == "tomcat" ]; then
+    cp -r /usr/local/tomcat_dep/* /BOOT-INF/lib/
+  elif [ $SERVER_CONTAINER_TYPE == "bes" ]; then
+    cp -r /usr/local/bes_dep/* /BOOT-INF/lib/
   fi
   jar -uf0 $JAR /BOOT-INF/lib
 

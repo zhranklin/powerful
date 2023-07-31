@@ -124,6 +124,10 @@ spec:
         {{- end }}
         - name: JAVA_OPTS
           value: {{ $javaOpts | quote }}
+        {{ if eq $appContext.env.SERVER_CONTAINER_TYPE "bes"}}
+        - name: BESAPP_LICENSE_DIR
+          value: /root/bes.lic.txt
+        {{- end }}
 {{- if $deploy.env }}
 {{- range $envName, $envValue := $deploy.env }}
   {{- $value := (tpl $envValue $deployContext) }}
@@ -145,6 +149,11 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
+        {{ if eq $appContext.env.SERVER_CONTAINER_TYPE "bes"}}
+        - mountPath: /usr/local/config/bes.lic.txt
+          name: powerful-bes-license
+          subPath: bes.lic.txt
+        {{- end }}
         {{- if contains ":" $deploy.image }}
         image: "{{ $deploy.hub }}/{{ $deploy.image }}"
         {{- else }}
@@ -169,6 +178,14 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
+      {{if eq $appContext.env.SERVER_CONTAINER_TYPE "bes"}}
+      - name: powerful-bes-license
+        configMap:
+          name: powerful-bes-license
+          items:
+            - key: bes.lic.txt
+              path: bes.lic.txt
+      {{- end }}
       imagePullSecrets:
 {{- range $name, $_ := $deploy.imagePullSecrets }}
       - name: {{ $name }}

@@ -19,6 +19,20 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+      <!-- 排除内嵌的tomcat依赖-->
+      <exclusions>
+        <exclusion>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- 引入上述步骤被排除的spring-boot-starter-tomcat，并将scope改为provided，保证编译正确-->
+    <dependency>
+      <artifactId>spring-boot-starter-tomcat</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <version>${springboot.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -65,6 +79,15 @@
         <executions>
           <execution><goals><goal>repackage</goal></goals></execution>
         </executions>
+        <!-- 将tomcat在打包阶段依赖排除-->
+        <configuration>
+          <excludes>
+            <exclude>
+              <groupId>org.apache.tomcat.embed</groupId>
+              <artifactId>spring-boot-starter-tomcat</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
       </plugin>
     </plugins>
   </build>

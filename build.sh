@@ -93,6 +93,9 @@ if [[ $BUILD_IMAGE = "1" ]]; then
   # 下载dubbo2.6.11和2.7.22的相关依赖
   mvn -f powerful-core/dubbo27pom.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/dubbo-jars/dubbo27x
   mvn -f powerful-core/dubbo26pom.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/dubbo-jars/dubbo26x
+  # 下载tomcat和宝兰德的相关依赖
+  mvn -f powerful-core/bes_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/bes_dep
+  mvn -f powerful-core/tomcat_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/tomcat_dep
 
   if [[ $USE_NEWEST_SDK = "1" ]]; then
     SED_CMD='1c\
@@ -125,6 +128,7 @@ if [[ $BUILD_IMAGE = "1" ]]; then
   docker manifest push $OPERATOR_IMAGE
   rm -rf ./docker/dubbo-jars
   rm -f ./docker/app.jar
+  rm -rf ./docker/containers-jars
   docker push $OPERATOR_IMAGE
   docker rmi $OPERATOR_IMAGE
   if [[ $BUILD_SDK = "1" ]]; then
