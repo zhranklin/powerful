@@ -27,6 +27,7 @@ import zhranklin.powerful.assist.Gen;
 import zhranklin.powerful.assist.RPCControllerAspect;
 import zhranklin.powerful.core.cases.StaticResources;
 import zhranklin.powerful.core.invoker.DubboRemoteInvoker;
+import zhranklin.powerful.core.invoker.HttpClient5RemoteInvoker;
 import zhranklin.powerful.core.invoker.HttpClientRemoteInvoker;
 import zhranklin.powerful.core.invoker.HttpRestTemplateRemoteInvoker;
 import zhranklin.powerful.core.service.PowerfulService;
@@ -42,6 +43,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 /**
  * Created by 张武 at 2019/9/24
@@ -81,19 +83,22 @@ public class PowerfulAutoConfiguration {
     }
 
     @Bean
-    PowerfulService powerfulService(@Autowired(required = false) DubboRemoteInvoker dubbo,
-                                    HttpClientRemoteInvoker httpClientRemoteInvoker, HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker) {
+    PowerfulService powerfulService(@Autowired(required = false) DubboRemoteInvoker dubbo, HttpClientRemoteInvoker httpClientRemoteInvoker,
+                                    HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker, HttpClient5RemoteInvoker httpClient5RemoteInvoker) {
         PowerfulService powerful = new PowerfulService(stringRenderer());
         if ("restTemplate".equalsIgnoreCase(defaultHttpClient)) {
             powerful.setInvoker("http", httpRestTemplateRemoteInvoker);
         } else if ("httpClient".equalsIgnoreCase(defaultHttpClient)) {
             powerful.setInvoker("http", httpClientRemoteInvoker);
+        } else if ("httpClient5".equalsIgnoreCase(defaultHttpClient)) {
+            powerful.setInvoker("http", httpClient5RemoteInvoker);
         } else {
             throw new IllegalStateException(String.format("Default HTTP Client not supported: '%s'", defaultHttpClient));
         }
         powerful.setInvoker("dubbo", dubbo);
-        powerful.setInvoker("http(restTemplate)", httpRestTemplateRemoteInvoker);
-        powerful.setInvoker("http(httpClient)", httpClientRemoteInvoker);
+        powerful.setInvoker("http(restTemplate)".toLowerCase(Locale.ENGLISH), httpRestTemplateRemoteInvoker);
+        powerful.setInvoker("http(httpClient)".toLowerCase(Locale.ENGLISH), httpClientRemoteInvoker);
+        powerful.setInvoker("http(httpClient5)".toLowerCase(Locale.ENGLISH), httpClient5RemoteInvoker);
         if (dubbo != null) {
             dubbo.setPowerful(powerful);
         }
@@ -108,6 +113,11 @@ public class PowerfulAutoConfiguration {
     @Bean
     HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, RestTemplate restTemplate) {
         return new HttpRestTemplateRemoteInvoker(stringRenderer, restTemplate);
+    }
+
+    @Bean
+    HttpClient5RemoteInvoker httpClient5RemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, ObjectMapper objectMapper) {
+        return new HttpClient5RemoteInvoker(stringRenderer, objectMapper);
     }
 
     @Bean

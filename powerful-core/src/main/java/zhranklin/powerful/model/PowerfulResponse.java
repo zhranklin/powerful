@@ -1,5 +1,7 @@
 package zhranklin.powerful.model;
 
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +41,17 @@ public class PowerfulResponse {
 		Arrays.asList(clientHttpResponse.getAllHeaders()).forEach(header -> responseHeader.put(header.getName(), header.getValue()));
 		return new PowerfulResponse(EntityUtils.toString(clientHttpResponse.getEntity()),
 				String.valueOf(clientHttpResponse.getStatusLine().getStatusCode()),
+				responseHeader);
+	}
+
+	public static PowerfulResponse fromHttp(org.apache.hc.client5.http.impl.classic.CloseableHttpResponse clientHttpResponse) throws IOException, ParseException {
+		Map<String, String> responseHeader = new HashMap<>();
+		Header[] headers = clientHttpResponse.getHeaders();
+		for (Header header : headers) {
+			responseHeader.put(header.getName(), header.getValue());
+		}
+		return new PowerfulResponse(org.apache.hc.core5.http.io.entity.EntityUtils.toString(clientHttpResponse.getEntity()),
+				String.valueOf(clientHttpResponse.getCode()),
 				responseHeader);
 	}
 

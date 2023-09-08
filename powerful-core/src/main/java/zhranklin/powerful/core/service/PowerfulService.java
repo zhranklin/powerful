@@ -273,7 +273,7 @@ public class PowerfulService {
             node.setCall(node.getCall().substring("dubbo://".length()));
             node.setBy("dubbo");
         }
-        RemoteInvoker invoker = invokers.get(node.getBy());
+        RemoteInvoker invoker = invokers.get(node.getBy().toLowerCase(Locale.ENGLISH));
         if (invoker == null) {
             throw new IllegalStateException(String.format("Protocol not supported in this instance: '%s'", node.getBy()));
         }
