@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.netease.cloud</groupId>
+  <artifactId>nsf-server</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <tongWeb.version>7.0.E.6_P3</tongWeb.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.tongweb.springboot</groupId>
+      <artifactId>tongweb-spring-boot-starter-2.x</artifactId>
+      <version>${tongWeb.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.tongweb</groupId>
+      <artifactId>tongweb-embed-core</artifactId>
+      <version>${tongWeb.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.tongweb</groupId>
+      <artifactId>tongweb-embed-el</artifactId>
+      <version>${tongWeb.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.tongweb</groupId>
+      <artifactId>tongweb-javax-annotation</artifactId>
+      <version>1.2</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.tongweb</groupId>
+      <artifactId>tongweb-dependencies-check</artifactId>
+      <version>${tongWeb.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.jdt</groupId>
+      <artifactId>ecj</artifactId>
+      <version>3.20.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.tongweb</groupId>
+      <artifactId>tongweb-lic-sdk</artifactId>
+      <version>4.4.1.2</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>

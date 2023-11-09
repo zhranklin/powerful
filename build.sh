@@ -96,6 +96,7 @@ if [[ $BUILD_IMAGE = "1" ]]; then
   # 下载tomcat和宝兰德的相关依赖
   mvn -f powerful-core/bes_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/bes_dep
   mvn -f powerful-core/tomcat_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/tomcat_dep
+  mvn -f powerful-core/tongweb_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/tongweb_dep
 
   if [[ $USE_NEWEST_SDK = "1" ]]; then
     SED_CMD='1c\

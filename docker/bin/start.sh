@@ -26,6 +26,8 @@ if [[ $RUN_DEMO == "1" ]]; then
     cp -r /usr/local/tomcat_dep/* /BOOT-INF/lib/
   elif [ $SERVER_CONTAINER_TYPE == "bes" ]; then
     cp -r /usr/local/bes_dep/* /BOOT-INF/lib/
+  elif [ $SERVER_CONTAINER_TYPE == "tongweb" ]; then
+    cp -r /usr/local/tongweb_dep/* /BOOT-INF/lib/
   fi
   jar -uf0 $JAR /BOOT-INF/lib
 
