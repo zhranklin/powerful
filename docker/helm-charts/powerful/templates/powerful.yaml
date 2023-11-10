@@ -73,6 +73,11 @@ metadata:
     {{- end }}
     {{- end }}
 spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 1
+    type: RollingUpdate
   replicas: {{ $deploy.replicaCount }}
   selector:
     matchLabels:
