@@ -127,8 +127,11 @@ spec:
              {{- $javaOpts = printf "%s %s" $javaOpts $value }}
           {{- end }}
         {{- end }}
+        {{- if eq $appContext.env.SERVER_CONTAINER_TYPE "tongweb" }}
+           {{- $javaOpts = printf "%s -Dserver.tongweb.license.type=file -Dserver.tongweb.license.path=/opt/TongWeb/license.dat" $javaOpts }}
+        {{- end }}
         - name: JAVA_OPTS
-          value: {{ $javaOpts | quote }} {{ if eq $appContext.env.SERVER_CONTAINER_TYPE "tongweb" }} -Dserver.tongweb.license.type=file -Dserver.tongweb.license.path=/opt/TongWeb/license.dat {{ end }}
+          value: {{ $javaOpts | quote }}
         {{ if eq $appContext.env.SERVER_CONTAINER_TYPE "bes"}}
         - name: BESAPP_LICENSE_DIR
           value: /root/bes.lic.txt
