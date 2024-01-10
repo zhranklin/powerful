@@ -19,6 +19,13 @@
     </dependency>
 
     <dependency>
+      <groupId>com.tongweb.springboot</groupId>
+      <artifactId>tongweb-spring-boot-websocket-2.x</artifactId>
+      <version>${tongWeb.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>com.tongweb</groupId>
       <artifactId>tongweb-embed-core</artifactId>
       <version>${tongWeb.version}</version>
