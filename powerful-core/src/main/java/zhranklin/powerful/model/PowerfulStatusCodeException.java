@@ -6,7 +6,7 @@ public class PowerfulStatusCodeException extends RuntimeException {
 	public final HttpStatus status;
 
 	public PowerfulStatusCodeException(HttpStatus status) {
-		super("Custom status code: " + status);
+		super("Custom status code: " + status.value());
 		this.status = status;
 	}
 
