@@ -23,7 +23,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 import zhranklin.powerful.assist.Gen;
 import zhranklin.powerful.assist.RPCControllerAspect;
 import zhranklin.powerful.core.cases.StaticResources;
@@ -31,7 +30,6 @@ import zhranklin.powerful.core.invoker.DubboRemoteInvoker;
 import zhranklin.powerful.core.invoker.HttpClient5RemoteInvoker;
 import zhranklin.powerful.core.invoker.HttpClientRemoteInvoker;
 import zhranklin.powerful.core.invoker.HttpRestTemplateRemoteInvoker;
-import zhranklin.powerful.core.invoker.WebClientRemoteInvoker;
 import zhranklin.powerful.core.invoker.OpenFeignRemoteInvoker;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.core.service.StringRenderer;
@@ -88,7 +86,7 @@ public class PowerfulAutoConfiguration {
     @Bean
     PowerfulService powerfulService(@Autowired(required = false) DubboRemoteInvoker dubbo, HttpClientRemoteInvoker httpClientRemoteInvoker,
                                     HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker, HttpClient5RemoteInvoker httpClient5RemoteInvoker,
-                                    WebClientRemoteInvoker webClientRemoteInvoker, OpenFeignRemoteInvoker openFeignRemoteInvoker) {
+                                    OpenFeignRemoteInvoker openFeignRemoteInvoker) {
         PowerfulService powerful = new PowerfulService(stringRenderer());
         if ("restTemplate".equalsIgnoreCase(defaultHttpClient)) {
             powerful.setInvoker("http", httpRestTemplateRemoteInvoker);
@@ -96,15 +94,12 @@ public class PowerfulAutoConfiguration {
             powerful.setInvoker("http", httpClientRemoteInvoker);
         } else if ("httpClient5".equalsIgnoreCase(defaultHttpClient)) {
             powerful.setInvoker("http", httpClient5RemoteInvoker);
-        } else if ("webflux".equalsIgnoreCase(defaultHttpClient)) {
-            powerful.setInvoker("http", webClientRemoteInvoker);
-        } else if ("openfeign".equalsIgnoreCase(defaultHttpClient)) {
+        }else if ("openfeign".equalsIgnoreCase(defaultHttpClient)) {
             powerful.setInvoker("http", openFeignRemoteInvoker);
         } else {
             throw new IllegalStateException(String.format("Default HTTP Client not supported: '%s'", defaultHttpClient));
         }
         powerful.setInvoker("dubbo", dubbo);
-        powerful.setInvoker("webflux", webClientRemoteInvoker);
         powerful.setInvoker("openfeign", openFeignRemoteInvoker);
         powerful.setInvoker("http(restTemplate)".toLowerCase(Locale.ENGLISH), httpRestTemplateRemoteInvoker);
         powerful.setInvoker("http(httpClient)".toLowerCase(Locale.ENGLISH), httpClientRemoteInvoker);
@@ -123,11 +118,6 @@ public class PowerfulAutoConfiguration {
     @Bean
     HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, RestTemplate restTemplate) {
         return new HttpRestTemplateRemoteInvoker(stringRenderer, restTemplate);
-    }
-
-    @Bean
-    WebClientRemoteInvoker webClientRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, WebClient webClient) {
-        return new WebClientRemoteInvoker(stringRenderer, webClient);
     }
 
     @Bean
@@ -160,11 +150,6 @@ public class PowerfulAutoConfiguration {
                 }
             });
         }};
-    }
-
-    @Bean
-    WebClient webClient() {
-        return WebClient.create();
     }
 
     @Bean

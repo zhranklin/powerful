@@ -8,7 +8,6 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.ClientResponse;
 
 import java.io.IOException;
 import java.util.*;
@@ -67,10 +66,6 @@ public class PowerfulResponse {
 		return new PowerfulResponse(org.apache.hc.core5.http.io.entity.EntityUtils.toString(clientHttpResponse.getEntity()),
 				String.valueOf(clientHttpResponse.getCode()),
 				responseHeader);
-	}
-
-	public static PowerfulResponse fromHttp(ClientResponse clientResponse) {
-		return new PowerfulResponse(clientResponse.bodyToMono(String.class).block(), String.valueOf(clientResponse.statusCode().value()), clientResponse.headers().asHttpHeaders().toSingleValueMap());
 	}
 
 	public ResponseEntity<String> makeHttpResponse(Instruction instruction) {

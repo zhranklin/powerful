@@ -12,11 +12,8 @@
     <JavaVersion>17</JavaVersion>
     <java.version>${JavaVersion}</java.version>
     <springboot.version>2.7.7</springboot.version>
-    <spring-webflux.version>5.3.31</spring-webflux.version>
-    <reactor-netty.version>1.0.39</reactor-netty.version>
     <spring-cloud-starter-openfeign.version>3.1.8</spring-cloud-starter-openfeign.version>
     <spring-cloud-starter-loadbalancer.version>3.1.7</spring-cloud-starter-loadbalancer.version>
-    <spring-cloud-starter-netflix-ribbon.version>2.2.9.RELEASE</spring-cloud-starter-netflix-ribbon.version>
   </properties>
 
   <dependencies>
@@ -144,17 +141,6 @@
       <artifactId>httpclient</artifactId>
       <version>4.5.13</version>
     </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webflux</artifactId>
-      <version>${spring-webflux.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.projectreactor.netty</groupId>
-      <artifactId>reactor-netty</artifactId>
-      <version>${reactor-netty.version}</version>
-      <scope>provided</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.springframework.cloud</groupId>
@@ -182,20 +168,6 @@
       <version>${spring-cloud-starter-loadbalancer.version}</version>
       <scope>provided</scope>
     </dependency>
-
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
-      <version>${spring-cloud-starter-netflix-ribbon.version}</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
 
     <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 -->
     <dependency>

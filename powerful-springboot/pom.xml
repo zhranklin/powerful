@@ -13,9 +13,6 @@
     <JavaVersion>17</JavaVersion>
     <java.version>${JavaVersion}</java.version>
     <springboot.version>2.7.7</springboot.version>
-    <spring-webflux.version>5.3.31</spring-webflux.version>
-    <reactor-netty.version>1.0.39</reactor-netty.version>
-    <reactor-netty.groupId>io.projectreactor.netty</reactor-netty.groupId>
     <spring-cloud-starter-openfeign.version>3.1.8</spring-cloud-starter-openfeign.version>
     <spring-cloud-starter-loadbalancer.version>3.1.7</spring-cloud-starter-loadbalancer.version>
     <spring-cloud-starter-loadbalancer.artifactId>spring-cloud-starter-loadbalancer</spring-cloud-starter-loadbalancer.artifactId>
@@ -60,11 +57,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-    <dependency>
-      <groupId>${reactor-netty.groupId}</groupId>
-      <artifactId>reactor-netty</artifactId>
-      <version>${reactor-netty.version}</version>
-    </dependency>
 
   </dependencies>
   <dependencyManagement>
@@ -76,11 +68,6 @@
         <version>${springboot.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-webflux</artifactId>
-        <version>${spring-webflux.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
