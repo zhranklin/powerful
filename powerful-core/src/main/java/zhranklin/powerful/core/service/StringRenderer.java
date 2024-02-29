@@ -63,7 +63,7 @@ public class StringRenderer implements EnvironmentAware {
         exprFuncs.put("header", context -> params -> {
             List<String> result = new ArrayList<>();
             String reqHeader = context.getRequestHeaders().get(params.get(0));
-            if (!StringUtils.isEmpty(reqHeader)) {
+            if (StringUtils.hasText(reqHeader)) {
                 result.add(reqHeader);
             }
             if (context.getResult() != null) {

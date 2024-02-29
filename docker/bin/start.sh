@@ -13,6 +13,7 @@ if [[ $RUN_DEMO == "1" ]]; then
   JAR=/opt/helm/powerful-boot-$SB_VERSION-java$JDK.jar
 
   jar -xvf $JAR BOOT-INF/lib
+
   # copy dubbo.jar into powerful.jar
   DUBBO_VERSION=${DUBBO_VERSION:-2.6.11}
   if [ $DUBBO_VERSION == "2.6.11" ]; then
@@ -20,6 +21,7 @@ if [[ $RUN_DEMO == "1" ]]; then
   elif [ $DUBBO_VERSION == "2.7.22" ]; then
     cp -r /usr/local/dubbo27x/* /BOOT-INF/lib/
   fi
+
   # copy container.jar(like bes or tomcat) into powerful.jar
   SERVER_CONTAINER_TYPE=${SERVER_CONTAINER_TYPE:-tomcat}
   if [ $SERVER_CONTAINER_TYPE == "tomcat" ]; then
@@ -29,6 +31,12 @@ if [[ $RUN_DEMO == "1" ]]; then
   elif [ $SERVER_CONTAINER_TYPE == "tongweb" ]; then
     cp -r /usr/local/tongweb_dep/* /BOOT-INF/lib/
   fi
+
+  # copy jakarta.jar into powerful.jar
+  if [ "$JDK" -ge 17 ]; then
+    cp -r /usr/local/jakarta_dep/springboot3/* /BOOT-INF/lib/
+  fi
+
   jar -uf0 $JAR /BOOT-INF/lib
 
   OPTS_FOR_GEN="$(echo "$JAVA_OPTS" | sed 's/-javaagent[^ ]*nsf[^ ]*\( \|$\)/ /g')"

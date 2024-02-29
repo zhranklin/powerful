@@ -14,8 +14,6 @@ import feign.FeignException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
 import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.invoker.RemoteInvoker;
@@ -49,13 +47,13 @@ public class PowerfulService {
     protected final StringRenderer stringRenderer;
     private final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(20, 200, 3, TimeUnit.MINUTES, new SynchronousQueue<>());
 
-    @Autowired
-    private TestingMethodService testingMethodService;
+    private final TestingMethodService testingMethodService;
 
     private final Map<String, RemoteInvoker> invokers = new HashMap<>();
 
-    public PowerfulService(StringRenderer stringRenderer) {
+    public PowerfulService(StringRenderer stringRenderer, TestingMethodService testingMethodService) {
         this.stringRenderer = stringRenderer;
+        this.testingMethodService = testingMethodService;
     }
 
     public static JsonNode getSimplifiedNode(Instruction instruction) throws IOException {
@@ -82,7 +80,7 @@ public class PowerfulService {
         instruction.setTrace(null);
         JsonNode result = simplify(base, instruction);
         instruction.setTrace(backup);
-        ((ObjectNode) result).put("trace", trace);
+        ((ObjectNode) result).set("trace", trace);
         return result;
     }
 
@@ -354,11 +352,11 @@ public class PowerfulService {
     }
 
     public static String encodeURLBase64(String body) {
-        return Base64Utils.encodeToUrlSafeString(body.trim().getBytes(StandardCharsets.UTF_8));
+        return Base64.getUrlEncoder().encodeToString(body.trim().getBytes(StandardCharsets.UTF_8));
     }
 
     public static String decodeURLBase64(String base64) {
-        return new String(Base64Utils.decodeFromUrlSafeString(base64));
+        return new String(Base64.getUrlDecoder().decode(base64));
     }
 
 }

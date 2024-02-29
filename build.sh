@@ -13,6 +13,33 @@ function getTag() {
   echo $tag
 }
 
+function adaptation4SpringBoot3() {
+    file="powerful-core/src/main/java/zhranklin/powerful/core/PowerfulAutoConfiguration.java"  # 编译前需要修改的PowerfulAutoConfiguration.java类
+    ## 取消注释57行至73代码
+    for ((i=57; i<=73; i++)); do
+        sed -i "${i}s/^\/\///" $file
+    done
+    # 注释76行至93行代码
+    for ((i=76; i<=93; i++)); do
+        sed -i "${i}s/^/\/\//" $file
+    done
+}
+
+function adaptation4SpringBoot2() {
+    file="powerful-core/src/main/java/zhranklin/powerful/core/PowerfulAutoConfiguration.java"  # 编译前需要修改的PowerfulAutoConfiguration.java类
+    ## 取消注释76行至93代码
+    for ((i=76; i<=93; i++)); do
+        sed -i "${i}s/^\/\///" $file
+    done
+    # 注释57行至73行代码
+    for ((i=57; i<=73; i++)); do
+        sed -i "${i}s/^/\/\//" $file
+    done
+}
+
+
+
+
 COMPILE_DEMO=1
 BUNDLE=0
 BUILD_SDK=0
@@ -72,7 +99,7 @@ if [[ $COMPILE_DEMO = 1 ]]; then
   if [[ $BUNDLE == "1" ]]; then
     export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.7"
     export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.7"
-    export boots_java17="2.6.14 2.7.7"
+    export boots_java17="2.6.14 2.7.7 3.1.9"
     export jdks="8 11 17"
   fi
   rm -rf docker/jars/*.jar
@@ -113,6 +140,16 @@ if [[ $COMPILE_DEMO = 1 ]]; then
               springCloudStarterLoadbalancerVersion="3.1.7"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               ;;
+          "3.1.9")
+              springCloudStarterOpenfeignVersion="4.0.6"
+              springCloudStarterLoadbalancerVersion="4.0.5"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
+              # 修改代码以适配springboot3
+              adaptation4SpringBoot3
+              (cd powerful-core; mvn clean install "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
+              # 恢复代码以重新适配springboot2
+              adaptation4SpringBoot2
+              ;;
           *)
               echo "unknown version: $version"
               ;;
@@ -132,6 +169,8 @@ if [[ $BUILD_IMAGE = "1" ]]; then
   mvn -f powerful-core/bes_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/bes_dep
   mvn -f powerful-core/tomcat_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/tomcat_dep
   mvn -f powerful-core/tongweb_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/tongweb_dep
+  # 下载jakarta相关依赖（适配springboot3）
+  mvn -f powerful-core/jakartapom.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/jakarta-jars/springboot3
 
   if [[ $USE_NEWEST_SDK = "1" ]]; then
     SED_CMD='1c\
@@ -165,6 +204,7 @@ if [[ $BUILD_IMAGE = "1" ]]; then
   rm -rf ./docker/dubbo-jars
   rm -f ./docker/app.jar
   rm -rf ./docker/containers-jars
+  rm -rf ./docker/jakarta-jars
   docker push $OPERATOR_IMAGE
   docker rmi $OPERATOR_IMAGE
   if [[ $BUILD_SDK = "1" ]]; then

@@ -4,7 +4,6 @@ import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ProtocolConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.dubbo.config.spring.context.annotation.DubboComponentScan;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubboConfig;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -35,13 +35,6 @@ import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.core.service.StringRenderer;
 import zhranklin.powerful.core.service.TestingMethodService;
 
-import javax.annotation.Nullable;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -60,16 +53,37 @@ public class PowerfulAutoConfiguration {
     @Value("${defaultHttpClient:RestTemplate}")
     String defaultHttpClient;
 
+    // 以下方法是为了解决SpringBoot3.0的兼容问题。编译springboot版本的demo时需要使用以下被注释的代码
+//    @Bean
+//    public FilterRegistrationBean filterRegistSpringBoot3() {
+//        FilterRegistrationBean frBean = new FilterRegistrationBean();
+//        frBean.setFilter(new jakarta.servlet.Filter() {
+//            @Override
+//            public void doFilter(jakarta.servlet.ServletRequest servletRequest, jakarta.servlet.ServletResponse servletResponse, jakarta.servlet.FilterChain filterChain) throws IOException, jakarta.servlet.ServletException {
+//                servletRequest.setAttribute("realBody", StreamUtils.copyToString(servletRequest.getInputStream(), StandardCharsets.UTF_8));
+//                filterChain.doFilter(servletRequest, servletResponse);
+//            }
+//            @Override public void init(jakarta.servlet.FilterConfig filterConfig) { }
+//            @Override public void destroy() { }
+//        });
+//        frBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+//        frBean.addUrlPatterns("/y");
+//        frBean.addUrlPatterns("/b");
+//        return frBean;
+//    }
+
+    // 以下方法是为了解决SpringBoot3.0的兼容问题。编译springboot2.x版本的demo时需要使用以下
     @Bean
     public FilterRegistrationBean filterRegist() {
         FilterRegistrationBean frBean = new FilterRegistrationBean();
-        frBean.setFilter(new Filter() {
+        frBean.setFilter(new javax.servlet.Filter() {
             @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+            public void doFilter(javax.servlet.ServletRequest servletRequest, javax.servlet.ServletResponse servletResponse, javax.servlet.FilterChain filterChain) throws IOException, javax.servlet.ServletException {
                 servletRequest.setAttribute("realBody", StreamUtils.copyToString(servletRequest.getInputStream(), StandardCharsets.UTF_8));
                 filterChain.doFilter(servletRequest, servletResponse);
             }
-            @Override public void init(FilterConfig filterConfig) { }
+            @Override public void init(javax.servlet.FilterConfig filterConfig) { }
+
             @Override public void destroy() { }
         });
         frBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
@@ -86,8 +100,8 @@ public class PowerfulAutoConfiguration {
     @Bean
     PowerfulService powerfulService(@Autowired(required = false) DubboRemoteInvoker dubbo, HttpClientRemoteInvoker httpClientRemoteInvoker,
                                     HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker, HttpClient5RemoteInvoker httpClient5RemoteInvoker,
-                                    OpenFeignRemoteInvoker openFeignRemoteInvoker) {
-        PowerfulService powerful = new PowerfulService(stringRenderer());
+                                    OpenFeignRemoteInvoker openFeignRemoteInvoker, TestingMethodService testingMethodService) {
+        PowerfulService powerful = new PowerfulService(stringRenderer(), testingMethodService);
         if ("restTemplate".equalsIgnoreCase(defaultHttpClient)) {
             powerful.setInvoker("http", httpRestTemplateRemoteInvoker);
         } else if ("httpClient".equalsIgnoreCase(defaultHttpClient)) {
@@ -111,8 +125,8 @@ public class PowerfulAutoConfiguration {
     }
 
     @Bean
-    HttpClientRemoteInvoker httpClientRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, ObjectMapper objectMapper) {
-        return new HttpClientRemoteInvoker(stringRenderer, objectMapper);
+    HttpClientRemoteInvoker httpClientRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer) {
+        return new HttpClientRemoteInvoker(stringRenderer);
     }
 
     @Bean
@@ -121,8 +135,8 @@ public class PowerfulAutoConfiguration {
     }
 
     @Bean
-    HttpClient5RemoteInvoker httpClient5RemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer, ObjectMapper objectMapper) {
-        return new HttpClient5RemoteInvoker(stringRenderer, objectMapper);
+    HttpClient5RemoteInvoker httpClient5RemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer) {
+        return new HttpClient5RemoteInvoker(stringRenderer);
     }
 
     @Bean
@@ -136,16 +150,35 @@ public class PowerfulAutoConfiguration {
     }
 
     @Bean
-    RestTemplate restTemplate() {
+    @ConditionalOnClass(jakarta.servlet.http.HttpServletRequest.class)
+    RestTemplate restTemplateSpringboot3() {
         return new RestTemplate() {{
             setErrorHandler(new ResponseErrorHandler() {
                 @Override
-                public boolean hasError(@Nullable ClientHttpResponse clientHttpResponse) {
+                public boolean hasError(@jakarta.annotation.Nullable ClientHttpResponse clientHttpResponse) {
                     return true;
                 }
 
                 @Override
-                public void handleError(@Nullable ClientHttpResponse clientHttpResponse) {
+                public void handleError(@jakarta.annotation.Nullable ClientHttpResponse clientHttpResponse) {
+
+                }
+            });
+        }};
+    }
+
+    @Bean
+    @ConditionalOnMissingClass("jakarta.servlet.http.HttpServletRequest")
+    RestTemplate restTemplate() {
+        return new RestTemplate() {{
+            setErrorHandler(new ResponseErrorHandler() {
+                @Override
+                public boolean hasError(@javax.annotation.Nullable ClientHttpResponse clientHttpResponse) {
+                    return true;
+                }
+
+                @Override
+                public void handleError(@javax.annotation.Nullable ClientHttpResponse clientHttpResponse) {
 
                 }
             });

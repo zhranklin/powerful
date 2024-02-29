@@ -1,8 +1,9 @@
 package zhranklin.powerful.core.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import feign.FeignException;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.PowerfulStatusCodeException;
@@ -14,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -24,8 +24,8 @@ import java.util.Map;
  * Created by 张武 at 2019/9/6
  */
 @RestController
-@ConditionalOnMissingClass("jakarta.servlet.http.HttpServletRequest")
-public class HttpController {
+@ConditionalOnClass(jakarta.servlet.http.HttpServletRequest.class)
+public class HttpControllerSpringboot3 {
 
     @Autowired
     private PowerfulService powerful;

@@ -43,7 +43,7 @@ public class StaticResources {
                 config.putAll((Map<String, Object>) new ObjectMapper(new YAMLFactory()).readValue(extResource.getInputStream(), Object.class));
             }
             Map<String, Map<String, Object>> caseSets = (Map<String, Map<String, Object>>) config.get("requestCases");
-            if (!StringUtils.isEmpty(System.getProperty("caseSets"))) {
+            if (StringUtils.hasText(System.getProperty("caseSets"))) {
                 HashSet<String> caseSetNames = new HashSet<>(Arrays.asList(System.getProperty("caseSets").split(",")));
                 for (String name : new ArrayList<>(caseSets.keySet())) {
                     if (!caseSetNames.contains(name)) {
@@ -102,7 +102,7 @@ public class StaticResources {
         for (Enumeration<?> e = mapping.propertyNames(); e.hasMoreElements(); ) {
             String name = (String) e.nextElement();
             String value = mapping.getProperty(name);
-            if (!StringUtils.isEmpty(value)) {
+            if (StringUtils.hasText(value)) {
                 if (trace) {
                     if (src.contains("/")) {
                         src = src.replaceAll("^" + name + "/", value + "/");

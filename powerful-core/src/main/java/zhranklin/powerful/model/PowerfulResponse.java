@@ -72,6 +72,6 @@ public class PowerfulResponse {
 		HttpHeaders respHeaders = new HttpHeaders();
 		instruction.currentNode().getResponseHeaders().forEach(respHeaders::set);
 		//todo 翻译status
-		return new ResponseEntity<>("" + result, respHeaders, HttpStatus.OK);
+		return new ResponseEntity<>("" + result, respHeaders, 200);
 	}
 }

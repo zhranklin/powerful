@@ -19,11 +19,10 @@ public class HttpClient5RemoteInvoker extends HttpRemoteAbstractInvoker {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpClientRemoteInvoker.class);
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public HttpClient5RemoteInvoker(StringRenderer stringRenderer, ObjectMapper objectMapper) {
+    public HttpClient5RemoteInvoker(StringRenderer stringRenderer) {
         super(stringRenderer);
-        this.objectMapper = objectMapper;
     }
 
     @Override
