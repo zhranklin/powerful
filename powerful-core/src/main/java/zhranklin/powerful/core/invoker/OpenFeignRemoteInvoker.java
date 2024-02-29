@@ -103,7 +103,8 @@ public class OpenFeignRemoteInvoker extends HttpRemoteAbstractInvoker{
             if(e instanceof FeignException){
                 return PowerfulResponse.fromHttp((FeignException) e);
             }
-            return null;
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
