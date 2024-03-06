@@ -13,33 +13,6 @@ function getTag() {
   echo $tag
 }
 
-function adaptation4SpringBoot3() {
-    file="powerful-core/src/main/java/zhranklin/powerful/core/PowerfulAutoConfiguration.java"  # 编译前需要修改的PowerfulAutoConfiguration.java类
-    ## 取消注释57行至73代码
-    for ((i=57; i<=73; i++)); do
-        sed -i "${i}s/^\/\///" $file
-    done
-    # 注释76行至93行代码
-    for ((i=76; i<=93; i++)); do
-        sed -i "${i}s/^/\/\//" $file
-    done
-}
-
-function adaptation4SpringBoot2() {
-    file="powerful-core/src/main/java/zhranklin/powerful/core/PowerfulAutoConfiguration.java"  # 编译前需要修改的PowerfulAutoConfiguration.java类
-    ## 取消注释76行至93代码
-    for ((i=76; i<=93; i++)); do
-        sed -i "${i}s/^\/\///" $file
-    done
-    # 注释57行至73行代码
-    for ((i=57; i<=73; i++)); do
-        sed -i "${i}s/^/\/\//" $file
-    done
-}
-
-
-
-
 COMPILE_DEMO=1
 BUNDLE=0
 BUILD_SDK=0
@@ -144,11 +117,7 @@ if [[ $COMPILE_DEMO = 1 ]]; then
               springCloudStarterOpenfeignVersion="4.0.6"
               springCloudStarterLoadbalancerVersion="4.0.5"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
-              # 修改代码以适配springboot3
-              adaptation4SpringBoot3
               (cd powerful-core; mvn clean install "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
-              # 恢复代码以重新适配springboot2
-              adaptation4SpringBoot2
               ;;
           *)
               echo "unknown version: $version"

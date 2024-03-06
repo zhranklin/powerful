@@ -36,6 +36,8 @@ import zhranklin.powerful.core.service.StringRenderer;
 import zhranklin.powerful.core.service.TestingMethodService;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
@@ -53,39 +55,57 @@ public class PowerfulAutoConfiguration {
     @Value("${defaultHttpClient:RestTemplate}")
     String defaultHttpClient;
 
-    // 以下方法是为了解决SpringBoot3.0的兼容问题。编译springboot版本的demo时需要使用以下被注释的代码
-//    @Bean
-//    public FilterRegistrationBean filterRegistSpringBoot3() {
-//        FilterRegistrationBean frBean = new FilterRegistrationBean();
-//        frBean.setFilter(new jakarta.servlet.Filter() {
-//            @Override
-//            public void doFilter(jakarta.servlet.ServletRequest servletRequest, jakarta.servlet.ServletResponse servletResponse, jakarta.servlet.FilterChain filterChain) throws IOException, jakarta.servlet.ServletException {
-//                servletRequest.setAttribute("realBody", StreamUtils.copyToString(servletRequest.getInputStream(), StandardCharsets.UTF_8));
-//                filterChain.doFilter(servletRequest, servletResponse);
-//            }
-//            @Override public void init(jakarta.servlet.FilterConfig filterConfig) { }
-//            @Override public void destroy() { }
-//        });
-//        frBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-//        frBean.addUrlPatterns("/y");
-//        frBean.addUrlPatterns("/b");
-//        return frBean;
-//    }
+    @Bean
+    @ConditionalOnClass(jakarta.servlet.Filter.class)
+    public FilterRegistrationBean filterRegistSpringBoot3() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        FilterRegistrationBean frBean = new FilterRegistrationBean();
+        jakarta.servlet.Filter filterSpringboot3 = new jakarta.servlet.Filter() {
+            @Override
+            public void doFilter(jakarta.servlet.ServletRequest servletRequest, jakarta.servlet.ServletResponse servletResponse, jakarta.servlet.FilterChain filterChain) throws IOException, jakarta.servlet.ServletException {
+                servletRequest.setAttribute("realBody", StreamUtils.copyToString(servletRequest.getInputStream(), StandardCharsets.UTF_8));
+                filterChain.doFilter(servletRequest, servletResponse);
+            }
+
+            @Override
+            public void init(jakarta.servlet.FilterConfig filterConfig) {
+            }
+
+            @Override
+            public void destroy() {
+            }
+        };
+        Method setFilterMethod = FilterRegistrationBean.class.getDeclaredMethod("setFilter", jakarta.servlet.Filter.class);
+        setFilterMethod.setAccessible(true);
+        setFilterMethod.invoke(frBean, filterSpringboot3);
+        frBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        frBean.addUrlPatterns("/y");
+        frBean.addUrlPatterns("/b");
+        return frBean;
+    }
 
     // 以下方法是为了解决SpringBoot3.0的兼容问题。编译springboot2.x版本的demo时需要使用以下
     @Bean
-    public FilterRegistrationBean filterRegist() {
+    @ConditionalOnMissingClass("jakarta.servlet.Filter")
+    public FilterRegistrationBean filterRegist() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         FilterRegistrationBean frBean = new FilterRegistrationBean();
-        frBean.setFilter(new javax.servlet.Filter() {
+        javax.servlet.Filter filter = new javax.servlet.Filter() {
             @Override
             public void doFilter(javax.servlet.ServletRequest servletRequest, javax.servlet.ServletResponse servletResponse, javax.servlet.FilterChain filterChain) throws IOException, javax.servlet.ServletException {
                 servletRequest.setAttribute("realBody", StreamUtils.copyToString(servletRequest.getInputStream(), StandardCharsets.UTF_8));
                 filterChain.doFilter(servletRequest, servletResponse);
             }
-            @Override public void init(javax.servlet.FilterConfig filterConfig) { }
 
-            @Override public void destroy() { }
-        });
+            @Override
+            public void init(javax.servlet.FilterConfig filterConfig) {
+            }
+
+            @Override
+            public void destroy() {
+            }
+        };
+        Method setFilterMethod = FilterRegistrationBean.class.getDeclaredMethod("setFilter", javax.servlet.Filter.class);
+        setFilterMethod.setAccessible(true);
+        setFilterMethod.invoke(frBean, filter);
         frBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         frBean.addUrlPatterns("/y");
         frBean.addUrlPatterns("/b");
@@ -150,35 +170,16 @@ public class PowerfulAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnClass(jakarta.servlet.http.HttpServletRequest.class)
-    RestTemplate restTemplateSpringboot3() {
-        return new RestTemplate() {{
-            setErrorHandler(new ResponseErrorHandler() {
-                @Override
-                public boolean hasError(@jakarta.annotation.Nullable ClientHttpResponse clientHttpResponse) {
-                    return true;
-                }
-
-                @Override
-                public void handleError(@jakarta.annotation.Nullable ClientHttpResponse clientHttpResponse) {
-
-                }
-            });
-        }};
-    }
-
-    @Bean
-    @ConditionalOnMissingClass("jakarta.servlet.http.HttpServletRequest")
     RestTemplate restTemplate() {
         return new RestTemplate() {{
             setErrorHandler(new ResponseErrorHandler() {
                 @Override
-                public boolean hasError(@javax.annotation.Nullable ClientHttpResponse clientHttpResponse) {
+                public boolean hasError(ClientHttpResponse clientHttpResponse) {
                     return true;
                 }
 
                 @Override
-                public void handleError(@javax.annotation.Nullable ClientHttpResponse clientHttpResponse) {
+                public void handleError(ClientHttpResponse clientHttpResponse) {
 
                 }
             });
