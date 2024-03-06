@@ -2,19 +2,18 @@ package zhranklin.powerful.core.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import zhranklin.powerful.core.service.PowerfulService;
-import zhranklin.powerful.model.Instruction;
-import zhranklin.powerful.model.PowerfulStatusCodeException;
-import zhranklin.powerful.model.RenderingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.NativeWebRequest;
+import zhranklin.powerful.core.service.PowerfulService;
+import zhranklin.powerful.model.Instruction;
+import zhranklin.powerful.model.PowerfulStatusCodeException;
+import zhranklin.powerful.model.RenderingContext;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -24,15 +23,15 @@ import java.util.Map;
  * Created by 张武 at 2019/9/6
  */
 @RestController
-@ConditionalOnMissingClass("jakarta.servlet.http.HttpServletRequest")
 public class HttpController {
 
     @Autowired
     private PowerfulService powerful;
 
     @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH})
-    public Object execute(@RequestBody Instruction instruction, HttpServletRequest request, @RequestParam Map<String, String> params) {
+    public Object execute(@RequestBody Instruction instruction, NativeWebRequest req, @RequestParam Map<String, String> params) {
         RenderingContext context = new RenderingContext();
+        RequestAdaptor.HttpServletRequest request = new RequestAdaptor(req).getRequest();
         try {
             context.setMethod(request.getMethod());
             context.setRequestHeaders(transformRequestHeaders(request));
@@ -56,14 +55,14 @@ public class HttpController {
         }
     }
     @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.GET, RequestMethod.DELETE})
-    public Object execute(String _body, HttpServletRequest request, @RequestParam Map<String, String> params) throws IOException {
+    public Object execute(String _body, NativeWebRequest request, @RequestParam Map<String, String> params) throws IOException {
         Instruction instruction = new ObjectMapper().readValue(PowerfulService.decodeURLBase64(_body), Instruction.class);
         params.remove("_body");
         return execute(instruction, request, params);
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<String, String> transformRequestHeaders(HttpServletRequest request) {
+    private static Map<String, String> transformRequestHeaders(RequestAdaptor.HttpServletRequest request) {
         Enumeration<String> names = request.getHeaderNames();
         HashMap<String, String> result = new HashMap<>();
         while (names.hasMoreElements()) {

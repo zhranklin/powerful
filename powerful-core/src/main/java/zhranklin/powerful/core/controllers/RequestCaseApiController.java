@@ -6,12 +6,12 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.NativeWebRequest;
 import zhranklin.powerful.core.cases.CaseValidator;
 import zhranklin.powerful.core.cases.RequestCase;
 import zhranklin.powerful.core.cases.StaticResources;
@@ -20,8 +20,6 @@ import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.PowerTraceNode;
 import zhranklin.powerful.model.RenderingContext;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -31,7 +29,6 @@ import java.util.stream.Collectors;
  * Created by 张武 at 2019/9/20
  */
 @Controller
-@ConditionalOnMissingClass("jakarta.servlet.http.HttpServletRequest")
 public class RequestCaseApiController {
 
     @Autowired
@@ -86,7 +83,8 @@ public class RequestCaseApiController {
     }
 
     @RequestMapping(value = "/executeAll/{set}", method = RequestMethod.GET)
-    void executeAll(@PathVariable String set, @RequestParam Map<String, String> params, HttpServletResponse response) throws IOException {
+    void executeAll(@PathVariable String set, @RequestParam Map<String, String> params, NativeWebRequest request) throws IOException {
+        RequestAdaptor.HttpServletResponse response = new RequestAdaptor(request).getResponse();
         PrintWriter writer = response.getWriter();
         Set<String> names = staticResources.rawCaseSets.getOrDefault(set, Collections.emptyMap()).keySet();
         for (String name : names) {
@@ -96,7 +94,8 @@ public class RequestCaseApiController {
     }
 
     @RequestMapping(value = "/executeAll", method = RequestMethod.GET)
-    void executeAll(@RequestParam Map<String, String> params, HttpServletResponse response) throws IOException {
+    void executeAll(@RequestParam Map<String, String> params, NativeWebRequest request) throws IOException {
+        RequestAdaptor.HttpServletResponse response = new RequestAdaptor(request).getResponse();
         PrintWriter writer = response.getWriter();
         Set<String> names = staticResources.rawCases.keySet();
         for (String name : names) {
@@ -105,7 +104,7 @@ public class RequestCaseApiController {
         writer.close();
     }
 
-    private void executeDuringResponse(Map<String, String> params, HttpServletResponse response, PrintWriter writer, String name) throws IOException {
+    private void executeDuringResponse(Map<String, String> params, RequestAdaptor.HttpServletResponse response, PrintWriter writer, String name) throws IOException {
         writer.println(String.format("=======executing: %s=======", name));
         response.flushBuffer();
         Object result = execute(staticResources.getCase(name), params, true);
@@ -128,8 +127,8 @@ public class RequestCaseApiController {
 
     @RequestMapping(value = "/y", method = RequestMethod.POST)
     @ResponseBody
-    Object yCase(HttpServletRequest request, @RequestParam(required = false, defaultValue = "false") boolean validate, @RequestParam Map<String, String> params) throws IOException {
-        String realBody = (String) request.getAttribute("realBody");
+    Object yCase(NativeWebRequest request, @RequestParam(required = false, defaultValue = "false") boolean validate, @RequestParam Map<String, String> params) throws IOException {
+        String realBody = (String) new RequestAdaptor(request).getRequest().getAttribute("realBody");
         return execute(new ObjectMapper(new YAMLFactory()).readValue(realBody, RequestCase.class), params, validate);
     }
 
@@ -147,8 +146,8 @@ public class RequestCaseApiController {
 
     @RequestMapping(value = "/b", method = RequestMethod.POST)
     @ResponseBody
-    String base64(HttpServletRequest request) {
-        String realBody = (String) request.getAttribute("realBody");
+    String base64(NativeWebRequest request) {
+        String realBody = (String) new RequestAdaptor(request).getRequest().getAttribute("realBody");
         return PowerfulService.encodeURLBase64(realBody);
     }
 
