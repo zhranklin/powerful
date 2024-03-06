@@ -10,6 +10,8 @@
 
   <properties>
     <JavaVersion>17</JavaVersion>
+<!--部署脚本中会被覆盖成provided-->
+    <dubboDepScope>compile</dubboDepScope>
     <java.version>${JavaVersion}</java.version>
     <springboot.version>2.7.7</springboot.version>
     <spring-cloud-starter-openfeign.version>3.1.8</spring-cloud-starter-openfeign.version>
@@ -80,26 +82,26 @@
       <groupId>org.apache.dubbo</groupId>
       <artifactId>dubbo</artifactId>
       <version>2.7.22</version>
-      <scope>provided</scope>
+      <scope>${dubboDepScope}</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.zookeeper</groupId>
       <artifactId>zookeeper</artifactId>
       <version>3.4.9</version>
       <type>pom</type>
-      <scope>provided</scope>
+      <scope>${dubboDepScope}</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.curator</groupId>
       <artifactId>curator-recipes</artifactId>
       <version>2.12.0</version>
-      <scope>provided</scope>
+      <scope>${dubboDepScope}</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.curator</groupId>
       <artifactId>curator-framework</artifactId>
       <version>2.12.0</version>
-      <scope>provided</scope>
+      <scope>${dubboDepScope}</scope>
     </dependency>
     <!--    dubbo 2.6.x-->
     <dependency>
@@ -136,7 +138,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-aop</artifactId>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
@@ -171,7 +172,6 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 -->
     <dependency>
       <groupId>org.apache.httpcomponents.client5</groupId>
       <artifactId>httpclient5</artifactId>
