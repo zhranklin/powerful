@@ -10,12 +10,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
  * Created by 张武 at 2021/10/14
  */
 public class PowerfulResponse {
+	public static final String RESPONSE_BODY_METHOD = "responseBody";
+	public static final String RESPONSE_HEADERS_METHOD = "responseHeaders";
+	public static final String GET_MESSAGE_METHOD = "getMessage";
 	public final Map<String, String> responseHeaders = new HashMap<>();
 	public Object result;
 	public String status;
@@ -36,8 +42,31 @@ public class PowerfulResponse {
 	}
 
 	public static PowerfulResponse fromHttp(FeignException e) {
-		String body=new String(e.responseBody().get().array());
-		return new PowerfulResponse(body, ""+e.status(), toSingleValueMap(e.responseHeaders()));
+		Method responseBodyMethod;
+		Method responseHeadersMethod;
+		try {
+			responseBodyMethod = FeignException.class.getMethod(RESPONSE_BODY_METHOD);
+			responseHeadersMethod = FeignException.class.getMethod(RESPONSE_HEADERS_METHOD);
+			@SuppressWarnings("unchecked")
+			Optional<ByteBuffer> bodyBuffer = (Optional<ByteBuffer>) responseBodyMethod.invoke(e);
+			String body = "";
+			if (bodyBuffer.isPresent()) {
+				body = new String(bodyBuffer.get().array());
+			}
+			@SuppressWarnings("unchecked")
+			Map<String, Collection<String>> headers = (Map<String, Collection<String>>) responseHeadersMethod.invoke(e);
+			return new PowerfulResponse(body, "" + e.status(), toSingleValueMap(headers));
+		} catch (NoSuchMethodException ex) {
+			try {
+				responseBodyMethod = FeignException.class.getMethod(GET_MESSAGE_METHOD);
+				String body = (String) responseBodyMethod.invoke(e);
+				return new PowerfulResponse(body, "" + e.status(), new HashMap<>());
+			} catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		} catch (InvocationTargetException | IllegalAccessException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
 	private static Map<String, String> toSingleValueMap(Map<String, Collection<String>> stringCollectionMap) {
@@ -72,6 +101,6 @@ public class PowerfulResponse {
 		HttpHeaders respHeaders = new HttpHeaders();
 		instruction.currentNode().getResponseHeaders().forEach(respHeaders::set);
 		//todo 翻译status
-		return new ResponseEntity<>("" + result, respHeaders, 200);
+		return new ResponseEntity<>("" + result, respHeaders, HttpStatus.OK);
 	}
 }

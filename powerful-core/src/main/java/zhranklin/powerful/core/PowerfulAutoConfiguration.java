@@ -56,7 +56,7 @@ public class PowerfulAutoConfiguration {
     String defaultHttpClient;
 
     @Bean
-    @ConditionalOnClass(jakarta.servlet.Filter.class)
+    @ConditionalOnClass(name = "jakarta.servlet.Filter")
     public FilterRegistrationBean filterRegistSpringBoot3() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         FilterRegistrationBean frBean = new FilterRegistrationBean();
         jakarta.servlet.Filter filterSpringboot3 = new jakarta.servlet.Filter() {
@@ -83,7 +83,6 @@ public class PowerfulAutoConfiguration {
         return frBean;
     }
 
-    // 以下方法是为了解决SpringBoot3.0的兼容问题。编译springboot2.x版本的demo时需要使用以下
     @Bean
     @ConditionalOnMissingClass("jakarta.servlet.Filter")
     public FilterRegistrationBean filterRegist() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {

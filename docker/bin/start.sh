@@ -33,7 +33,7 @@ if [[ $RUN_DEMO == "1" ]]; then
   fi
 
   # copy jakarta.jar into powerful.jar
-  if [ "$SB_VERSION" == "3.1.9" ]; then
+  if [[ "$SB_VERSION" == "3.1.9" || "$SB_VERSION" == "3.2.3" || "$SB_VERSION" == "3.0.13" ]]; then
     cp -r /usr/local/jakarta_dep/springboot3/* /BOOT-INF/lib/
   fi
 

@@ -10,7 +10,7 @@
 
   <properties>
     <JavaVersion>17</JavaVersion>
-<!--部署脚本中会被覆盖成provided-->
+    <!--部署脚本中会被覆盖成provided-->
     <dubboDepScope>compile</dubboDepScope>
     <java.version>${JavaVersion}</java.version>
     <springboot.version>2.7.7</springboot.version>
@@ -214,6 +214,8 @@
           <source>${java.version}</source>
           <target>${java.version}</target>
           <encoding>UTF-8</encoding>
+          <!--Springboot3.2.x: Set to true to generate metadata for reflection on method parameters.-->
+          <parameters>true</parameters>
         </configuration>
       </plugin>
     </plugins>

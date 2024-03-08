@@ -51,7 +51,7 @@ public class HttpController {
                 int intStatus=((FeignException) e.getCause()).status();
                 status = HttpStatus.valueOf(intStatus);
             }
-            return new ResponseEntity<>(e.getMessage(), respHeaders, status.value());
+            return new ResponseEntity<>(e.getMessage(), respHeaders, status);
         }
     }
     @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.GET, RequestMethod.DELETE})

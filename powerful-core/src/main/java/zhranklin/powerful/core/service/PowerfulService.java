@@ -24,7 +24,9 @@ import zhranklin.powerful.model.PowerfulStatusCodeException;
 import zhranklin.powerful.model.RenderingContext;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.SynchronousQueue;
@@ -35,6 +37,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static zhranklin.powerful.model.PowerfulResponse.GET_MESSAGE_METHOD;
+import static zhranklin.powerful.model.PowerfulResponse.RESPONSE_BODY_METHOD;
 
 /**
  * Created by 张武 at 2019/9/6
@@ -181,7 +186,26 @@ public class PowerfulService {
                 context.setResult(new PowerfulResponse(e.getMessage(), "200", null));
             } else {
                 if(e instanceof FeignException){
-                    String message=new String(((FeignException) e).responseBody().get().array());
+                    String message;
+                    Method responseBodyMethod;
+                    try {
+                        responseBodyMethod = FeignException.class.getMethod(RESPONSE_BODY_METHOD);
+                        @SuppressWarnings("unchecked")
+                        Optional<ByteBuffer> bodyBuffer = (Optional<ByteBuffer>) responseBodyMethod.invoke(e);
+                        message = "";
+                        if (bodyBuffer.isPresent()) {
+                            message = new String(bodyBuffer.get().array());
+                        }
+                    } catch (NoSuchMethodException ex) {
+                        try {
+                            responseBodyMethod = FeignException.class.getMethod(GET_MESSAGE_METHOD);
+                            message = (String) responseBodyMethod.invoke(e);
+                        } catch (Exception exception) {
+                            throw new RuntimeException(exception);
+                        }
+                    } catch (InvocationTargetException | IllegalAccessException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     throw new RuntimeException(stringRenderer.render(template, context) + ": " + message, e);
                 }
                 throw new RuntimeException(stringRenderer.render(template, context) + ": " + e.getMessage(), e);

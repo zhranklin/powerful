@@ -72,13 +72,13 @@ if [[ $COMPILE_DEMO = 1 ]]; then
   if [[ $BUNDLE == "1" ]]; then
     export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.7"
     export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.7"
-    export boots_java17="2.6.14 2.7.7 3.1.9"
+    export boots_java17="2.6.14 2.7.7 3.0.13 3.1.9 3.2.3"
     export jdks="8 11 17"
   fi
   rm -rf docker/jars/*.jar
   for jdk in $jdks; do
     JavaVersion=$jdk
-    (cd powerful-core; mvn clean install -DdubboDepScope=provided "-DJavaVersion=${JavaVersion}" $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
+    (cd powerful-core; mvn clean install "-DdubboDepScope=provided" "-DJavaVersion=${JavaVersion}" $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
     versions=$(eval "echo \$boots_java$jdk")
     for version in $versions; do
       echo "version: $version, jdk: $jdk, JavaVersion: $JavaVersion"
@@ -113,17 +113,29 @@ if [[ $COMPILE_DEMO = 1 ]]; then
               springCloudStarterLoadbalancerVersion="3.1.7"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               ;;
+          "3.0.13")
+              springCloudStarterOpenfeignVersion="4.0.6"
+              springCloudStarterLoadbalancerVersion="4.0.5"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
+              (cd powerful-core; mvn clean install "-DdubboDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
+              ;;
           "3.1.9")
               springCloudStarterOpenfeignVersion="4.0.6"
               springCloudStarterLoadbalancerVersion="4.0.5"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
-              (cd powerful-core; mvn clean install -DdubboDepScope=provided -DtomcatDepScope=provided "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
+              (cd powerful-core; mvn clean install "-DdubboDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
+              ;;
+          "3.2.3")
+              springCloudStarterOpenfeignVersion="4.1.0"
+              springCloudStarterLoadbalancerVersion="4.1.1"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
+              (cd powerful-core; mvn clean install "-DdubboDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
               ;;
           *)
               echo "unknown version: $version"
               ;;
       esac
-      (cd powerful-springboot; mvn clean install -DdubboDepScope=provided -DtomcatDepScope=provided "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}" "-Dspring-cloud-starter-openfeign.version=${springCloudStarterOpenfeignVersion}" "-Dspring-cloud-starter-loadbalancer.version=${springCloudStarterLoadbalancerVersion}" "-Dspring-cloud-starter-loadbalancer.artifactId=${springCloudStarterLoadbalancerArtifactId}")
+      (cd powerful-springboot; mvn clean install "-DdubboDepScope=provided" "-DtomcatDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}" "-Dspring-cloud-starter-openfeign.version=${springCloudStarterOpenfeignVersion}" "-Dspring-cloud-starter-loadbalancer.version=${springCloudStarterLoadbalancerVersion}" "-Dspring-cloud-starter-loadbalancer.artifactId=${springCloudStarterLoadbalancerArtifactId}")
       cp powerful-springboot/target/powerful-boot-$version-java$JavaVersion.jar docker/jars
     done
   done

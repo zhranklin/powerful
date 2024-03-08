@@ -105,6 +105,8 @@
           <target>${java.version}</target>
           <release>${java.version}</release>
           <encoding>UTF-8</encoding>
+          <!--Springboot3.2.x: Set to true to generate metadata for reflection on method parameters.-->
+          <parameters>true</parameters>
         </configuration>
       </plugin>
       <plugin>
