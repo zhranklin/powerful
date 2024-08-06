@@ -10,6 +10,8 @@
   <artifactId>powerful-springboot</artifactId>
 
   <properties>
+    <!--部署脚本中会被覆盖成provided-->
+    <tomcatDepScope>compile</tomcatDepScope>
     <JavaVersion>17</JavaVersion>
     <java.version>${JavaVersion}</java.version>
     <springboot.version>2.7.7</springboot.version>
@@ -35,7 +37,7 @@
       <artifactId>spring-boot-starter-tomcat</artifactId>
       <groupId>org.springframework.boot</groupId>
       <version>${springboot.version}</version>
-      <scope>provided</scope>
+      <scope>${tomcatDepScope}</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -114,12 +116,8 @@
         </executions>
         <!-- 将tomcat在打包阶段依赖排除-->
         <configuration>
-          <excludes>
-            <exclude>
-              <groupId>org.apache.tomcat.embed</groupId>
-              <artifactId>spring-boot-starter-tomcat</artifactId>
-            </exclude>
-          </excludes>
+          <excludeGroupIds>org.apache.tomcat</excludeGroupIds>
+          <excludeGroupIds>org.apache.tomcat.embed</excludeGroupIds>
         </configuration>
       </plugin>
     </plugins>

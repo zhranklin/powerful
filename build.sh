@@ -117,13 +117,13 @@ if [[ $COMPILE_DEMO = 1 ]]; then
               springCloudStarterOpenfeignVersion="4.0.6"
               springCloudStarterLoadbalancerVersion="4.0.5"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
-              (cd powerful-core; mvn clean install -DdubboDepScope=provided "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
+              (cd powerful-core; mvn clean install -DdubboDepScope=provided -DtomcatDepScope=provided "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
               ;;
           *)
               echo "unknown version: $version"
               ;;
       esac
-      (cd powerful-springboot; mvn clean install -DdubboDepScope=provided "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}" "-Dspring-cloud-starter-openfeign.version=${springCloudStarterOpenfeignVersion}" "-Dspring-cloud-starter-loadbalancer.version=${springCloudStarterLoadbalancerVersion}" "-Dspring-cloud-starter-loadbalancer.artifactId=${springCloudStarterLoadbalancerArtifactId}")
+      (cd powerful-springboot; mvn clean install -DdubboDepScope=provided -DtomcatDepScope=provided "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}" "-Dspring-cloud-starter-openfeign.version=${springCloudStarterOpenfeignVersion}" "-Dspring-cloud-starter-loadbalancer.version=${springCloudStarterLoadbalancerVersion}" "-Dspring-cloud-starter-loadbalancer.artifactId=${springCloudStarterLoadbalancerArtifactId}")
       cp powerful-springboot/target/powerful-boot-$version-java$JavaVersion.jar docker/jars
     done
   done
