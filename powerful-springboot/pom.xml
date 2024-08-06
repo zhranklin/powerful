@@ -118,6 +118,16 @@
         <configuration>
           <excludeGroupIds>org.apache.tomcat</excludeGroupIds>
           <excludeGroupIds>org.apache.tomcat.embed</excludeGroupIds>
+          <excludes>
+            <exclude>
+              <groupId>org.apache.dubbo</groupId>
+              <artifactId>dubbo</artifactId>
+            </exclude>
+            <exclude>
+              <groupId>com.alibaba</groupId>
+              <artifactId>dubbo</artifactId>
+            </exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>
