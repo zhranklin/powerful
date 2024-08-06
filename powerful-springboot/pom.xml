@@ -118,8 +118,7 @@
         </executions>
         <!-- 将tomcat在打包阶段依赖排除-->
         <configuration>
-          <excludeGroupIds>org.apache.tomcat</excludeGroupIds>
-          <excludeGroupIds>org.apache.tomcat.embed</excludeGroupIds>
+          <excludeGroupIds>org.apache.tomcat,org.apache.tomcat.embed</excludeGroupIds>
           <excludes>
             <exclude>
               <groupId>org.apache.dubbo</groupId>
