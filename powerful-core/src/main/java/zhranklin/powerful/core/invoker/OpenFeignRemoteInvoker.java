@@ -33,15 +33,6 @@ public class OpenFeignRemoteInvoker extends HttpRemoteAbstractInvoker{
     private CAgentClient c;
     @Autowired
     @Lazy
-    private ADubboAgentClient ad;
-    @Autowired
-    @Lazy
-    private ADubboAgentClient bd;
-    @Autowired
-    @Lazy
-    private ADubboAgentClient cd;
-    @Autowired
-    @Lazy
     private ASidecarClient as;
     @Autowired
     @Lazy
@@ -49,15 +40,6 @@ public class OpenFeignRemoteInvoker extends HttpRemoteAbstractInvoker{
     @Autowired
     @Lazy
     private CSidecarClient cs;
-    @Autowired
-    @Lazy
-    private ADubboSidecarClient ads;
-    @Autowired
-    @Lazy
-    private ADubboSidecarClient bds;
-    @Autowired
-    @Lazy
-    private ADubboSidecarClient cds;
 
     private Map<String, CommonClient> serviceMap = new HashMap<>();
 
@@ -112,15 +94,9 @@ public class OpenFeignRemoteInvoker extends HttpRemoteAbstractInvoker{
         serviceMap.put("a-agent", a);
         serviceMap.put("b-agent", b);
         serviceMap.put("c-agent", c);
-        serviceMap.put("a-dubbo-agent", ad);
-        serviceMap.put("b-dubbo-agent", bd);
-        serviceMap.put("c-dubbo-agent", cd);
         serviceMap.put("a-sidecar", as);
         serviceMap.put("b-sidecar", bs);
         serviceMap.put("c-sidecar", cs);
-        serviceMap.put("a-dubbo-sidecar", ads);
-        serviceMap.put("b-dubbo-sidecar", bds);
-        serviceMap.put("c-dubbo-sidecar", cds);
     }
 
 }
