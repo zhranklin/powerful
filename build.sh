@@ -66,13 +66,13 @@ fi
 
 # Step 2: 编译demo, 本地修改过demo的java代码, 或第一次构建时需要
 if [[ $COMPILE_DEMO = 1 ]]; then
-  export boots_java17="2.7.7"
+  export boots_java17="2.7.18"
   export jdks="17"
   # 如果指定了bundle版本, 则会编译所有的jar包, 否则只编译2.7 on java17
   if [[ $BUNDLE == "1" ]]; then
-    export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.7"
-    export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.7"
-    export boots_java17="2.6.14 2.7.7 3.0.13 3.1.9 3.2.3"
+    export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.18"
+    export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.18"
+    export boots_java17="2.6.14 2.7.18 3.0.13 3.1.9 3.2.3"
     export jdks="8 11 17"
   fi
   rm -rf docker/jars/*.jar
@@ -108,7 +108,7 @@ if [[ $COMPILE_DEMO = 1 ]]; then
               springCloudStarterLoadbalancerVersion="3.1.7"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               ;;
-          "2.7.7")
+          "2.7.18")
               springCloudStarterOpenfeignVersion="3.1.8"
               springCloudStarterLoadbalancerVersion="3.1.7"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
@@ -161,7 +161,7 @@ if [[ $BUILD_IMAGE = "1" ]]; then
   fi
   if [[ $BUNDLE != "1" ]]; then
     SED_CMD="$SED_CMD
-             ;s#\./jars/\*\.jar#./jars/powerful-boot-2.7.7-java17.jar#g; s/-jdk-all//g"
+             ;s#\./jars/\*\.jar#./jars/powerful-boot-2.7.18-java17.jar#g; s/-jdk-all//g"
   fi
   OPERATOR_IMAGE="$hub/powerful:$tag"
   if [[ $BUNDLE == "1" ]]; then

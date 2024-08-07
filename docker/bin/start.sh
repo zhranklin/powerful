@@ -9,7 +9,7 @@ if [[ $RUN_DEMO == "1" ]]; then
   JDK=${JDK:-17}
   export JAVA_HOME=/usr/local/openjdk-$JDK
   export PATH=$JAVA_HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-  SB_VERSION=${SB_VERSION:-2.7.7}
+  SB_VERSION=${SB_VERSION:-2.7.18}
   JAR=/opt/helm/powerful-boot-$SB_VERSION-java$JDK.jar
 
   jar -xvf $JAR BOOT-INF/lib
