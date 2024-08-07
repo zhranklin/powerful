@@ -17,24 +17,38 @@ if [[ $RUN_DEMO == "1" ]]; then
   # copy dubbo.jar into powerful.jar
   DUBBO_VERSION=${DUBBO_VERSION:-2.6.11}
   if [ $DUBBO_VERSION == "2.6.11" ]; then
+    echo "copy dubbo26x into powerful.jar"
     cp -r /usr/local/dubbo26x/* /BOOT-INF/lib/
   elif [ $DUBBO_VERSION == "2.7.22" ]; then
+    echo "copy dubbo27x into powerful.jar"
     cp -r /usr/local/dubbo27x/* /BOOT-INF/lib/
   fi
 
   # copy container.jar(like bes or tomcat) into powerful.jar
   SERVER_CONTAINER_TYPE=${SERVER_CONTAINER_TYPE:-tomcat}
   if [ $SERVER_CONTAINER_TYPE == "tomcat" ]; then
-    cp -r /usr/local/tomcat_dep/* /BOOT-INF/lib/
+      if [[ "$SB_VERSION" == "3.1.9" || "$SB_VERSION" == "3.2.3" || "$SB_VERSION" == "3.0.13" ]]; then
+        echo "copy tomcat10_dep into powerful.jar"
+        cp -r /usr/local/tomcat10_dep/* /BOOT-INF/lib/
+      elif [[ "$SB_VERSION" == "1.5.22.RELEASE" ]]; then
+        echo "copy tomcat8_dep into powerful.jar"
+        cp -r /usr/local/tomcat8_dep/* /BOOT-INF/lib/
+      else
+        echo "copy tomcat_dep into powerful.jar"
+        cp -r /usr/local/tomcat_dep/* /BOOT-INF/lib/
+      fi
   elif [ $SERVER_CONTAINER_TYPE == "bes" ]; then
+    echo "copy bes_dep into powerful.jar"
     cp -r /usr/local/bes_dep/* /BOOT-INF/lib/
   elif [ $SERVER_CONTAINER_TYPE == "tongweb" ]; then
+    echo "copy tongweb_dep into powerful.jar"
     cp -r /usr/local/tongweb_dep/* /BOOT-INF/lib/
   fi
 
   # copy jakarta.jar into powerful.jar
   if [[ "$SB_VERSION" == "3.1.9" || "$SB_VERSION" == "3.2.3" || "$SB_VERSION" == "3.0.13" ]]; then
-    cp -r /usr/local/jakarta_dep/springboot3/* /BOOT-INF/lib/
+    echo "copy jakarta_dep into powerful.jar"
+    cp -r /usr/local/jakarta_dep/* /BOOT-INF/lib/
   fi
 
   jar -uf0 $JAR /BOOT-INF/lib

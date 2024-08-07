@@ -7,6 +7,8 @@ COPY dubbo-jars/dubbo26x /usr/local/dubbo26x
 COPY dubbo-jars/dubbo27x /usr/local/dubbo27x
 COPY containers-jars/bes_dep /usr/local/bes_dep
 COPY containers-jars/tomcat_dep /usr/local/tomcat_dep
+COPY containers-jars/tomcat10_dep /usr/local/tomcat10_dep
+COPY containers-jars/tomcat8_dep /usr/local/tomcat8_dep
 COPY containers-jars/tongweb_dep /usr/local/tongweb_dep
 COPY jakarta-jars/springboot3 /usr/local/jakarta_dep
 

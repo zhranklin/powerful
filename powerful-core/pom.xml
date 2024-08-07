@@ -14,9 +14,6 @@
     <dubboDepScope>compile</dubboDepScope>
     <java.version>${JavaVersion}</java.version>
     <springboot.version>2.7.18</springboot.version>
-    <spring-cloud-starter-openfeign.version>3.1.8</spring-cloud-starter-openfeign.version>
-    <spring-cloud-starter-loadbalancer.version>3.1.7</spring-cloud-starter-loadbalancer.version>
-    <spring-cloud-starter-loadbalancer.artifactId>spring-cloud-starter-loadbalancer</spring-cloud-starter-loadbalancer.artifactId>
   </properties>
 
   <dependencies>
@@ -144,10 +141,11 @@
       <version>4.5.13</version>
     </dependency>
 
+<!--    for springboot1.5.x -->
     <dependency>
       <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-openfeign</artifactId>
-      <version>${spring-cloud-starter-openfeign.version}</version>
+      <artifactId>spring-cloud-starter-feign</artifactId>
+      <version>1.4.7.RELEASE</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -164,12 +162,33 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>org.springframework.cloud</groupId>
-      <artifactId>${spring-cloud-starter-loadbalancer.artifactId}</artifactId>
-      <version>${spring-cloud-starter-loadbalancer.version}</version>
+      <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+      <version>1.4.7.RELEASE</version>
       <scope>provided</scope>
+    </dependency>
+
+<!--    for springboot2.x and springboot3.x-->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-openfeign</artifactId>
+      <version>3.1.9</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

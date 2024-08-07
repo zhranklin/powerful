@@ -1,12 +1,10 @@
 package zhranklin.powerful.app;
 
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import zhranklin.powerful.assist.Gen;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@EnableFeignClients(basePackages = "zhranklin.powerful.core.openfeign")
 public class PowerfulApplication {
 
     public static void main(String[] args) {

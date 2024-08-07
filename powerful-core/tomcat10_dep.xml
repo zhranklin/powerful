@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.netease.cloud</groupId>
+    <artifactId>nsf-server</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <tomcat.version>10.1.24</tomcat.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <artifactId>tomcat-embed-core</artifactId>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <version>${tomcat.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <artifactId>tomcat-embed-el</artifactId>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <version>${tomcat.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <version>${tomcat.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>

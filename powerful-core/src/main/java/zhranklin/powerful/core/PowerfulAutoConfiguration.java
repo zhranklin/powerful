@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.dubbo.config.spring.context.annotation.DubboComponentScan;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubboConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -48,6 +51,8 @@ import java.util.Locale;
 @ComponentScan(basePackages = {"zhranklin.powerful.core.controllers"})
 public class PowerfulAutoConfiguration {
 
+    private final static Logger logger = LoggerFactory.getLogger(PowerfulAutoConfiguration.class);
+
     @Value("${configPath:/etc/powerful-cases/config.yaml}")
 	String configPath;
 
@@ -58,6 +63,7 @@ public class PowerfulAutoConfiguration {
     @Bean
     @ConditionalOnClass(name = "jakarta.servlet.Filter")
     public FilterRegistrationBean filterRegistSpringBoot3() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        logger.info("ConditionalOnClass jakarta.servlet.Filter.");
         FilterRegistrationBean frBean = new FilterRegistrationBean();
         jakarta.servlet.Filter filterSpringboot3 = new jakarta.servlet.Filter() {
             @Override
@@ -86,6 +92,7 @@ public class PowerfulAutoConfiguration {
     @Bean
     @ConditionalOnMissingClass("jakarta.servlet.Filter")
     public FilterRegistrationBean filterRegist() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        logger.info("ConditionalOnMissingClass jakarta.servlet.Filter.");
         FilterRegistrationBean frBean = new FilterRegistrationBean();
         javax.servlet.Filter filter = new javax.servlet.Filter() {
             @Override
@@ -300,4 +307,17 @@ public class PowerfulAutoConfiguration {
         }
     }
 
+//    springboot2.x and springboot3.x
+    @ConditionalOnClass(org.springframework.cloud.openfeign.EnableFeignClients.class)
+    @Configuration
+    @org.springframework.cloud.openfeign.EnableFeignClients(basePackages = "zhranklin.powerful.core.openfeign")
+    public static class SpringCloudOpenFeignConfiguration{
+    }
+
+//    springboot1.5.x
+    @ConditionalOnClass(org.springframework.cloud.netflix.feign.EnableFeignClients.class)
+    @Configuration
+    @EnableFeignClients(basePackages = "zhranklin.powerful.core.openfeign")
+    public static class SpringCloudNetflixFeignConfiguration{
+    }
 }

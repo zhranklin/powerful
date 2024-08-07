@@ -70,9 +70,9 @@ if [[ $COMPILE_DEMO = 1 ]]; then
   export jdks="17"
   # 如果指定了bundle版本, 则会编译所有的jar包, 否则只编译2.7 on java17
   if [[ $BUNDLE == "1" ]]; then
-    export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.18"
-    export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.6.14 2.7.18"
-    export boots_java17="2.6.14 2.7.18 3.0.13 3.1.9 3.2.3"
+    export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.4.13 2.6.15 2.7.18"
+    export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.4.13 2.6.15 2.7.18"
+    export boots_java17="2.6.15 2.7.18 3.0.13 3.1.9 3.2.3"
     export jdks="8 11 17"
   fi
   rm -rf docker/jars/*.jar
@@ -84,8 +84,8 @@ if [[ $COMPILE_DEMO = 1 ]]; then
       echo "version: $version, jdk: $jdk, JavaVersion: $JavaVersion"
       case $version in
           "1.5.22.RELEASE")
-              springCloudStarterOpenfeignVersion="2.0.4.RELEASE"
-              springCloudStarterLoadbalancerVersion="2.0.4.RELEASE"
+              springCloudStarterOpenfeignVersion="1.4.7.RELEASE"
+              springCloudStarterLoadbalancerVersion="1.4.7.RELEASE"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
               ;;
           "2.0.9.RELEASE")
@@ -103,14 +103,19 @@ if [[ $COMPILE_DEMO = 1 ]]; then
               springCloudStarterLoadbalancerVersion="2.2.9.RELEASE"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
               ;;
-          "2.6.14")
-              springCloudStarterOpenfeignVersion="3.1.8"
-              springCloudStarterLoadbalancerVersion="3.1.7"
+          "2.4.13")
+              springCloudStarterOpenfeignVersion="3.0.7"
+              springCloudStarterLoadbalancerVersion="3.0.6"
+              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
+              ;;
+          "2.6.15")
+              springCloudStarterOpenfeignVersion="3.1.9"
+              springCloudStarterLoadbalancerVersion="3.1.8"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               ;;
           "2.7.18")
-              springCloudStarterOpenfeignVersion="3.1.8"
-              springCloudStarterLoadbalancerVersion="3.1.7"
+              springCloudStarterOpenfeignVersion="3.1.9"
+              springCloudStarterLoadbalancerVersion="3.1.8"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               ;;
           "3.0.13")
@@ -126,8 +131,8 @@ if [[ $COMPILE_DEMO = 1 ]]; then
               (cd powerful-core; mvn clean install "-DdubboDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
               ;;
           "3.2.3")
-              springCloudStarterOpenfeignVersion="4.1.0"
-              springCloudStarterLoadbalancerVersion="4.1.1"
+              springCloudStarterOpenfeignVersion="4.1.3"
+              springCloudStarterLoadbalancerVersion="4.1.4"
               springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               (cd powerful-core; mvn clean install "-DdubboDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
               ;;
@@ -149,6 +154,8 @@ if [[ $BUILD_IMAGE = "1" ]]; then
   # 下载tomcat和宝兰德的相关依赖
   mvn -f powerful-core/bes_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/bes_dep
   mvn -f powerful-core/tomcat_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/tomcat_dep
+  mvn -f powerful-core/tomcat10_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/tomcat10_dep
+  mvn -f powerful-core/tomcat8_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/tomcat8_dep
   mvn -f powerful-core/tongweb_dep.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/containers-jars/tongweb_dep
   # 下载jakarta相关依赖（适配springboot3）
   mvn -f powerful-core/jakartapom.xml dependency:copy-dependencies -DincludeScope=provided -DincludeTypes=jar -DoutputDirectory=../docker/jakarta-jars/springboot3
