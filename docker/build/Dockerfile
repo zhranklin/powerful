@@ -1,4 +1,4 @@
-FROM zhranklin/helm-operator:v1.5.8-jdk-all
+FROM harbor.cloud.netease.com/qztest/helm-operator:v1.5.8-jdk-all
 
 ADD ./jars/*.jar /opt/helm/
 COPY watches.yaml ${HOME}/watches.yaml
