@@ -34,7 +34,7 @@ done
 cd `dirname $0`
 git status
 
-hub=${hub:-zhranklin}
+hub=harbor.cloud.netease.com/qztest
 tag=$(getTag)
 sdkImage=$hub/helm-operator:$tag
 if [[ $BUNDLE == "1" ]]; then
@@ -73,7 +73,8 @@ if [[ $COMPILE_DEMO = 1 ]]; then
     export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.4.13 2.6.15 2.7.18"
     export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.4.13 2.6.15 2.7.18"
     export boots_java17="2.6.15 2.7.18 3.0.13 3.1.9 3.2.3"
-    export jdks="8 11 17"
+    export boots_java21="2.7.18 3.0.13 3.1.9 3.2.3"
+    export jdks="8 11 17 21"
   fi
   rm -rf docker/jars/*.jar
   for jdk in $jdks; do
