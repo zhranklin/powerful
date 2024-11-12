@@ -16,9 +16,66 @@
     <java.version>${JavaVersion}</java.version>
     <springboot.version>2.7.18</springboot.version>
     <spring-cloud-starter-openfeign.version>3.1.9</spring-cloud-starter-openfeign.version>
-    <spring-cloud-starter-loadbalancer.version>3.1.8</spring-cloud-starter-loadbalancer.version>
-    <spring-cloud-starter-loadbalancer.artifactId>spring-cloud-starter-loadbalancer</spring-cloud-starter-loadbalancer.artifactId>
   </properties>
+  <profiles>
+    <profile>
+      <id>webflux-reactor-old</id>
+      <dependencies>
+        <dependency>
+          <groupId>io.projectreactor.ipc</groupId>
+          <artifactId>reactor-netty</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>webflux-reactor-new</id>
+      <dependencies>
+        <dependency>
+          <groupId>io.projectreactor.netty</groupId>
+          <artifactId>reactor-netty</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>webflux</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-webflux</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>feign-new</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>com.google.guava</groupId>
+              <artifactId>guava</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>feign-old</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.cloud</groupId>
+          <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>com.google.guava</groupId>
+              <artifactId>guava</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
   <dependencies>
     <dependency>
@@ -47,17 +104,6 @@
       <groupId>zhranklin</groupId>
       <artifactId>powerful-core</artifactId>
       <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>${spring-cloud-starter-loadbalancer.artifactId}</artifactId>
-      <version>${spring-cloud-starter-loadbalancer.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>

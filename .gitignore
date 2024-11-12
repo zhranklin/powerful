@@ -28,10 +28,12 @@ target/
 /.nb-gradle/
 build/
 !/docker/**
-docker/jars/*.jar
+docker/jars
 
 ### VS Code ###
 .vscode/
 /test
 .DS_Store
-/docker/dubbo-jars
+docker/dubbo-jars
+docker/containers-jars
+docker/jakarta-jars

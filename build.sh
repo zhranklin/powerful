@@ -70,8 +70,8 @@ if [[ $COMPILE_DEMO = 1 ]]; then
   export jdks="17"
   # 如果指定了bundle版本, 则会编译所有的jar包, 否则只编译2.7 on java17
   if [[ $BUNDLE == "1" ]]; then
-    export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.4.13 2.6.15 2.7.18"
-    export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.4.13 2.6.15 2.7.18"
+    export boots_java8="1.5.22.RELEASE 2.0.9.RELEASE 2.1.18.RELEASE 2.2.13.RELEASE 2.3.12.RELEASE 2.4.13 2.6.15 2.7.18"
+    export boots_java11="2.1.18.RELEASE 2.2.13.RELEASE 2.3.12.RELEASE 2.4.13 2.6.15 2.7.18"
     export boots_java17="2.6.15 2.7.18 3.0.13 3.1.9 3.2.3"
     export boots_java21="2.7.18 3.0.13 3.1.9 3.2.3"
     export jdks="8 11 17 21"
@@ -83,65 +83,56 @@ if [[ $COMPILE_DEMO = 1 ]]; then
     versions=$(eval "echo \$boots_java$jdk")
     for version in $versions; do
       echo "version: $version, jdk: $jdk, JavaVersion: $JavaVersion"
+      webfluxProfile=,webflux-reactor-new,webflux
+      feignProfile=,feign-new
+      profile=placeholder
       case $version in
-          "1.5.22.RELEASE")
+          1.5.*.RELEASE)
+              webfluxProfile=
+              feignProfile=,feign-old
               springCloudStarterOpenfeignVersion="1.4.7.RELEASE"
-              springCloudStarterLoadbalancerVersion="1.4.7.RELEASE"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
               ;;
-          "2.0.9.RELEASE")
+          2.0.*.RELEASE)
+              webfluxProfile=,webflux-reactor-old,webflux
+              feignProfile=,feign-old
               springCloudStarterOpenfeignVersion="2.0.4.RELEASE"
-              springCloudStarterLoadbalancerVersion="2.0.4.RELEASE"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
               ;;
-          "2.1.18.RELEASE")
+          2.1.*.RELEASE)
               springCloudStarterOpenfeignVersion="2.1.5.RELEASE"
-              springCloudStarterLoadbalancerVersion="2.1.5.RELEASE"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
+              feignProfile=,feign-old
               ;;
-          "2.2.13.RELEASE")
+          2.2.*.RELEASE|2.3.*.RELEASE)
               springCloudStarterOpenfeignVersion="2.2.9.RELEASE"
-              springCloudStarterLoadbalancerVersion="2.2.9.RELEASE"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-netflix-ribbon"
+              feignProfile=,feign-old
               ;;
-          "2.4.13")
+          2.4.*)
               springCloudStarterOpenfeignVersion="3.0.7"
-              springCloudStarterLoadbalancerVersion="3.0.6"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               ;;
-          "2.6.15")
+          2.6.*|2.7.*)
               springCloudStarterOpenfeignVersion="3.1.9"
-              springCloudStarterLoadbalancerVersion="3.1.8"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               ;;
-          "2.7.18")
-              springCloudStarterOpenfeignVersion="3.1.9"
-              springCloudStarterLoadbalancerVersion="3.1.8"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
-              ;;
-          "3.0.13")
+          3.0.*|3.1.*)
               springCloudStarterOpenfeignVersion="4.0.6"
-              springCloudStarterLoadbalancerVersion="4.0.5"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               (cd powerful-core; mvn clean install "-DdubboDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
               ;;
-          "3.1.9")
-              springCloudStarterOpenfeignVersion="4.0.6"
-              springCloudStarterLoadbalancerVersion="4.0.5"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
-              (cd powerful-core; mvn clean install "-DdubboDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
-              ;;
-          "3.2.3")
+          3.2.3)
               springCloudStarterOpenfeignVersion="4.1.3"
-              springCloudStarterLoadbalancerVersion="4.1.4"
-              springCloudStarterLoadbalancerArtifactId="spring-cloud-starter-loadbalancer"
               (cd powerful-core; mvn clean install "-DdubboDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}"  $(test "$(uname)" = "Darwin" && echo  -Dos.detected.classifier=osx-x86_64))
               ;;
           *)
               echo "unknown version: $version"
+              exit 1
               ;;
       esac
-      (cd powerful-springboot; mvn clean install "-DdubboDepScope=provided" "-DtomcatDepScope=provided" "-DJavaVersion=${JavaVersion}" "-Dspringboot.version=${version}" "-Dspring-cloud-starter-openfeign.version=${springCloudStarterOpenfeignVersion}" "-Dspring-cloud-starter-loadbalancer.version=${springCloudStarterLoadbalancerVersion}" "-Dspring-cloud-starter-loadbalancer.artifactId=${springCloudStarterLoadbalancerArtifactId}")
+      profile=$profile$webfluxProfile
+      (cd powerful-springboot; mvn clean install \
+          "-DdubboDepScope=provided" \
+          "-DtomcatDepScope=provided" \
+          "-DJavaVersion=${JavaVersion}" \
+          "-Dspringboot.version=${version}" \
+          "-Dspring-cloud-starter-openfeign.version=${springCloudStarterOpenfeignVersion}" \
+          -P$profile
+      )
       cp powerful-springboot/target/powerful-boot-$version-java$JavaVersion.jar docker/jars
     done
   done

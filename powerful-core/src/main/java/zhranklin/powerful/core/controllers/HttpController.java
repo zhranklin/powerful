@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.NativeWebRequest;
+import reactor.core.publisher.Mono;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.model.Instruction;
 import zhranklin.powerful.model.PowerfulStatusCodeException;
@@ -38,7 +39,7 @@ public class HttpController {
             context.setPath(request.getServletPath());
             context.setParams(params);
             powerful.execute(instruction, context);
-            return context.getResult().makeHttpResponse(instruction);
+			return wrapWebflux(req, context.getResult().makeHttpResponse(instruction));
         } catch (RuntimeException e) {
             e.printStackTrace();
             HttpHeaders respHeaders = new HttpHeaders();
@@ -51,14 +52,22 @@ public class HttpController {
                 int intStatus=((FeignException) e.getCause()).status();
                 status = HttpStatus.valueOf(intStatus);
             }
-            return new ResponseEntity<>(e.getMessage(), respHeaders, status);
+			return wrapWebflux(req, new ResponseEntity<String>(e.getMessage(), respHeaders, status));
         }
     }
     @RequestMapping(value = {"/**/execute"}, method = {RequestMethod.GET, RequestMethod.DELETE})
     public Object execute(String _body, NativeWebRequest request, @RequestParam Map<String, String> params) throws IOException {
         Instruction instruction = new ObjectMapper().readValue(PowerfulService.decodeURLBase64(_body), Instruction.class);
         params.remove("_body");
-        return execute(instruction, request, params);
+		return wrapWebflux(request, execute(instruction, request, params));
+    }
+
+    private static Object wrapWebflux(NativeWebRequest req, Object result) {
+        if ("true".equals(req.getHeader("powerful-is-webflux"))) {
+            System.out.println("return webflux");
+            return Mono.just(result);
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
