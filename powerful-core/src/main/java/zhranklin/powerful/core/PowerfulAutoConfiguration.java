@@ -17,7 +17,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -30,12 +29,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import zhranklin.powerful.assist.Gen;
 import zhranklin.powerful.assist.RPCControllerAspect;
 import zhranklin.powerful.core.cases.StaticResources;
-import zhranklin.powerful.core.invoker.DubboRemoteInvoker;
-import zhranklin.powerful.core.invoker.HttpClient5RemoteInvoker;
-import zhranklin.powerful.core.invoker.HttpClientRemoteInvoker;
-import zhranklin.powerful.core.invoker.HttpRestTemplateRemoteInvoker;
-import zhranklin.powerful.core.invoker.OpenFeignRemoteInvoker;
-import zhranklin.powerful.core.invoker.WebClientRemoteInvoker;
+import zhranklin.powerful.core.invoker.*;
 import zhranklin.powerful.core.service.PowerfulService;
 import zhranklin.powerful.core.service.StringRenderer;
 import zhranklin.powerful.core.service.TestingMethodService;
@@ -128,7 +122,7 @@ public class PowerfulAutoConfiguration {
     @Bean
     PowerfulService powerfulService(@Autowired(required = false) DubboRemoteInvoker dubbo, HttpClientRemoteInvoker httpClientRemoteInvoker,
                                     HttpRestTemplateRemoteInvoker httpRestTemplateRemoteInvoker, HttpClient5RemoteInvoker httpClient5RemoteInvoker,
-                                    OpenFeignRemoteInvoker openFeignRemoteInvoker, WebClientRemoteInvoker webClientRemoteInvoker, TestingMethodService testingMethodService) {
+                                    WebClientRemoteInvoker webClientRemoteInvoker, TestingMethodService testingMethodService) {
         PowerfulService powerful = new PowerfulService(stringRenderer(), testingMethodService);
         if ("restTemplate".equalsIgnoreCase(defaultHttpClient)) {
             powerful.setInvoker("http", httpRestTemplateRemoteInvoker);
@@ -138,13 +132,10 @@ public class PowerfulAutoConfiguration {
             powerful.setInvoker("http", httpClient5RemoteInvoker);
 		} else if ("webflux".equalsIgnoreCase(defaultHttpClient)) {
 			powerful.setInvoker("http", webClientRemoteInvoker);
-        }else if ("openfeign".equalsIgnoreCase(defaultHttpClient)) {
-            powerful.setInvoker("http", openFeignRemoteInvoker);
         } else {
             throw new IllegalStateException(String.format("Default HTTP Client not supported: '%s'", defaultHttpClient));
         }
         powerful.setInvoker("dubbo", dubbo);
-        powerful.setInvoker("openfeign", openFeignRemoteInvoker);
 		powerful.setInvoker("webflux", webClientRemoteInvoker);
         powerful.setInvoker("http(restTemplate)".toLowerCase(Locale.ENGLISH), httpRestTemplateRemoteInvoker);
         powerful.setInvoker("http(httpClient)".toLowerCase(Locale.ENGLISH), httpClientRemoteInvoker);
@@ -206,9 +197,6 @@ public class PowerfulAutoConfiguration {
 	WebClient webClient() {
 		return WebClient.create();
 	}
-
-	@Bean
-    OpenFeignRemoteInvoker openFeignRemoteInvoker(@Qualifier("stringRenderer") StringRenderer stringRenderer) {return new OpenFeignRemoteInvoker(stringRenderer);}
 
     @Bean
     Jackson2ObjectMapperBuilderCustomizer objectMapper() {
@@ -322,17 +310,4 @@ public class PowerfulAutoConfiguration {
         }
     }
 
-//    springboot2.x and springboot3.x
-    @ConditionalOnClass(org.springframework.cloud.openfeign.EnableFeignClients.class)
-    @Configuration
-    @org.springframework.cloud.openfeign.EnableFeignClients(basePackages = "zhranklin.powerful.core.openfeign")
-    public static class SpringCloudOpenFeignConfiguration{
-    }
-
-//    springboot1.5.x
-    @ConditionalOnClass(org.springframework.cloud.netflix.feign.EnableFeignClients.class)
-    @Configuration
-    @EnableFeignClients(basePackages = "zhranklin.powerful.core.openfeign")
-    public static class SpringCloudNetflixFeignConfiguration{
-    }
 }

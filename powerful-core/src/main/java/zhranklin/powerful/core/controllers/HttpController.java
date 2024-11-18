@@ -1,7 +1,6 @@
 package zhranklin.powerful.core.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,10 +46,6 @@ public class HttpController {
             HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
             if (e.getCause() instanceof PowerfulStatusCodeException) {
                 status = ((PowerfulStatusCodeException) e.getCause()).status;
-            }
-            if (e.getCause() instanceof FeignException) {
-                int intStatus=((FeignException) e.getCause()).status();
-                status = HttpStatus.valueOf(intStatus);
             }
 			return wrapWebflux(req, new ResponseEntity<String>(e.getMessage(), respHeaders, status));
         }
