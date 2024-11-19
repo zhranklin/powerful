@@ -174,6 +174,8 @@ public class PowerfulService {
         } catch (Exception e) {
             if (handleException) {
                 context.setResult(new PowerfulResponse(e.getMessage(), "200", null));
+            } else {
+				throw new RuntimeException(stringRenderer.render(template, context) + ": " + e.getMessage(), e);
             }
         } finally {
             double delayMillis = (System.nanoTime() - requestStarts) / 1000000f;
